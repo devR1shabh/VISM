@@ -8,6 +8,8 @@ import ReadinessScore from "../components/output/ReadinessScore";
 import ComplianceNotes from "../components/output/ComplianceNotes";
 import TimelineEstimate from "../components/output/TimelineEstimate";
 
+import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
+
 import { generateMockAnalysis } from "../services/mockAnalysis";
 
 function Analysis() {
@@ -26,31 +28,32 @@ function Analysis() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gray-100">
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto p-6">
 
-        <h1 className="text-3xl font-bold mb-8">
+        <h1 className="text-4xl font-bold mb-8">
           Visa Analysis Report
         </h1>
 
+        {/* Case Information */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">
 
           <h2 className="text-2xl font-semibold mb-4">
             Case Information
           </h2>
 
-          <p className="mb-2">
+          <p className="mb-3">
             <strong>Visa Type:</strong>{" "}
             {visaType || "Not Provided"}
           </p>
 
-          <p className="mb-2">
-            <strong>Country:</strong>{" "}
+          <p className="mb-3">
+            <strong>Destination Country:</strong>{" "}
             {country || "Not Provided"}
           </p>
 
-          <div className="mt-4">
+          <div>
             <strong>Case Description:</strong>
 
             <p className="mt-2 text-gray-700">
@@ -60,6 +63,7 @@ function Analysis() {
 
         </div>
 
+        {/* Analysis Results */}
         <div className="grid md:grid-cols-2 gap-6">
 
           <ApplicationOverview
@@ -89,6 +93,8 @@ function Analysis() {
           <TimelineEstimate
             timeline={analysis.timeline}
           />
+
+          <VisaJourneyDiagram />
 
         </div>
 
