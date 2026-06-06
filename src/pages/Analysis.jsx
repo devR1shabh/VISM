@@ -4,6 +4,9 @@ import ApplicationOverview from "../components/output/ApplicationOverview";
 import DocumentChecklist from "../components/output/DocumentChecklist";
 import RiskPanel from "../components/output/RiskPanel";
 import JourneySteps from "../components/output/JourneySteps";
+import ReadinessScore from "../components/output/ReadinessScore";
+import ComplianceNotes from "../components/output/ComplianceNotes";
+import TimelineEstimate from "../components/output/TimelineEstimate";
 
 import { generateMockAnalysis } from "../services/mockAnalysis";
 
@@ -31,7 +34,6 @@ function Analysis() {
           Visa Analysis Report
         </h1>
 
-        {/* Case Information */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">
 
           <h2 className="text-2xl font-semibold mb-4">
@@ -58,7 +60,6 @@ function Analysis() {
 
         </div>
 
-        {/* Analysis Results */}
         <div className="grid md:grid-cols-2 gap-6">
 
           <ApplicationOverview
@@ -75,6 +76,18 @@ function Analysis() {
 
           <JourneySteps
             journey={analysis.journey}
+          />
+
+          <ReadinessScore
+            score={analysis.score}
+          />
+
+          <ComplianceNotes
+            notes={analysis.complianceNotes}
+          />
+
+          <TimelineEstimate
+            timeline={analysis.timeline}
           />
 
         </div>
