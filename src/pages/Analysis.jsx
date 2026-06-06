@@ -8,6 +8,7 @@ import JourneySteps from "../components/output/JourneySteps";
 import ReadinessScore from "../components/output/ReadinessScore";
 import ComplianceNotes from "../components/output/ComplianceNotes";
 import TimelineEstimate from "../components/output/TimelineEstimate";
+import FollowUpActions from "../components/output/FollowUpActions";
 
 import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
 
@@ -63,7 +64,6 @@ function Analysis() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-
       <div className="max-w-7xl mx-auto p-6">
 
         <h1 className="text-4xl font-bold mb-8">
@@ -128,12 +128,15 @@ function Analysis() {
             timeline={analysis.timeline}
           />
 
+          <FollowUpActions
+            actions={analysis.followUpActions}
+          />
+
           <VisaJourneyDiagram />
 
         </div>
 
       </div>
-
     </div>
   );
 }

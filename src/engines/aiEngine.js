@@ -46,6 +46,14 @@ export async function generateVisaAnalysis(
         stage: "Decision",
         duration: "4-12 Weeks"
       }
+    ],
+
+    followUpActions: [
+      "Gather financial statements",
+      "Upload passport copy",
+      "Schedule biometrics appointment",
+      "Review application form",
+      "Verify supporting documents"
     ]
   };
 }

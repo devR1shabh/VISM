@@ -1,5 +1,3 @@
-export async function RiskAgent(
-  analysis
-) {
+export async function RiskAgent(analysis) {
   return analysis.risks;
 }
