@@ -2,21 +2,19 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import ApplicationOverview from "../components/output/ApplicationOverview";
-import DocumentChecklist from "../components/output/DocumentChecklist";
+import DocumentCollectionTracker from "../components/output/DocumentCollectionTracker";
 import RiskPanel from "../components/output/RiskPanel";
 import JourneySteps from "../components/output/JourneySteps";
 import ReadinessScore from "../components/output/ReadinessScore";
 import ComplianceNotes from "../components/output/ComplianceNotes";
 import TimelineEstimate from "../components/output/TimelineEstimate";
 import FollowUpActions from "../components/output/FollowUpActions";
+import AssessmentPanel from "../components/output/AssessmentPanel";
 
 import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
 
 import { generateVisaAnalysis } from "../engines/aiEngine";
-
-import { WorkflowAgent } from "../agents/WorkflowAgent";
-import { DocumentAgent } from "../agents/DocumentAgent";
-import { RiskAgent } from "../agents/RiskAgent";
+import { OrchestratorAgent } from "../agents/OrchestratorAgent";
 
 function Analysis() {
   const location = useLocation();
@@ -37,15 +35,29 @@ function Analysis() {
         description
       );
 
-      const workflow = await WorkflowAgent(result);
-      const documents = await DocumentAgent(result);
-      const risks = await RiskAgent(result);
+      const agentResults =
+        await OrchestratorAgent(result);
 
       setAnalysis({
         ...result,
-        journey: workflow,
-        documents,
-        risks,
+
+        journey: agentResults.workflow,
+
+        documents: agentResults.documents,
+
+        risks: agentResults.risks,
+
+        complianceNotes:
+          agentResults.compliance,
+
+        score:
+          agentResults.readiness,
+
+        timeline:
+          agentResults.timeline,
+
+        assessment:
+          agentResults.assessment,
       });
     }
 
@@ -70,7 +82,6 @@ function Analysis() {
           Visa Analysis Report
         </h1>
 
-        {/* Case Information */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">
 
           <h2 className="text-2xl font-semibold mb-4">
@@ -97,14 +108,13 @@ function Analysis() {
 
         </div>
 
-        {/* Analysis Results */}
         <div className="grid md:grid-cols-2 gap-6">
 
           <ApplicationOverview
             overview={analysis.overview}
           />
 
-          <DocumentChecklist
+          <DocumentCollectionTracker
             documents={analysis.documents}
           />
 
@@ -118,6 +128,10 @@ function Analysis() {
 
           <ReadinessScore
             score={analysis.score}
+          />
+
+          <AssessmentPanel
+            assessment={analysis.assessment}
           />
 
           <ComplianceNotes
