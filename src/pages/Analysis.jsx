@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import ApplicationOverview from "../components/output/ApplicationOverview";
@@ -10,7 +11,11 @@ import TimelineEstimate from "../components/output/TimelineEstimate";
 
 import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
 
-import { generateMockAnalysis } from "../services/mockAnalysis";
+import { generateVisaAnalysis } from "../engines/aiEngine";
+
+import { WorkflowAgent } from "../agents/WorkflowAgent";
+import { DocumentAgent } from "../agents/DocumentAgent";
+import { RiskAgent } from "../agents/RiskAgent";
 
 function Analysis() {
   const location = useLocation();
@@ -21,11 +26,40 @@ function Analysis() {
     description,
   } = location.state || {};
 
-  const analysis = generateMockAnalysis(
-    visaType,
-    country,
-    description
-  );
+  const [analysis, setAnalysis] = useState(null);
+
+  useEffect(() => {
+    async function runAnalysis() {
+      const result = await generateVisaAnalysis(
+        visaType,
+        country,
+        description
+      );
+
+      const workflow = await WorkflowAgent(result);
+      const documents = await DocumentAgent(result);
+      const risks = await RiskAgent(result);
+
+      setAnalysis({
+        ...result,
+        journey: workflow,
+        documents,
+        risks,
+      });
+    }
+
+    runAnalysis();
+  }, [visaType, country, description]);
+
+  if (!analysis) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-2xl font-semibold">
+          Analyzing Visa Case...
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
