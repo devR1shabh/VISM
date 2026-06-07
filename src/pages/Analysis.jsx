@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+
+import { useCase } from "../context/CaseContext";
 
 import ApplicationOverview from "../components/output/ApplicationOverview";
-import DocumentCollectionTracker from "../components/output/DocumentCollectionTracker";
 import DocumentUploadPanel from "../components/output/DocumentUploadPanel";
 import RiskPanel from "../components/output/RiskPanel";
 import JourneySteps from "../components/output/JourneySteps";
@@ -19,28 +19,26 @@ import { generateVisaAnalysis } from "../engines/aiEngine";
 import { OrchestratorAgent } from "../agents/OrchestratorAgent";
 
 function Analysis() {
-  const location = useLocation();
+  const { caseData } = useCase();
 
-  const {
-    visaType,
-    country,
-    description,
-  } = location.state || {};
-
-  const [analysis, setAnalysis] = useState(null);
+  const [analysis, setAnalysis] =
+    useState(null);
 
   useEffect(() => {
     async function runAnalysis() {
-      const result = await generateVisaAnalysis(
-        visaType,
-        country,
-        description
-      );
+      if (!caseData) return;
+
+      const result =
+        await generateVisaAnalysis(
+          caseData.visaType,
+          caseData.country,
+          caseData.description
+        );
 
       const agentResults =
         await OrchestratorAgent(result);
 
-      setAnalysis({
+      const finalAnalysis = {
         ...result,
 
         journey:
@@ -66,11 +64,27 @@ function Analysis() {
 
         notification:
           agentResults.notification,
-      });
+      };
+
+      setAnalysis(finalAnalysis);
     }
 
     runAnalysis();
-  }, [visaType, country, description]);
+  }, [
+    caseData?.visaType,
+    caseData?.country,
+    caseData?.description,
+  ]);
+
+  if (!caseData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-2xl font-semibold">
+          No Active Case Found
+        </h2>
+      </div>
+    );
+  }
 
   if (!analysis) {
     return (
@@ -97,20 +111,25 @@ function Analysis() {
           </h2>
 
           <p className="mb-3">
+            <strong>Case ID:</strong>{" "}
+            {caseData.caseId}
+          </p>
+
+          <p className="mb-3">
             <strong>Visa Type:</strong>{" "}
-            {visaType || "Not Provided"}
+            {caseData.visaType}
           </p>
 
           <p className="mb-3">
             <strong>Destination Country:</strong>{" "}
-            {country || "Not Provided"}
+            {caseData.country}
           </p>
 
           <div>
             <strong>Case Description:</strong>
 
             <p className="mt-2 text-gray-700">
-              {description || "No description provided."}
+              {caseData.description}
             </p>
           </div>
 
@@ -120,10 +139,6 @@ function Analysis() {
 
           <ApplicationOverview
             overview={analysis.overview}
-          />
-
-          <DocumentCollectionTracker
-            documents={analysis.documents}
           />
 
           <DocumentUploadPanel

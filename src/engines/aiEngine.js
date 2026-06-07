@@ -1,4 +1,3 @@
-import countryProfiles from "../data/countryProfiles";
 import { initializeCase } from "../services/caseService";
 
 export async function generateVisaAnalysis(
@@ -17,46 +16,51 @@ export async function generateVisaAnalysis(
   let followUpActions = [];
   let score = 85;
 
-  if (
-    visaType === "Student Visa" &&
-    countryProfiles[country]
-  ) {
-    documents =
-      countryProfiles[country].student.documents;
+  if (visaType === "Student Visa") {
+    documents = [
+      "Passport",
+      "Academic Transcripts",
+      "University Offer Letter",
+      "Financial Proof",
+      "Language Test Results"
+    ];
 
-    risks =
-      countryProfiles[country].student.risks;
-
-    score =
-      countryProfiles[country].student.score;
+    risks = [
+      "Insufficient financial evidence",
+      "Missing academic records",
+      "Incomplete language test documentation"
+    ];
 
     followUpActions = [
-      "Upload admission documents",
-      "Verify financial evidence",
-      "Review student visa requirements",
-      "Prepare supporting documents"
+      "Upload academic transcripts",
+      "Upload university offer letter",
+      "Upload financial proof",
+      "Upload language test results"
     ];
+
+    score = 88;
   }
 
   else if (visaType === "Work Visa") {
     documents = [
-      "Valid Passport",
+      "Passport",
+      "Resume",
       "Employment Contract",
       "Work Permit Documents",
-      "Resume",
       "Financial Evidence"
     ];
 
     risks = [
       "Missing employment documentation",
-      "Employer sponsorship issues"
+      "Employer sponsorship issues",
+      "Incomplete work permit information"
     ];
 
     followUpActions = [
       "Upload employment contract",
-      "Verify employer sponsorship",
-      "Prepare supporting documents",
-      "Review work permit requirements"
+      "Upload resume",
+      "Verify work permit requirements",
+      "Prepare supporting documents"
     ];
 
     score = 82;
@@ -64,10 +68,10 @@ export async function generateVisaAnalysis(
 
   else if (visaType === "Tourist Visa") {
     documents = [
-      "Valid Passport",
+      "Passport",
       "Bank Statements",
       "Hotel Booking",
-      "Return Flight Ticket",
+      "Flight Reservation",
       "Travel Itinerary"
     ];
 
@@ -77,10 +81,10 @@ export async function generateVisaAnalysis(
     ];
 
     followUpActions = [
-      "Upload travel itinerary",
-      "Upload hotel reservations",
-      "Provide bank statements",
-      "Review tourist visa requirements"
+      "Upload bank statements",
+      "Upload hotel booking",
+      "Upload flight reservation",
+      "Upload travel itinerary"
     ];
 
     score = 80;
@@ -103,10 +107,10 @@ export async function generateVisaAnalysis(
     ];
 
     followUpActions = [
-      "Verify language test scores",
-      "Prepare employment records",
-      "Obtain police clearance",
-      "Review PR eligibility"
+      "Upload educational credentials",
+      "Upload employment records",
+      "Upload language test results",
+      "Upload police clearance"
     ];
 
     score = 75;
@@ -129,10 +133,10 @@ export async function generateVisaAnalysis(
     ];
 
     followUpActions = [
-      "Collect relationship documents",
-      "Verify sponsor eligibility",
-      "Prepare financial evidence",
-      "Review sponsorship application"
+      "Upload relationship proof",
+      "Upload sponsor documents",
+      "Upload financial evidence",
+      "Upload identity documents"
     ];
 
     score = 84;
@@ -178,8 +182,8 @@ export async function generateVisaAnalysis(
 
     complianceNotes: [
       "Verify passport validity.",
-      "Review country-specific immigration requirements.",
-      "Ensure all supporting documents are accurate."
+      "Ensure all supporting documents are accurate.",
+      "Review visa requirements before submission."
     ],
 
     timeline: [

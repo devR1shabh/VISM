@@ -1,55 +1,101 @@
+import documentTypes from "./documentTypes";
+
 export function parseDocument(
   fileName
 ) {
   const lower =
     fileName.toLowerCase();
 
-  if (
-    lower.includes("passport")
-  ) {
-    return {
-      type: "Passport",
-      status: "Detected",
-      extractedData: {
-        validity:
-          "Passport appears valid",
-      },
-    };
-  }
+  const matches = {
+    Passport: [
+      "passport"
+    ],
 
-  if (
-    lower.includes("bank")
-  ) {
-    return {
-      type:
-        "Bank Statement",
-      status: "Detected",
-      extractedData: {
-        finances:
-          "Financial evidence found",
-      },
-    };
-  }
+    "Academic Transcripts": [
+      "transcript",
+      "academic"
+    ],
 
-  if (
-    lower.includes("offer")
-  ) {
-    return {
-      type:
-        "Offer Letter",
-      status: "Detected",
-      extractedData: {
-        admission:
-          "Admission evidence found",
-      },
-    };
+    "University Offer Letter": [
+      "offer",
+      "admission"
+    ],
+
+    "Financial Proof": [
+      "bank",
+      "financial",
+      "statement"
+    ],
+
+    "Language Test Results": [
+      "ielts",
+      "toefl",
+      "pte"
+    ],
+
+    Resume: [
+      "resume",
+      "cv"
+    ],
+
+    "Employment Contract": [
+      "employment",
+      "contract"
+    ],
+
+    "Work Permit Documents": [
+      "permit",
+      "workpermit"
+    ],
+
+    "Police Clearance Certificate": [
+      "police",
+      "clearance"
+    ],
+
+    "Relationship Proof": [
+      "marriage",
+      "relationship"
+    ],
+  };
+
+  for (const type of documentTypes) {
+    const keywords =
+      matches[type];
+
+    if (!keywords) continue;
+
+    const found =
+      keywords.some(
+        (keyword) =>
+          lower.includes(keyword)
+      );
+
+    if (found) {
+      return {
+        type,
+        status: "Detected",
+
+        confidence: "Mock Detection",
+
+        extractedData: {
+          summary:
+            `${type} identified`,
+        },
+      };
+    }
   }
 
   return {
-    type:
-      "Unknown Document",
-    status:
-      "Needs Review",
-    extractedData: {},
+    type: "Unknown",
+
+    status: "Needs Review",
+
+    confidence: "Low",
+
+    extractedData: {
+      summary:
+        "Document could not be identified",
+    },
   };
 }
