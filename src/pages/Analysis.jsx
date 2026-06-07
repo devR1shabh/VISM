@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { useCase } from "../context/CaseContext";
 
@@ -19,7 +20,10 @@ import { generateVisaAnalysis } from "../engines/aiEngine";
 import { OrchestratorAgent } from "../agents/OrchestratorAgent";
 
 function Analysis() {
-  const { caseData } = useCase();
+  const {
+    caseData,
+    setCaseData,
+  } = useCase();
 
   const [analysis, setAnalysis] =
     useState(null);
@@ -67,6 +71,11 @@ function Analysis() {
       };
 
       setAnalysis(finalAnalysis);
+
+      setCaseData((prev) => ({
+        ...prev,
+        analysis: finalAnalysis,
+      }));
     }
 
     runAnalysis();
@@ -74,6 +83,7 @@ function Analysis() {
     caseData?.visaType,
     caseData?.country,
     caseData?.description,
+    setCaseData,
   ]);
 
   if (!caseData) {
@@ -100,9 +110,27 @@ function Analysis() {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto p-6">
 
-        <h1 className="text-4xl font-bold mb-8">
+        <h1 className="text-4xl font-bold mb-6">
           Visa Analysis Report
         </h1>
+
+        <div className="flex gap-4 mb-8">
+
+          <Link
+            to="/documents"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Documents
+          </Link>
+
+          <Link
+            to="/tasks"
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Tasks
+          </Link>
+
+        </div>
 
         <div className="bg-white p-6 rounded-lg shadow mb-8">
 

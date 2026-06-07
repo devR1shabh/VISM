@@ -26,13 +26,29 @@ function Documents() {
       (doc) => !doc.valid
     );
 
+  const requiredDocuments =
+    caseData.analysis?.documents || [];
+
+  const uploadedRequiredDocs =
+    validDocuments.map(
+      (doc) => doc.requiredDocument
+    );
+
+  const missingDocuments =
+    requiredDocuments.filter(
+      (doc) =>
+        !uploadedRequiredDocs.includes(
+          doc
+        )
+    );
+
   return (
     <div className="min-h-screen bg-gray-100">
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
 
         <h1 className="text-4xl font-bold mb-8">
-          Applicant Profile
+          Applicant Profile & Document Repository
         </h1>
 
         <div className="bg-white p-6 rounded-lg shadow mb-6">
@@ -63,53 +79,51 @@ function Documents() {
 
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
 
           <div className="bg-white p-6 rounded-lg shadow">
 
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4 text-green-600">
               Valid Documents
             </h2>
 
             <p className="mb-4">
-              Total:
-              {" "}
-              {validDocuments.length}
+              Count: {validDocuments.length}
             </p>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
 
-              {validDocuments.map(
-                (
-                  document,
-                  index
-                ) => (
-                  <div
-                    key={index}
-                    className="border p-3 rounded"
-                  >
-                    <p>
-                      <strong>
-                        Required:
-                      </strong>{" "}
-                      {
-                        document.requiredDocument
-                      }
-                    </p>
+              {validDocuments.length === 0 ? (
+                <p>No valid documents.</p>
+              ) : (
+                validDocuments.map(
+                  (
+                    document,
+                    index
+                  ) => (
+                    <div
+                      key={index}
+                      className="border p-3 rounded"
+                    >
+                      <p>
+                        <strong>
+                          Required:
+                        </strong>{" "}
+                        {
+                          document.requiredDocument
+                        }
+                      </p>
 
-                    <p>
-                      <strong>
-                        File:
-                      </strong>{" "}
-                      {
-                        document.fileName
-                      }
-                    </p>
-
-                    <p className="text-green-600">
-                      Valid
-                    </p>
-                  </div>
+                      <p>
+                        <strong>
+                          File:
+                        </strong>{" "}
+                        {
+                          document.fileName
+                        }
+                      </p>
+                    </div>
+                  )
                 )
               )}
 
@@ -119,49 +133,92 @@ function Documents() {
 
           <div className="bg-white p-6 rounded-lg shadow">
 
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4 text-red-600">
               Invalid Documents
             </h2>
 
             <p className="mb-4">
-              Total:
-              {" "}
-              {invalidDocuments.length}
+              Count: {invalidDocuments.length}
             </p>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
 
-              {invalidDocuments.map(
-                (
-                  document,
-                  index
-                ) => (
-                  <div
-                    key={index}
-                    className="border p-3 rounded"
-                  >
-                    <p>
-                      <strong>
-                        Required:
-                      </strong>{" "}
-                      {
-                        document.requiredDocument
-                      }
-                    </p>
+              {invalidDocuments.length === 0 ? (
+                <p>No invalid documents.</p>
+              ) : (
+                invalidDocuments.map(
+                  (
+                    document,
+                    index
+                  ) => (
+                    <div
+                      key={index}
+                      className="border p-3 rounded"
+                    >
+                      <p>
+                        <strong>
+                          Required:
+                        </strong>{" "}
+                        {
+                          document.requiredDocument
+                        }
+                      </p>
 
-                    <p>
-                      <strong>
-                        File:
-                      </strong>{" "}
-                      {
-                        document.fileName
-                      }
-                    </p>
+                      <p>
+                        <strong>
+                          Uploaded:
+                        </strong>{" "}
+                        {
+                          document.fileName
+                        }
+                      </p>
 
-                    <p className="text-red-600">
-                      Invalid
-                    </p>
-                  </div>
+                      <p>
+                        <strong>
+                          Detected:
+                        </strong>{" "}
+                        {
+                          document.detectedType
+                        }
+                      </p>
+                    </div>
+                  )
+                )
+              )}
+
+            </div>
+
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+
+            <h2 className="text-xl font-bold mb-4 text-orange-600">
+              Missing Documents
+            </h2>
+
+            <p className="mb-4">
+              Count: {missingDocuments.length}
+            </p>
+
+            <div className="space-y-3">
+
+              {missingDocuments.length === 0 ? (
+                <p>
+                  All required documents uploaded.
+                </p>
+              ) : (
+                missingDocuments.map(
+                  (
+                    document,
+                    index
+                  ) => (
+                    <div
+                      key={index}
+                      className="border p-3 rounded"
+                    >
+                      {document}
+                    </div>
+                  )
                 )
               )}
 
