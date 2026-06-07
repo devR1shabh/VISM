@@ -8,20 +8,26 @@ import { useCase } from "../../context/CaseContext";
 
 function CaseForm() {
   const navigate = useNavigate();
-
-  const { setCaseData } = useCase();
+  const { setCaseData, clearCase } = useCase();
 
   const [visaType, setVisaType] = useState("");
   const [country, setCountry] = useState("");
   const [description, setDescription] = useState("");
 
   const handleAnalyze = () => {
+    if (!visaType || !country) return;
+
+    // Clear any previous case + documents before starting fresh
+    clearCase();
+
     const newCase = {
       caseId: `CASE-${Date.now()}`,
 
       visaType,
       country,
       description,
+
+      status: "In Progress",
 
       createdAt: new Date().toISOString(),
 
@@ -53,15 +59,10 @@ function CaseForm() {
           onChange={(e) => setVisaType(e.target.value)}
           className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">
-            Select Visa Type
-          </option>
+          <option value="">Select Visa Type</option>
 
           {visaTypes.map((visa) => (
-            <option
-              key={visa}
-              value={visa}
-            >
+            <option key={visa} value={visa}>
               {visa}
             </option>
           ))}
@@ -75,21 +76,14 @@ function CaseForm() {
 
         <select
           value={country}
-          onChange={(e) =>
-            setCountry(e.target.value)
-          }
+          onChange={(e) => setCountry(e.target.value)}
           className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">
-            Select Country
-          </option>
+          <option value="">Select Country</option>
 
-          {countries.map((country) => (
-            <option
-              key={country}
-              value={country}
-            >
-              {country}
+          {countries.map((c) => (
+            <option key={c} value={c}>
+              {c}
             </option>
           ))}
         </select>
@@ -103,11 +97,7 @@ function CaseForm() {
         <textarea
           rows="6"
           value={description}
-          onChange={(e) =>
-            setDescription(
-              e.target.value
-            )
-          }
+          onChange={(e) => setDescription(e.target.value)}
           className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Describe the immigration or visa case in detail..."
         />
@@ -115,7 +105,8 @@ function CaseForm() {
 
       <button
         onClick={handleAnalyze}
-        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+        disabled={!visaType || !country}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Analyze Case
       </button>
