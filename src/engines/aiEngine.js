@@ -1,16 +1,22 @@
 import countryProfiles from "../data/countryProfiles";
+import { initializeCase } from "../services/caseService";
 
 export async function generateVisaAnalysis(
   visaType,
   country,
   description
 ) {
+  const caseData = initializeCase(
+    visaType,
+    country,
+    description
+  );
+
   let documents = [];
   let risks = [];
   let followUpActions = [];
   let score = 85;
 
-  // COUNTRY-AWARE STUDENT VISA
   if (
     visaType === "Student Visa" &&
     countryProfiles[country]
@@ -32,7 +38,6 @@ export async function generateVisaAnalysis(
     ];
   }
 
-  // WORK VISA
   else if (visaType === "Work Visa") {
     documents = [
       "Valid Passport",
@@ -57,7 +62,6 @@ export async function generateVisaAnalysis(
     score = 82;
   }
 
-  // TOURIST VISA
   else if (visaType === "Tourist Visa") {
     documents = [
       "Valid Passport",
@@ -82,8 +86,9 @@ export async function generateVisaAnalysis(
     score = 80;
   }
 
-  // PERMANENT RESIDENCY
-  else if (visaType === "Permanent Residency") {
+  else if (
+    visaType === "Permanent Residency"
+  ) {
     documents = [
       "Passport",
       "Educational Credentials",
@@ -107,8 +112,9 @@ export async function generateVisaAnalysis(
     score = 75;
   }
 
-  // FAMILY SPONSORSHIP
-  else if (visaType === "Family Sponsorship") {
+  else if (
+    visaType === "Family Sponsorship"
+  ) {
     documents = [
       "Passport",
       "Relationship Proof",
@@ -132,7 +138,6 @@ export async function generateVisaAnalysis(
     score = 84;
   }
 
-  // DEFAULT
   else {
     documents = [
       "Passport",
@@ -152,7 +157,10 @@ export async function generateVisaAnalysis(
   }
 
   return {
-    overview: `${visaType} application for ${country}. ${description}`,
+    ...caseData,
+
+    overview:
+      `${visaType} application for ${country}. ${description}`,
 
     documents,
 

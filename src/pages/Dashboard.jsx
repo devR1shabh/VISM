@@ -1,42 +1,57 @@
-import { useState } from "react";
-
-import Header from "../components/layout/Header";
-import CaseForm from "../components/input/CaseForm";
-
-import ApplicationOverview from "../components/output/ApplicationOverview";
-import DocumentChecklist from "../components/output/DocumentChecklist";
-import RiskPanel from "../components/output/RiskPanel";
-import JourneySteps from "../components/output/JourneySteps";
+import { Link } from "react-router-dom";
 
 function Dashboard() {
-  const [showResults, setShowResults] = useState(false);
-
-  const handleAnalyze = () => {
-    setShowResults(true);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
 
-      <Header />
+      <div className="max-w-6xl mx-auto p-6">
 
-      <div className="max-w-5xl mx-auto p-6">
+        <h1 className="text-4xl font-bold mb-8">
+          VISM Dashboard
+        </h1>
 
-        <CaseForm onAnalyze={handleAnalyze} />
+        <div className="grid md:grid-cols-3 gap-6">
 
-        {showResults && (
-          <div className="grid md:grid-cols-2 gap-6 mt-8">
+          <Link
+            to="/analysis"
+            className="bg-white p-6 rounded-lg shadow"
+          >
+            <h2 className="text-xl font-bold">
+              Analysis Report
+            </h2>
 
-            <ApplicationOverview />
+            <p className="mt-2 text-gray-600">
+              View immigration assessment.
+            </p>
+          </Link>
 
-            <DocumentChecklist />
+          <Link
+            to="/documents"
+            className="bg-white p-6 rounded-lg shadow"
+          >
+            <h2 className="text-xl font-bold">
+              Document Center
+            </h2>
 
-            <RiskPanel />
+            <p className="mt-2 text-gray-600">
+              Manage uploaded documents.
+            </p>
+          </Link>
 
-            <JourneySteps />
+          <Link
+            to="/tasks"
+            className="bg-white p-6 rounded-lg shadow"
+          >
+            <h2 className="text-xl font-bold">
+              Task Center
+            </h2>
 
-          </div>
-        )}
+            <p className="mt-2 text-gray-600">
+              Manage follow-up tasks.
+            </p>
+          </Link>
+
+        </div>
 
       </div>
 

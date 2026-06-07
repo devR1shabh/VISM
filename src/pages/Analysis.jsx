@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 
 import ApplicationOverview from "../components/output/ApplicationOverview";
 import DocumentCollectionTracker from "../components/output/DocumentCollectionTracker";
+import DocumentUploadPanel from "../components/output/DocumentUploadPanel";
 import RiskPanel from "../components/output/RiskPanel";
 import JourneySteps from "../components/output/JourneySteps";
 import ReadinessScore from "../components/output/ReadinessScore";
@@ -10,6 +11,7 @@ import ComplianceNotes from "../components/output/ComplianceNotes";
 import TimelineEstimate from "../components/output/TimelineEstimate";
 import FollowUpActions from "../components/output/FollowUpActions";
 import AssessmentPanel from "../components/output/AssessmentPanel";
+import NotificationPanel from "../components/output/NotificationPanel";
 
 import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
 
@@ -41,11 +43,14 @@ function Analysis() {
       setAnalysis({
         ...result,
 
-        journey: agentResults.workflow,
+        journey:
+          agentResults.workflow,
 
-        documents: agentResults.documents,
+        documents:
+          agentResults.documents,
 
-        risks: agentResults.risks,
+        risks:
+          agentResults.risks,
 
         complianceNotes:
           agentResults.compliance,
@@ -58,6 +63,9 @@ function Analysis() {
 
         assessment:
           agentResults.assessment,
+
+        notification:
+          agentResults.notification,
       });
     }
 
@@ -118,6 +126,10 @@ function Analysis() {
             documents={analysis.documents}
           />
 
+          <DocumentUploadPanel
+            documents={analysis.documents}
+          />
+
           <RiskPanel
             risks={analysis.risks}
           />
@@ -132,6 +144,10 @@ function Analysis() {
 
           <AssessmentPanel
             assessment={analysis.assessment}
+          />
+
+          <NotificationPanel
+            notification={analysis.notification}
           />
 
           <ComplianceNotes

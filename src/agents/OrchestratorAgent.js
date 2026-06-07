@@ -5,6 +5,8 @@ import { ComplianceAgent } from "./ComplianceAgent";
 import { ReadinessAgent } from "./ReadinessAgent";
 import { TimelineAgent } from "./TimelineAgent";
 import { AssessmentAgent } from "./AssessmentAgent";
+import { NotificationAgent } from "./NotificationAgent";
+import { TaskAgent } from "./TaskAgent";
 
 export async function OrchestratorAgent(
   analysis
@@ -30,6 +32,15 @@ export async function OrchestratorAgent(
   const assessment =
     await AssessmentAgent(analysis);
 
+  const notification =
+    await NotificationAgent(
+      analysis,
+      []
+    );
+
+  const tasks =
+    await TaskAgent(analysis);
+
   return {
     workflow,
     documents,
@@ -38,5 +49,7 @@ export async function OrchestratorAgent(
     readiness,
     timeline,
     assessment,
+    notification,
+    tasks,
   };
 }
