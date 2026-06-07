@@ -1,32 +1,41 @@
-import { useState } from "react";
+import { useCase } from "../../context/CaseContext";
 
 function TaskManagementPanel({
   tasks = [],
 }) {
-  const [taskList, setTaskList] =
-    useState(tasks);
+  const {
+    uploadedDocuments,
+  } = useCase();
 
-  const toggleTask = (id) => {
-    setTaskList(
-      taskList.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              status:
-                task.status ===
-                "Completed"
-                  ? "Pending"
-                  : "Completed",
-            }
-          : task
+  const isTaskCompleted = (
+    task
+  ) => {
+    if (
+      !task.title.startsWith(
+        "Upload "
       )
+    ) {
+      return false;
+    }
+
+    const documentName =
+      task.title.replace(
+        "Upload ",
+        ""
+      );
+
+    return uploadedDocuments.some(
+      (doc) =>
+        doc.valid &&
+        doc.requiredDocument ===
+          documentName
     );
   };
 
   const completed =
-    taskList.filter(
+    tasks.filter(
       (task) =>
-        task.status === "Completed"
+        isTaskCompleted(task)
     ).length;
 
   return (
@@ -37,37 +46,41 @@ function TaskManagementPanel({
       </h2>
 
       <p className="mb-4">
-        {completed} / {taskList.length}
+        {completed} / {tasks.length}
         {" "}
         Completed
       </p>
 
       <div className="space-y-3">
 
-        {taskList.map((task) => (
-          <div
-            key={task.id}
-            className="flex justify-between items-center border-b pb-2"
-          >
-            <span>
-              {task.title}
-            </span>
+        {tasks.map((task) => {
+          const completed =
+            isTaskCompleted(task);
 
-            <button
-              onClick={() =>
-                toggleTask(task.id)
-              }
-              className={`px-3 py-1 rounded text-white ${
-                task.status ===
-                "Completed"
-                  ? "bg-green-600"
-                  : "bg-gray-500"
-              }`}
+          return (
+            <div
+              key={task.id}
+              className="flex justify-between items-center border-b pb-2"
             >
-              {task.status}
-            </button>
-          </div>
-        ))}
+              <span>
+                {task.title}
+              </span>
+
+              <span
+                className={`px-3 py-1 rounded text-white ${
+                  completed
+                    ? "bg-green-600"
+                    : "bg-gray-500"
+                }`}
+              >
+                {completed
+                  ? "Completed"
+                  : "Pending"}
+              </span>
+
+            </div>
+          );
+        })}
 
       </div>
 
