@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { parseDocument } from "../../services/documentParser";
 import { useCase } from "../../context/CaseContext";
 
@@ -6,14 +5,9 @@ function DocumentUploadPanel({
   documents = [],
 }) {
   const {
+    uploadedDocuments,
     addDocument,
   } = useCase();
-
-  const [uploadedFiles, setUploadedFiles] =
-    useState({});
-
-  const [parsedDocuments, setParsedDocuments] =
-    useState({});
 
   const handleUpload = (
     documentName,
@@ -46,31 +40,16 @@ function DocumentUploadPanel({
         isValid,
     };
 
-    addDocument(
-      documentRecord
-    );
-
-    setParsedDocuments((prev) => ({
-      ...prev,
-      [documentName]: {
-        ...parsedResult,
-        isValid,
-      },
-    }));
-
-    if (isValid) {
-      setUploadedFiles((prev) => ({
-        ...prev,
-        [documentName]:
-          file.name,
-      }));
-    }
+    addDocument(documentRecord);
   };
 
+  const validUploads =
+    uploadedDocuments.filter(
+      (doc) => doc.valid
+    );
+
   const uploadedCount =
-    Object.keys(
-      uploadedFiles
-    ).length;
+    validUploads.length;
 
   const totalCount =
     documents.length;
@@ -85,6 +64,16 @@ function DocumentUploadPanel({
           ) * 100
         );
 
+  const getDocumentStatus = (
+    documentName
+  ) => {
+    return uploadedDocuments.find(
+      (doc) =>
+        doc.requiredDocument ===
+        documentName
+    );
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow">
 
@@ -95,19 +84,14 @@ function DocumentUploadPanel({
       <div className="mb-6">
 
         <p className="font-medium">
-          Uploaded:
-          {" "}
-          {uploadedCount}
-          {" / "}
-          {totalCount}
+          Uploaded: {uploadedCount} / {totalCount}
         </p>
 
         <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
           <div
             className="bg-blue-600 h-3 rounded-full transition-all duration-300"
             style={{
-              width:
-                `${progress}%`,
+              width: `${progress}%`,
             }}
           />
         </div>
@@ -120,8 +104,11 @@ function DocumentUploadPanel({
 
       <div className="space-y-4">
 
-        {documents.map(
-          (doc) => (
+        {documents.map((doc) => {
+          const uploadedDoc =
+            getDocumentStatus(doc);
+
+          return (
             <div
               key={doc}
               className="border rounded-lg p-4"
@@ -135,63 +122,42 @@ function DocumentUploadPanel({
                     {doc}
                   </h3>
 
-                  {uploadedFiles[
-                    doc
-                  ] ? (
+                  {!uploadedDoc ? (
+                    <p className="text-red-500 text-sm mt-1">
+                      Not Uploaded
+                    </p>
+                  ) : uploadedDoc.valid ? (
                     <>
                       <p className="text-green-600 text-sm mt-1">
-                        Uploaded:
-                        {" "}
-                        {
-                          uploadedFiles[
-                            doc
-                          ]
-                        }
+                        Uploaded: {uploadedDoc.fileName}
                       </p>
 
                       <p className="text-blue-600 text-sm mt-1">
-                        Type:
-                        {" "}
-                        {
-                          parsedDocuments[
-                            doc
-                          ]?.type
-                        }
+                        Type: {uploadedDoc.detectedType}
                       </p>
 
                       <p className="text-green-600 text-sm">
-                        ✓ Valid
-                        Document
+                        ✓ Valid Document
                       </p>
                     </>
-                  ) : parsedDocuments[
-                      doc
-                    ] ? (
+                  ) : (
                     <>
                       <p className="text-red-600 text-sm mt-1">
                         Invalid Upload
                       </p>
 
                       <p className="text-gray-600 text-sm">
-                        Expected:
-                        {" "}
-                        {doc}
+                        Expected: {doc}
                       </p>
 
                       <p className="text-gray-600 text-sm">
-                        Detected:
-                        {" "}
-                        {
-                          parsedDocuments[
-                            doc
-                          ]?.type
-                        }
+                        Detected: {uploadedDoc.detectedType}
+                      </p>
+
+                      <p className="text-red-600 text-sm">
+                        Uploaded: {uploadedDoc.fileName}
                       </p>
                     </>
-                  ) : (
-                    <p className="text-red-500 text-sm mt-1">
-                      Not Uploaded
-                    </p>
                   )}
 
                 </div>
@@ -203,9 +169,7 @@ function DocumentUploadPanel({
                   <input
                     type="file"
                     className="hidden"
-                    onChange={(
-                      e
-                    ) =>
+                    onChange={(e) =>
                       handleUpload(
                         doc,
                         e
@@ -218,8 +182,8 @@ function DocumentUploadPanel({
               </div>
 
             </div>
-          )
-        )}
+          );
+        })}
 
       </div>
 
