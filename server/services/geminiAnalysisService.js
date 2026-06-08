@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(
 );
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash",
 });
 
 export async function generateAIInsights(
@@ -19,11 +19,13 @@ export async function generateAIInsights(
   const prompt = `
 You are an expert immigration consultant.
 
+Analyze this visa application.
+
 Visa Type: ${visaType}
 Country: ${country}
 Description: ${description}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON.
 
 {
   "overview": "",
@@ -50,21 +52,77 @@ Return ONLY valid JSON:
   },
   "followUpActions": []
 }
+
+Rules:
+- Maximum 3 risks
+- Maximum 5 timeline stages
+- Maximum 5 followUpActions
+- Risk level must be HIGH, MEDIUM, or LOW
+- Return JSON only
+- No markdown
+- No explanations
 `;
 
-  const result =
-    await model.generateContent(
-      prompt
+  try {
+    const result =
+      await model.generateContent(
+        prompt
+      );
+
+    const response =
+      result.response.text();
+
+    const cleaned =
+      response
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.error(
+      "Gemini Analysis Error:",
+      error
     );
 
-  const response =
-    result.response.text();
+    return {
+      overview:
+        `Visa application for ${country}. AI analysis unavailable.`,
 
-  const cleaned =
-    response
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+      risks: [
+        {
+          level: "LOW",
+          message:
+            "AI service temporarily unavailable.",
+        },
+      ],
 
-  return JSON.parse(cleaned);
+      assessment: {
+        strengths: [],
+        concerns: [],
+        recommendation:
+          "Please try again later.",
+      },
+
+      timeline: [
+        {
+          stage:
+            "Application Review",
+          duration:
+            "Pending",
+        },
+      ],
+
+      notification: {
+        title:
+          "Analysis Unavailable",
+        message:
+          "AI analysis could not be generated.",
+      },
+
+      followUpActions: [
+        "Review application manually",
+      ],
+    };
+  }
 }
