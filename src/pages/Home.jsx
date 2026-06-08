@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
-
 import CaseForm from "../components/input/CaseForm";
 import { useCase } from "../context/CaseContext";
+import { Link } from "react-router-dom";
+
+import Navbar from "../components/layout/Navbar";
 
 function Home() {
   const {
@@ -11,6 +12,8 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+
+      <Navbar />
 
       <div className="max-w-4xl mx-auto p-8">
 
@@ -27,7 +30,7 @@ function Home() {
           <div className="bg-white p-6 rounded-lg shadow mb-8">
 
             <h2 className="text-2xl font-bold mb-4">
-              Active Case
+              Current Application
             </h2>
 
             <p className="mb-2">
@@ -56,14 +59,23 @@ function Home() {
                 to="/analysis"
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
-                Continue Case
+                Resume Application
               </Link>
 
               <button
-                onClick={clearCase}
+                onClick={() => {
+                  const confirmed =
+                    window.confirm(
+                      "Starting a new application will remove the current case. Continue?"
+                    );
+
+                  if (confirmed) {
+                    clearCase();
+                  }
+                }}
                 className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
-                Create New Case
+                Start New Application
               </button>
 
             </div>
