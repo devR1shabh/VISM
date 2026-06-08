@@ -8,54 +8,131 @@ export function parseDocument(
 
   const matches = {
     Passport: [
-      "passport"
+      "passport",
     ],
 
     "Academic Transcripts": [
       "transcript",
-      "academic"
+      "academic",
+      "marksheet",
+      "grade",
+      "semester",
+      "result",
     ],
 
     "University Offer Letter": [
       "offer",
-      "admission"
+      "admission",
+      "acceptance",
+      "university",
+      "college",
     ],
 
     "Financial Proof": [
       "bank",
       "financial",
-      "statement"
+      "statement",
+      "fund",
+      "balance",
+      "sponsor",
+      "income",
     ],
 
     "Language Test Results": [
       "ielts",
       "toefl",
-      "pte"
+      "pte",
+      "language",
+      "test",
+      "english",
+      "score",
+      "exam",
+      "certificate",
     ],
 
     Resume: [
       "resume",
-      "cv"
+      "cv",
+      "profile",
     ],
 
     "Employment Contract": [
       "employment",
-      "contract"
+      "contract",
+      "offerletter",
+      "joboffer",
     ],
 
     "Work Permit Documents": [
       "permit",
-      "workpermit"
+      "workpermit",
+      "authorization",
+      "workvisa",
     ],
 
     "Police Clearance Certificate": [
       "police",
-      "clearance"
+      "clearance",
+      "pcc",
+      "background",
     ],
 
     "Relationship Proof": [
       "marriage",
-      "relationship"
+      "relationship",
+      "spouse",
+      "family",
+      "certificate",
+    ],
+
+    "Educational Credentials": [
+      "degree",
+      "diploma",
+      "education",
+      "credential",
+    ],
+
+    "Employment Records": [
+      "employment",
+      "experience",
+      "salary",
+      "record",
+    ],
+
+    "Sponsor Documents": [
+      "sponsor",
+      "support",
+    ],
+
+    "Identity Documents": [
+      "identity",
+      "id",
+      "aadhaar",
+      "license",
+    ],
+
+    "Bank Statements": [
+      "bank",
+      "statement",
+      "account",
+    ],
+
+    "Hotel Booking": [
+      "hotel",
+      "booking",
+      "reservation",
+    ],
+
+    "Flight Reservation": [
+      "flight",
+      "ticket",
+      "reservation",
+    ],
+
+    "Travel Itinerary": [
+      "itinerary",
+      "travelplan",
+      "travel",
     ],
   };
 
@@ -76,11 +153,12 @@ export function parseDocument(
         type,
         status: "Detected",
 
-        confidence: "Mock Detection",
+        confidence:
+          "Filename Match",
 
         extractedData: {
           summary:
-            `${type} identified`,
+            `${type} identified from filename`,
         },
       };
     }
@@ -89,9 +167,11 @@ export function parseDocument(
   return {
     type: "Unknown",
 
-    status: "Needs Review",
+    status:
+      "Needs Review",
 
-    confidence: "Low",
+    confidence:
+      "Low",
 
     extractedData: {
       summary:

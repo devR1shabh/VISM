@@ -9,7 +9,8 @@ import { NotificationAgent } from "./NotificationAgent";
 import { TaskAgent } from "./TaskAgent";
 
 export async function OrchestratorAgent(
-  analysis
+  analysis,
+  uploadedDocuments = []
 ) {
   const workflow =
     await WorkflowAgent(analysis);
@@ -18,7 +19,10 @@ export async function OrchestratorAgent(
     await DocumentAgent(analysis);
 
   const risks =
-    await RiskAgent(analysis);
+    await RiskAgent(
+      analysis,
+      uploadedDocuments
+    );
 
   const compliance =
     await ComplianceAgent(analysis);
@@ -35,7 +39,7 @@ export async function OrchestratorAgent(
   const notification =
     await NotificationAgent(
       analysis,
-      []
+      uploadedDocuments
     );
 
   const tasks =

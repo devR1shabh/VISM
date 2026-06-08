@@ -1,11 +1,8 @@
-export async function RiskAgent(
-  analysis,
+export function calculateRisks(
+  requiredDocuments = [],
   uploadedDocuments = []
 ) {
   const risks = [];
-
-  const requiredDocuments =
-    analysis.documents || [];
 
   const validDocuments =
     uploadedDocuments.filter(
@@ -60,7 +57,7 @@ export async function RiskAgent(
     risks.push({
       level: "MEDIUM",
       message:
-        "Language proficiency evidence not provided.",
+        "Language proficiency evidence missing.",
     });
   }
 
@@ -72,7 +69,7 @@ export async function RiskAgent(
     risks.push({
       level: "HIGH",
       message:
-        "University offer letter missing.",
+        "University offer letter not uploaded.",
     });
   }
 
@@ -84,7 +81,7 @@ export async function RiskAgent(
     risks.push({
       level: "HIGH",
       message:
-        "Employment contract not uploaded.",
+        "Employment contract missing.",
     });
   }
 

@@ -11,7 +11,13 @@ function TaskManagementPanel({
     task
   ) => {
     if (
-      !task.title.startsWith(
+      typeof task !== "object"
+    ) {
+      return false;
+    }
+
+    if (
+      !task.title?.startsWith(
         "Upload "
       )
     ) {
@@ -33,9 +39,8 @@ function TaskManagementPanel({
   };
 
   const completed =
-    tasks.filter(
-      (task) =>
-        isTaskCompleted(task)
+    tasks.filter((task) =>
+      isTaskCompleted(task)
     ).length;
 
   return (
@@ -53,34 +58,47 @@ function TaskManagementPanel({
 
       <div className="space-y-3">
 
-        {tasks.map((task) => {
-          const completed =
-            isTaskCompleted(task);
+        {tasks.map(
+          (task, index) => {
+            const isObject =
+              typeof task ===
+              "object";
 
-          return (
-            <div
-              key={task.id}
-              className="flex justify-between items-center border-b pb-2"
-            >
-              <span>
-                {task.title}
-              </span>
+            const completed =
+              isObject
+                ? isTaskCompleted(
+                    task
+                  )
+                : false;
 
-              <span
-                className={`px-3 py-1 rounded text-white ${
-                  completed
-                    ? "bg-green-600"
-                    : "bg-gray-500"
-                }`}
+            return (
+              <div
+                key={index}
+                className="flex justify-between items-center border-b pb-2"
               >
-                {completed
-                  ? "Completed"
-                  : "Pending"}
-              </span>
 
-            </div>
-          );
-        })}
+                <span>
+                  {isObject
+                    ? task.title
+                    : task}
+                </span>
+
+                <span
+                  className={`px-3 py-1 rounded text-white ${
+                    completed
+                      ? "bg-green-600"
+                      : "bg-gray-500"
+                  }`}
+                >
+                  {completed
+                    ? "Completed"
+                    : "Pending"}
+                </span>
+
+              </div>
+            );
+          }
+        )}
 
       </div>
 

@@ -10,23 +10,15 @@ function NotificationPanel({
         Notifications
       </h2>
 
-      <div className="mb-4">
-        <h3 className="font-semibold">
-          Applicant Update
-        </h3>
-
-        <p className="text-gray-700 mt-1">
-          {notification.applicantMessage}
-        </p>
-      </div>
-
       <div>
         <h3 className="font-semibold">
-          Processor Update
+          {notification.title ||
+            "Application Update"}
         </h3>
 
-        <p className="text-gray-700 mt-1">
-          {notification.processorMessage}
+        <p className="text-gray-700 mt-2">
+          {notification.message ||
+            "No notification available."}
         </p>
       </div>
 

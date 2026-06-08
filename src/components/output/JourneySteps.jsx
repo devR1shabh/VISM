@@ -1,4 +1,6 @@
-function JourneySteps({ journey }) {
+function JourneySteps({
+  journey = [],
+}) {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
 
@@ -6,11 +8,46 @@ function JourneySteps({ journey }) {
         Immigration Journey
       </h2>
 
-      <ol className="list-decimal ml-5">
-        {journey.map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
+      {journey.length === 0 ? (
+        <p className="text-gray-500">
+          No journey information available.
+        </p>
+      ) : (
+        <ol className="list-decimal ml-5 space-y-2">
+
+          {journey.map(
+            (step, index) => (
+              <li key={index}>
+
+                {typeof step ===
+                "string" ? (
+                  step
+                ) : (
+                  <>
+                    <span className="font-medium">
+                      {step.stage ||
+                        step.name ||
+                        "Journey Step"}
+                    </span>
+
+                    {(step.duration ||
+                      step.status) && (
+                      <span className="text-gray-500 ml-2">
+                        (
+                        {step.duration ||
+                          step.status}
+                        )
+                      </span>
+                    )}
+                  </>
+                )}
+
+              </li>
+            )
+          )}
+
+        </ol>
+      )}
 
     </div>
   );

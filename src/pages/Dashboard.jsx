@@ -63,28 +63,34 @@ function Dashboard() {
     caseData.analysis?.tasks || [];
 
   const completedTasks =
-    tasks.filter((task) => {
-      if (
-        !task.title.startsWith(
-          "Upload "
-        )
-      ) {
-        return false;
-      }
+  tasks.filter((task) => {
+    if (
+      typeof task !== "object"
+    ) {
+      return false;
+    }
 
-      const documentName =
-        task.title.replace(
-          "Upload ",
-          ""
-        );
+    if (
+      !task.title?.startsWith(
+        "Upload "
+      )
+    ) {
+      return false;
+    }
 
-      return uploadedDocuments.some(
-        (doc) =>
-          doc.valid &&
-          doc.requiredDocument ===
-            documentName
+    const documentName =
+      task.title.replace(
+        "Upload ",
+        ""
       );
-    }).length;
+
+    return uploadedDocuments.some(
+      (doc) =>
+        doc.valid &&
+        doc.requiredDocument ===
+          documentName
+    );
+  }).length;
 
   const pendingTasks =
     tasks.length -
