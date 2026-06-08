@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { useCase } from "../context/CaseContext";
 
@@ -9,6 +8,7 @@ function Documents() {
   const {
     caseData,
     uploadedDocuments,
+    activityFeed,
   } = useCase();
 
   if (!caseData) {
@@ -95,6 +95,8 @@ function Documents() {
 
         </div>
 
+        {/* Applicant Profile */}
+
         <div className="mb-6">
           <ApplicantProfile
             caseData={caseData}
@@ -102,7 +104,11 @@ function Documents() {
           />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Documents Grid */}
+
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+
+          {/* Valid Documents */}
 
           <div className="bg-white rounded-lg shadow p-6">
 
@@ -124,11 +130,13 @@ function Documents() {
               </p>
             ) : (
               <div className="space-y-3">
+
                 {validDocuments.map((doc, i) => (
                   <div
                     key={i}
                     className="border border-green-100 bg-green-50 rounded-lg p-3"
                   >
+
                     <p className="text-sm font-semibold">
                       {doc.requiredDocument}
                     </p>
@@ -140,12 +148,26 @@ function Documents() {
                     <p className="text-xs text-green-600 mt-1 font-medium">
                       ✓ Validated
                     </p>
+
+                    {doc.uploadedAt && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        Uploaded:
+                        {" "}
+                        {new Date(
+                          doc.uploadedAt
+                        ).toLocaleString()}
+                      </p>
+                    )}
+
                   </div>
                 ))}
+
               </div>
             )}
 
           </div>
+
+          {/* Invalid Documents */}
 
           <div className="bg-white rounded-lg shadow p-6">
 
@@ -167,11 +189,13 @@ function Documents() {
               </p>
             ) : (
               <div className="space-y-3">
+
                 {invalidDocuments.map((doc, i) => (
                   <div
                     key={i}
                     className="border border-red-100 bg-red-50 rounded-lg p-3"
                   >
+
                     <p className="text-sm font-semibold">
                       {doc.requiredDocument}
                     </p>
@@ -183,12 +207,26 @@ function Documents() {
                     <p className="text-xs text-red-600">
                       Detected as: {doc.detectedType}
                     </p>
+
+                    {doc.uploadedAt && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        Uploaded:
+                        {" "}
+                        {new Date(
+                          doc.uploadedAt
+                        ).toLocaleString()}
+                      </p>
+                    )}
+
                   </div>
                 ))}
+
               </div>
             )}
 
           </div>
+
+          {/* Missing Documents */}
 
           <div className="bg-white rounded-lg shadow p-6">
 
@@ -210,11 +248,13 @@ function Documents() {
               </p>
             ) : (
               <div className="space-y-3">
+
                 {missingDocuments.map((doc, i) => (
                   <div
                     key={i}
                     className="border border-orange-100 bg-orange-50 rounded-lg p-3"
                   >
+
                     <p className="text-sm font-semibold">
                       {doc}
                     </p>
@@ -222,12 +262,55 @@ function Documents() {
                     <p className="text-xs text-orange-600 mt-1">
                       ⚠ Not yet uploaded
                     </p>
+
                   </div>
                 ))}
+
               </div>
             )}
 
           </div>
+
+        </div>
+
+        {/* Activity Feed */}
+
+        <div className="bg-white rounded-lg shadow p-6">
+
+          <h2 className="text-xl font-bold mb-4">
+            Recent Activity
+          </h2>
+
+          {activityFeed.length === 0 ? (
+            <p className="text-gray-500">
+              No activity recorded yet.
+            </p>
+          ) : (
+            <div className="space-y-3">
+
+              {activityFeed
+                .slice(0, 10)
+                .map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 rounded-r"
+                  >
+
+                    <p className="font-medium">
+                      {activity.message}
+                    </p>
+
+                    <p className="text-xs text-gray-500 mt-1">
+                      {new Date(
+                        activity.timestamp
+                      ).toLocaleString()}
+                    </p>
+
+                  </div>
+                ))}
+
+            </div>
+          )}
 
         </div>
 

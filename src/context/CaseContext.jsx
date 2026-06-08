@@ -8,8 +8,9 @@ import {
 const CaseContext = createContext();
 
 const STORAGE_KEYS = {
-  caseData:          "vism_caseData",
+  caseData: "vism_caseData",
   uploadedDocuments: "vism_uploadedDocuments",
+  activityFeed: "vism_activityFeed",
 };
 
 function loadFromStorage(key, fallback) {
@@ -23,56 +24,171 @@ function loadFromStorage(key, fallback) {
 
 function saveToStorage(key, value) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
   } catch {
-    // localStorage unavailable — graceful degradation
+    // localStorage unavailable
   }
 }
 
-export function CaseProvider({ children }) {
-  const [caseData, setCaseDataRaw] = useState(
-    () => loadFromStorage(STORAGE_KEYS.caseData, null)
+export function CaseProvider({
+  children,
+}) {
+  const [caseData, setCaseDataRaw] =
+    useState(() =>
+      loadFromStorage(
+        STORAGE_KEYS.caseData,
+        null
+      )
+    );
+
+  const [
+    uploadedDocuments,
+    setUploadedDocumentsRaw,
+  ] = useState(() =>
+    loadFromStorage(
+      STORAGE_KEYS.uploadedDocuments,
+      []
+    )
   );
 
-  const [uploadedDocuments, setUploadedDocumentsRaw] = useState(
-    () => loadFromStorage(STORAGE_KEYS.uploadedDocuments, [])
+  const [
+    activityFeed,
+    setActivityFeedRaw,
+  ] = useState(() =>
+    loadFromStorage(
+      STORAGE_KEYS.activityFeed,
+      []
+    )
   );
 
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.caseData, caseData);
+    saveToStorage(
+      STORAGE_KEYS.caseData,
+      caseData
+    );
   }, [caseData]);
 
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.uploadedDocuments, uploadedDocuments);
+    saveToStorage(
+      STORAGE_KEYS.uploadedDocuments,
+      uploadedDocuments
+    );
   }, [uploadedDocuments]);
 
-  const setCaseData = (updater) => {
+  useEffect(() => {
+    saveToStorage(
+      STORAGE_KEYS.activityFeed,
+      activityFeed
+    );
+  }, [activityFeed]);
+
+  const setCaseData = (
+    updater
+  ) => {
     setCaseDataRaw((prev) => {
       const next =
-        typeof updater === "function" ? updater(prev) : updater;
-      saveToStorage(STORAGE_KEYS.caseData, next);
+        typeof updater ===
+        "function"
+          ? updater(prev)
+          : updater;
+
+      saveToStorage(
+        STORAGE_KEYS.caseData,
+        next
+      );
+
       return next;
     });
   };
 
-  const addDocument = (document) => {
-    setUploadedDocumentsRaw((prev) => {
-      const next = [...prev, document];
-      saveToStorage(STORAGE_KEYS.uploadedDocuments, next);
-      return next;
-    });
+  const addDocument = (
+    document
+  ) => {
+    setUploadedDocumentsRaw(
+      (prev) => {
+        const next = [
+          ...prev,
+          document,
+        ];
+
+        saveToStorage(
+          STORAGE_KEYS.uploadedDocuments,
+          next
+        );
+
+        return next;
+      }
+    );
   };
 
-  const clearDocuments = () => {
-    setUploadedDocumentsRaw([]);
-    saveToStorage(STORAGE_KEYS.uploadedDocuments, []);
+  const addActivity = (
+    type,
+    message
+  ) => {
+    const activity = {
+      id: Date.now(),
+      type,
+      message,
+      timestamp:
+        new Date().toISOString(),
+    };
+
+    setActivityFeedRaw(
+      (prev) => [
+        activity,
+        ...prev,
+      ]
+    );
   };
+
+  const clearDocuments =
+    () => {
+      setUploadedDocumentsRaw(
+        []
+      );
+
+      saveToStorage(
+        STORAGE_KEYS.uploadedDocuments,
+        []
+      );
+    };
+
+  const clearActivity =
+    () => {
+      setActivityFeedRaw([]);
+
+      saveToStorage(
+        STORAGE_KEYS.activityFeed,
+        []
+      );
+    };
 
   const clearCase = () => {
     setCaseDataRaw(null);
-    saveToStorage(STORAGE_KEYS.caseData, null);
-    setUploadedDocumentsRaw([]);
-    saveToStorage(STORAGE_KEYS.uploadedDocuments, []);
+
+    saveToStorage(
+      STORAGE_KEYS.caseData,
+      null
+    );
+
+    setUploadedDocumentsRaw(
+      []
+    );
+
+    saveToStorage(
+      STORAGE_KEYS.uploadedDocuments,
+      []
+    );
+
+    setActivityFeedRaw([]);
+
+    saveToStorage(
+      STORAGE_KEYS.activityFeed,
+      []
+    );
   };
 
   return (
@@ -84,6 +200,11 @@ export function CaseProvider({ children }) {
         uploadedDocuments,
         addDocument,
         clearDocuments,
+
+        activityFeed,
+        addActivity,
+        clearActivity,
+
         clearCase,
       }}
     >
@@ -93,5 +214,7 @@ export function CaseProvider({ children }) {
 }
 
 export function useCase() {
-  return useContext(CaseContext);
+  return useContext(
+    CaseContext
+  );
 }

@@ -7,6 +7,7 @@ function DocumentUploadPanel({
   const {
     uploadedDocuments,
     addDocument,
+    addActivity,
   } = useCase();
 
   const handleUpload = (
@@ -25,7 +26,8 @@ function DocumentUploadPanel({
       parsedResult.type;
 
     const isValid =
-      detectedType === documentName;
+      detectedType ===
+      documentName;
 
     const documentRecord = {
       requiredDocument:
@@ -38,9 +40,21 @@ function DocumentUploadPanel({
 
       valid:
         isValid,
+
+      uploadedAt:
+        new Date().toISOString(),
     };
 
-    addDocument(documentRecord);
+    addDocument(
+      documentRecord
+    );
+
+    addActivity(
+      "upload",
+      isValid
+        ? `${documentName} uploaded successfully`
+        : `${documentName} upload failed validation`
+    );
   };
 
   const validUploads =
@@ -64,15 +78,16 @@ function DocumentUploadPanel({
           ) * 100
         );
 
-  const getDocumentStatus = (
-    documentName
-  ) => {
-    return uploadedDocuments.find(
-      (doc) =>
-        doc.requiredDocument ===
-        documentName
-    );
-  };
+  const getDocumentStatus =
+    (
+      documentName
+    ) => {
+      return uploadedDocuments.find(
+        (doc) =>
+          doc.requiredDocument ===
+          documentName
+      );
+    };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
@@ -84,14 +99,19 @@ function DocumentUploadPanel({
       <div className="mb-6">
 
         <p className="font-medium">
-          Uploaded: {uploadedCount} / {totalCount}
+          Uploaded:
+          {" "}
+          {uploadedCount}
+          {" / "}
+          {totalCount}
         </p>
 
         <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
           <div
             className="bg-blue-600 h-3 rounded-full transition-all duration-300"
             style={{
-              width: `${progress}%`,
+              width:
+                `${progress}%`,
             }}
           />
         </div>
@@ -104,86 +124,126 @@ function DocumentUploadPanel({
 
       <div className="space-y-4">
 
-        {documents.map((doc) => {
-          const uploadedDoc =
-            getDocumentStatus(doc);
+        {documents.map(
+          (doc) => {
+            const uploadedDoc =
+              getDocumentStatus(
+                doc
+              );
 
-          return (
-            <div
-              key={doc}
-              className="border rounded-lg p-4"
-            >
+            return (
+              <div
+                key={doc}
+                className="border rounded-lg p-4"
+              >
 
-              <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center">
 
-                <div>
+                  <div>
 
-                  <h3 className="font-medium">
-                    {doc}
-                  </h3>
+                    <h3 className="font-medium">
+                      {doc}
+                    </h3>
 
-                  {!uploadedDoc ? (
-                    <p className="text-red-500 text-sm mt-1">
-                      Not Uploaded
-                    </p>
-                  ) : uploadedDoc.valid ? (
-                    <>
-                      <p className="text-green-600 text-sm mt-1">
-                        Uploaded: {uploadedDoc.fileName}
+                    {!uploadedDoc ? (
+                      <p className="text-red-500 text-sm mt-1">
+                        Not Uploaded
                       </p>
+                    ) : uploadedDoc.valid ? (
+                      <>
+                        <p className="text-green-600 text-sm mt-1">
+                          Uploaded:
+                          {" "}
+                          {
+                            uploadedDoc.fileName
+                          }
+                        </p>
 
-                      <p className="text-blue-600 text-sm mt-1">
-                        Type: {uploadedDoc.detectedType}
-                      </p>
+                        <p className="text-blue-600 text-sm mt-1">
+                          Type:
+                          {" "}
+                          {
+                            uploadedDoc.detectedType
+                          }
+                        </p>
 
-                      <p className="text-green-600 text-sm">
-                        ✓ Valid Document
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-red-600 text-sm mt-1">
-                        Invalid Upload
-                      </p>
+                        <p className="text-green-600 text-sm">
+                          ✓ Valid Document
+                        </p>
 
-                      <p className="text-gray-600 text-sm">
-                        Expected: {doc}
-                      </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Uploaded:
+                          {" "}
+                          {new Date(
+                            uploadedDoc.uploadedAt
+                          ).toLocaleString()}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-red-600 text-sm mt-1">
+                          Invalid Upload
+                        </p>
 
-                      <p className="text-gray-600 text-sm">
-                        Detected: {uploadedDoc.detectedType}
-                      </p>
+                        <p className="text-gray-600 text-sm">
+                          Expected:
+                          {" "}
+                          {doc}
+                        </p>
 
-                      <p className="text-red-600 text-sm">
-                        Uploaded: {uploadedDoc.fileName}
-                      </p>
-                    </>
-                  )}
+                        <p className="text-gray-600 text-sm">
+                          Detected:
+                          {" "}
+                          {
+                            uploadedDoc.detectedType
+                          }
+                        </p>
+
+                        <p className="text-red-600 text-sm">
+                          Uploaded:
+                          {" "}
+                          {
+                            uploadedDoc.fileName
+                          }
+                        </p>
+
+                        <p className="text-xs text-gray-500 mt-1">
+                          Uploaded:
+                          {" "}
+                          {new Date(
+                            uploadedDoc.uploadedAt
+                          ).toLocaleString()}
+                        </p>
+                      </>
+                    )}
+
+                  </div>
+
+                  <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+
+                    Upload
+
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(
+                        e
+                      ) =>
+                        handleUpload(
+                          doc,
+                          e
+                        )
+                      }
+                    />
+
+                  </label>
 
                 </div>
 
-                <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-
-                  Upload
-
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={(e) =>
-                      handleUpload(
-                        doc,
-                        e
-                      )
-                    }
-                  />
-
-                </label>
-
               </div>
-
-            </div>
-          );
-        })}
+            );
+          }
+        )}
 
       </div>
 
