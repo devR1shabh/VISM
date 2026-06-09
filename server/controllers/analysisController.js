@@ -1,6 +1,6 @@
 import {
-  generateAIInsights,
-} from "../services/geminiAnalysisService.js";
+  generateVisaAnalysisAI
+} from "../services/visaAnalysisService.js";
 
 export async function generateAnalysis(
   req,
@@ -13,14 +13,14 @@ export async function generateAnalysis(
       description,
     } = req.body;
 
-    const aiAnalysis =
-      await generateAIInsights(
+    const analysis =
+      await generateVisaAnalysisAI(
         visaType,
         country,
         description
       );
 
-    res.json(aiAnalysis);
+    res.json(analysis);
   } catch (error) {
     console.error(
       "Analysis Controller Error:",
@@ -29,7 +29,7 @@ export async function generateAnalysis(
 
     res.status(500).json({
       error:
-        "AI analysis failed",
+        "Analysis generation failed",
     });
   }
 }

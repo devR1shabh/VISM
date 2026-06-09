@@ -1,4 +1,7 @@
-import { parseDocument } from "../../services/documentParser";
+import {
+  uploadPassport,
+} from "../../services/api";
+
 import { useCase } from "../../context/CaseContext";
 
 function DocumentUploadPanel({
@@ -10,7 +13,7 @@ function DocumentUploadPanel({
     addActivity,
   } = useCase();
 
-  const handleUpload = (
+  const handleUpload = async (
     documentName,
     event
   ) => {
@@ -19,42 +22,82 @@ function DocumentUploadPanel({
 
     if (!file) return;
 
-    const parsedResult =
-      parseDocument(file.name);
+    try {
+      if (
+        documentName ===
+        "Passport"
+      ) {
+        const result =
+          await uploadPassport(
+            file
+          );
 
-    const detectedType =
-      parsedResult.type;
+        const documentRecord = {
+          requiredDocument:
+            "Passport",
 
-    const isValid =
-      detectedType ===
-      documentName;
+          fileName:
+            file.name,
 
-    const documentRecord = {
-      requiredDocument:
-        documentName,
+          detectedType:
+            result.documentType,
 
-      fileName:
-        file.name,
+          valid:
+            result.valid,
 
-      detectedType,
+          passportData:
+            result.passportData,
 
-      valid:
-        isValid,
+          uploadedAt:
+            new Date().toISOString(),
+        };
 
-      uploadedAt:
-        new Date().toISOString(),
-    };
+        addDocument(
+          documentRecord
+        );
 
-    addDocument(
-      documentRecord
-    );
+        addActivity(
+          "upload",
+          result.valid
+            ? "Passport verified successfully"
+            : "Passport verification failed"
+        );
 
-    addActivity(
-      "upload",
-      isValid
-        ? `${documentName} uploaded successfully`
-        : `${documentName} upload failed validation`
-    );
+        return;
+      }
+
+      const documentRecord = {
+        requiredDocument:
+          documentName,
+
+        fileName:
+          file.name,
+
+        detectedType:
+          documentName,
+
+        valid: true,
+
+        uploadedAt:
+          new Date().toISOString(),
+      };
+
+      addDocument(
+        documentRecord
+      );
+
+      addActivity(
+        "upload",
+        `${documentName} uploaded`
+      );
+    } catch (error) {
+      console.error(error);
+
+      addActivity(
+        "error",
+        `${documentName} upload failed`
+      );
+    }
   };
 
   const validUploads =
@@ -91,13 +134,11 @@ function DocumentUploadPanel({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-
       <h2 className="text-xl font-bold mb-4">
         Document Upload Center
       </h2>
 
       <div className="mb-6">
-
         <p className="font-medium">
           Uploaded:
           {" "}
@@ -119,11 +160,9 @@ function DocumentUploadPanel({
         <p className="text-sm text-gray-600 mt-2">
           {progress}% Complete
         </p>
-
       </div>
 
       <div className="space-y-4">
-
         {documents.map(
           (doc) => {
             const uploadedDoc =
@@ -136,11 +175,8 @@ function DocumentUploadPanel({
                 key={doc}
                 className="border rounded-lg p-4"
               >
-
                 <div className="flex justify-between items-center">
-
                   <div>
-
                     <h3 className="font-medium">
                       {doc}
                     </h3>
@@ -171,6 +207,46 @@ function DocumentUploadPanel({
                           ✓ Valid Document
                         </p>
 
+                        {uploadedDoc.passportData && (
+                          <div className="mt-3 text-sm bg-gray-50 p-3 rounded">
+                            <p>
+                              <strong>
+                                Name:
+                              </strong>
+                              {" "}
+                              {
+                                uploadedDoc
+                                  .passportData
+                                  .fullName
+                              }
+                            </p>
+
+                            <p>
+                              <strong>
+                                Passport No:
+                              </strong>
+                              {" "}
+                              {
+                                uploadedDoc
+                                  .passportData
+                                  .passportNumber
+                              }
+                            </p>
+
+                            <p>
+                              <strong>
+                                Expiry:
+                              </strong>
+                              {" "}
+                              {
+                                uploadedDoc
+                                  .passportData
+                                  .expiryDate
+                              }
+                            </p>
+                          </div>
+                        )}
+
                         <p className="text-xs text-gray-500 mt-1">
                           Uploaded:
                           {" "}
@@ -185,26 +261,8 @@ function DocumentUploadPanel({
                           Invalid Upload
                         </p>
 
-                        <p className="text-gray-600 text-sm">
-                          Expected:
-                          {" "}
-                          {doc}
-                        </p>
-
-                        <p className="text-gray-600 text-sm">
-                          Detected:
-                          {" "}
-                          {
-                            uploadedDoc.detectedType
-                          }
-                        </p>
-
                         <p className="text-red-600 text-sm">
-                          Uploaded:
-                          {" "}
-                          {
-                            uploadedDoc.fileName
-                          }
+                          Verification failed
                         </p>
 
                         <p className="text-xs text-gray-500 mt-1">
@@ -216,11 +274,9 @@ function DocumentUploadPanel({
                         </p>
                       </>
                     )}
-
                   </div>
 
                   <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-
                     Upload
 
                     <input
@@ -235,18 +291,13 @@ function DocumentUploadPanel({
                         )
                       }
                     />
-
                   </label>
-
                 </div>
-
               </div>
             );
           }
         )}
-
       </div>
-
     </div>
   );
 }

@@ -21,31 +21,31 @@ export function calculateRisks(
         !uploadedNames.includes(doc)
     );
 
-  if (
-    missingDocuments.length >= 3
-  ) {
-    risks.push({
-      level: "HIGH",
-      message:
-        "Multiple required documents are missing.",
-    });
-  }
+  // Critical Document
 
   if (
     missingDocuments.includes(
-      "Financial Proof"
-    ) ||
-    missingDocuments.includes(
-      "Financial Evidence"
-    ) ||
-    missingDocuments.includes(
-      "Bank Statements"
+      "Passport"
     )
   ) {
     risks.push({
       level: "HIGH",
       message:
-        "Financial documentation is missing.",
+        "Passport has not been uploaded. The application cannot proceed without a valid passport.",
+    });
+  }
+
+  // Student Visa Risks
+
+  if (
+    missingDocuments.includes(
+      "University Offer Letter"
+    )
+  ) {
+    risks.push({
+      level: "HIGH",
+      message:
+        "University Offer Letter is missing.",
     });
   }
 
@@ -57,21 +57,11 @@ export function calculateRisks(
     risks.push({
       level: "MEDIUM",
       message:
-        "Language proficiency evidence missing.",
+        "Language proficiency evidence has not been provided.",
     });
   }
 
-  if (
-    missingDocuments.includes(
-      "University Offer Letter"
-    )
-  ) {
-    risks.push({
-      level: "HIGH",
-      message:
-        "University offer letter not uploaded.",
-    });
-  }
+  // Work Visa Risks
 
   if (
     missingDocuments.includes(
@@ -81,9 +71,94 @@ export function calculateRisks(
     risks.push({
       level: "HIGH",
       message:
-        "Employment contract missing.",
+        "Employment Contract is required for work visa processing.",
     });
   }
+
+  if (
+    missingDocuments.includes(
+      "Work Permit"
+    )
+  ) {
+    risks.push({
+      level: "MEDIUM",
+      message:
+        "Work Permit documentation is missing.",
+    });
+  }
+
+  // Tourist Visa Risks
+
+  if (
+    missingDocuments.includes(
+      "Flight Reservation"
+    )
+  ) {
+    risks.push({
+      level: "MEDIUM",
+      message:
+        "Flight reservation has not been provided.",
+    });
+  }
+
+  if (
+    missingDocuments.includes(
+      "Hotel Booking"
+    )
+  ) {
+    risks.push({
+      level: "LOW",
+      message:
+        "Accommodation evidence is missing.",
+    });
+  }
+
+  // Financial Documents
+
+  if (
+    missingDocuments.includes(
+      "Financial Proof"
+    ) ||
+    missingDocuments.includes(
+      "Bank Statement"
+    )
+  ) {
+    risks.push({
+      level: "HIGH",
+      message:
+        "Financial evidence is missing and may affect eligibility assessment.",
+    });
+  }
+
+  // General Missing Documents
+
+  if (
+    missingDocuments.length >= 3
+  ) {
+    risks.push({
+      level: "HIGH",
+      message:
+        "Multiple required documents are still missing.",
+    });
+  } else if (
+    missingDocuments.length === 2
+  ) {
+    risks.push({
+      level: "MEDIUM",
+      message:
+        "Several supporting documents remain outstanding.",
+    });
+  } else if (
+    missingDocuments.length === 1
+  ) {
+    risks.push({
+      level: "LOW",
+      message:
+        "One required document is still pending upload.",
+    });
+  }
+
+  // No Risks
 
   if (
     missingDocuments.length === 0
@@ -91,7 +166,7 @@ export function calculateRisks(
     risks.push({
       level: "LOW",
       message:
-        "Application appears complete.",
+        "All required documents have been uploaded successfully.",
     });
   }
 

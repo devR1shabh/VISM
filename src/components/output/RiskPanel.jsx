@@ -64,7 +64,7 @@ function RiskPanel() {
       <div className="flex items-center justify-between mb-4">
 
         <h2 className="text-xl font-bold">
-          AI Risk Assessment
+          Risk Assessment
         </h2>
 
         <span className="text-sm text-gray-500">
@@ -84,7 +84,7 @@ function RiskPanel() {
           </p>
 
           <p className="text-sm text-gray-500 mt-2">
-            Application appears healthy.
+            All required documents appear complete.
           </p>
 
         </div>

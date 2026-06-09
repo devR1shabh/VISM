@@ -33,3 +33,32 @@ export async function generateAnalysis(
 
   return response.json();
 }
+
+export async function uploadPassport(
+  file
+) {
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    file
+  );
+
+  const response =
+    await fetch(
+      `${API_URL}/documents/passport`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      "Passport extraction failed"
+    );
+  }
+
+  return response.json();
+}

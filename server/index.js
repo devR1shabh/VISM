@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import analysisRoutes from "./routes/analysisRoutes.js";
+import documentRoutes from "./routes/documentRoutes.js";
 
 dotenv.config();
 
@@ -15,6 +16,11 @@ app.use(express.json());
 app.use(
   "/api/analysis",
   analysisRoutes
+);
+
+app.use(
+  "/api/documents",
+  documentRoutes
 );
 
 const PORT =

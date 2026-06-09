@@ -1,8 +1,12 @@
 import { useEffect, useRef } from "react";
 import mermaid from "mermaid";
 
+import { useCase } from "../../context/CaseContext";
+
 function VisaJourneyDiagram() {
   const diagramRef = useRef(null);
+
+  const { caseData } = useCase();
 
   useEffect(() => {
     mermaid.initialize({
@@ -13,13 +17,55 @@ function VisaJourneyDiagram() {
 
     const renderDiagram = async () => {
       try {
-        const graphDefinition = `
+        let graphDefinition = "";
+
+        switch (caseData?.visaType) {
+          case "Student Visa":
+            graphDefinition = `
 graph TD
-    A[Document Collection] --> B[Application Preparation]
-    B --> C[Submission]
-    C --> D[Biometrics]
-    D --> E[Decision]
+    A[Academic Documents]
+    --> B[Financial Verification]
+    --> C[University Offer Review]
+    --> D[Visa Submission]
+    --> E[Biometrics]
+    --> F[Decision]
 `;
+            break;
+
+          case "Work Visa":
+            graphDefinition = `
+graph TD
+    A[Employment Documents]
+    --> B[Employer Verification]
+    --> C[Work Authorization Review]
+    --> D[Visa Submission]
+    --> E[Processing]
+    --> F[Decision]
+`;
+            break;
+
+          case "Tourist Visa":
+            graphDefinition = `
+graph TD
+    A[Travel Documents]
+    --> B[Financial Verification]
+    --> C[Accommodation Review]
+    --> D[Visa Submission]
+    --> E[Processing]
+    --> F[Decision]
+`;
+            break;
+
+          default:
+            graphDefinition = `
+graph TD
+    A[Document Collection]
+    --> B[Application Preparation]
+    --> C[Visa Submission]
+    --> D[Processing]
+    --> E[Decision]
+`;
+        }
 
         const id = `mermaid-${Date.now()}`;
 
@@ -32,7 +78,10 @@ graph TD
           diagramRef.current.innerHTML = svg;
         }
       } catch (error) {
-        console.error("Mermaid Error:", error);
+        console.error(
+          "Mermaid Error:",
+          error
+        );
 
         if (diagramRef.current) {
           diagramRef.current.innerHTML =
@@ -42,20 +91,18 @@ graph TD
     };
 
     renderDiagram();
-  }, []);
+  }, [caseData]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-
       <h2 className="text-xl font-bold mb-4">
-        Visa Journey Diagram
+        Visa Processing Journey
       </h2>
 
       <div
         ref={diagramRef}
         className="overflow-x-auto"
       />
-
     </div>
   );
 }

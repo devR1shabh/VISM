@@ -1,14 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY
-);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 export async function generateAIInsights(
@@ -19,13 +15,11 @@ export async function generateAIInsights(
   const prompt = `
 You are an expert immigration consultant.
 
-Analyze this visa application.
-
 Visa Type: ${visaType}
 Country: ${country}
 Description: ${description}
 
-Return ONLY valid JSON.
+Return ONLY valid JSON in this exact format:
 
 {
   "overview": "",
@@ -55,22 +49,47 @@ Return ONLY valid JSON.
 
 Rules:
 - Maximum 3 risks
+- Risk level must be HIGH, MEDIUM, or LOW
 - Maximum 5 timeline stages
 - Maximum 5 followUpActions
-- Risk level must be HIGH, MEDIUM, or LOW
-- Return JSON only
+- JSON only
 - No markdown
 - No explanations
 `;
 
   try {
-    const result =
-      await model.generateContent(
-        prompt
-      );
+    const completion =
+      await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+
+        temperature: 0.3,
+
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an expert immigration consultant. Return valid JSON only.",
+          },
+
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      });
 
     const response =
-      result.response.text();
+      completion.choices[0].message.content;
+
+    console.log(
+      "\n===== GROQ RESPONSE ====="
+    );
+
+    console.log(response);
+
+    console.log(
+      "=========================\n"
+    );
 
     const cleaned =
       response
@@ -78,10 +97,13 @@ Rules:
         .replace(/```/g, "")
         .trim();
 
-    return JSON.parse(cleaned);
+    const parsed =
+      JSON.parse(cleaned);
+
+    return parsed;
   } catch (error) {
     console.error(
-      "Gemini Analysis Error:",
+      "Groq Analysis Error:",
       error
     );
 

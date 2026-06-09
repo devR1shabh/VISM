@@ -14,7 +14,6 @@ import ComplianceNotes from "../components/output/ComplianceNotes";
 import TimelineEstimate from "../components/output/TimelineEstimate";
 import FollowUpActions from "../components/output/FollowUpActions";
 import AssessmentPanel from "../components/output/AssessmentPanel";
-import NotificationPanel from "../components/output/NotificationPanel";
 
 import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
 
@@ -39,6 +38,7 @@ useState(false);
 useEffect(() => {
 if (analysis) return;
 if (!caseData) return;
+
 
 async function runAnalysis() {
   try {
@@ -68,6 +68,7 @@ async function runAnalysis() {
 }
 
 runAnalysis();
+
 
 }, [
 caseData,
@@ -111,11 +112,11 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
 
         <h2 className="text-2xl font-semibold text-gray-700">
-          Running AI Analysis...
+          Generating Visa Analysis...
         </h2>
 
         <p className="text-gray-500 mt-2">
-          Gemini is analyzing the visa application
+          Preparing application insights and document requirements
         </p>
       </div>
     </div>
@@ -133,11 +134,13 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
 
 
   <div className="max-w-7xl mx-auto p-6">
+
     <h1 className="text-4xl font-bold mb-6 text-gray-800">
-      AI Visa Analysis Report
+      Visa Case Analysis
     </h1>
 
     <div className="flex flex-wrap gap-4 mb-8">
+
       <Link
         to="/documents"
         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
@@ -158,9 +161,11 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
       >
         Dashboard
       </Link>
+
     </div>
 
     <div className="bg-white p-6 rounded-lg shadow mb-8">
+
       <h2 className="text-2xl font-semibold mb-4">
         Case Information
       </h2>
@@ -189,9 +194,11 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
           {caseData.description}
         </p>
       </div>
+
     </div>
 
     <div className="grid md:grid-cols-2 gap-6">
+
       <ApplicationOverview
         overview={
           analysis.overview
@@ -203,6 +210,8 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
           analysis.documents || []
         }
       />
+
+      <ReadinessScore />
 
       <RiskPanel
         risks={
@@ -216,17 +225,11 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
         }
       />
 
-      <ReadinessScore />
+      <VisaJourneyDiagram />
 
-      <AssessmentPanel
-        assessment={
-          analysis.assessment
-        }
-      />
-
-      <NotificationPanel
-        notification={
-          analysis.notification
+      <TimelineEstimate
+        timeline={
+          analysis.timeline || []
         }
       />
 
@@ -236,20 +239,20 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
         }
       />
 
-      <TimelineEstimate
-        timeline={
-          analysis.timeline || []
-        }
-      />
-
       <FollowUpActions
         actions={
           analysis.followUpActions || []
         }
       />
 
-      <VisaJourneyDiagram />
+      <AssessmentPanel
+        assessment={
+          analysis.assessment
+        }
+      />
+
     </div>
+
   </div>
 </div>
 
