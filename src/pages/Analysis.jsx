@@ -7,9 +7,10 @@ import Navbar from "../components/layout/Navbar";
 
 import ApplicationOverview from "../components/output/ApplicationOverview";
 import DocumentUploadPanel from "../components/output/DocumentUploadPanel";
+import CaseSummary from "../components/output/CaseSummary";
 import RiskPanel from "../components/output/RiskPanel";
 import JourneySteps from "../components/output/JourneySteps";
-import ReadinessScore from "../components/output/ReadinessScore";
+
 import ComplianceNotes from "../components/output/ComplianceNotes";
 import TimelineEstimate from "../components/output/TimelineEstimate";
 import FollowUpActions from "../components/output/FollowUpActions";
@@ -211,7 +212,11 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
         }
       />
 
-      <ReadinessScore />
+      <CaseSummary
+  documents={
+    analysis.documents || []
+  }
+/>
 
       <RiskPanel
         risks={
