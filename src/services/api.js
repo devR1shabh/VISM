@@ -50,3 +50,19 @@ export async function verifyDocument(file, documentType) {
 
   return response.json();
 }
+
+export async function sendCopilotMessage(caseContext, message) {
+  const response = await fetch(`${API_URL}/copilot/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ caseContext, message }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Copilot request failed");
+  }
+
+  return response.json();
+}
