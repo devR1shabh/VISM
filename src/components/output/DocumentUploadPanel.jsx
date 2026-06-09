@@ -32,6 +32,11 @@ function DocumentUploadPanel({
             file
           );
 
+        console.log(
+          "PASSPORT RESULT:",
+          result
+        );
+
         const documentRecord = {
           requiredDocument:
             "Passport",
@@ -209,6 +214,7 @@ function DocumentUploadPanel({
 
                         {uploadedDoc.passportData && (
                           <div className="mt-3 text-sm bg-gray-50 p-3 rounded">
+
                             <p>
                               <strong>
                                 Name:
@@ -235,6 +241,30 @@ function DocumentUploadPanel({
 
                             <p>
                               <strong>
+                                Nationality:
+                              </strong>
+                              {" "}
+                              {
+                                uploadedDoc
+                                  .passportData
+                                  .nationality
+                              }
+                            </p>
+
+                            <p>
+                              <strong>
+                                Date Of Birth:
+                              </strong>
+                              {" "}
+                              {
+                                uploadedDoc
+                                  .passportData
+                                  .dateOfBirth
+                              }
+                            </p>
+
+                            <p>
+                              <strong>
                                 Expiry:
                               </strong>
                               {" "}
@@ -244,6 +274,15 @@ function DocumentUploadPanel({
                                   .expiryDate
                               }
                             </p>
+
+                            <pre className="text-xs mt-3 bg-white p-2 rounded border overflow-auto">
+                              {JSON.stringify(
+                                uploadedDoc.passportData,
+                                null,
+                                2
+                              )}
+                            </pre>
+
                           </div>
                         )}
 
