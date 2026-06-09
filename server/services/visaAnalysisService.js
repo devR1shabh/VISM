@@ -6,26 +6,17 @@ export async function generateVisaAnalysisAI(
   const documentMap = {
     "Student Visa": [
       "Passport",
-      "Academic Transcripts",
-      "University Offer Letter",
-      "Financial Proof",
-      "Language Test Results",
+      "Academic Transcript",
     ],
 
     "Work Visa": [
       "Passport",
       "Resume",
-      "Employment Contract",
-      "Work Permit",
-      "Financial Proof",
     ],
 
     "Tourist Visa": [
       "Passport",
       "Bank Statement",
-      "Hotel Booking",
-      "Flight Reservation",
-      "Travel Itinerary",
     ],
   };
 
@@ -63,23 +54,17 @@ export async function generateVisaAnalysisAI(
   const followUpMap = {
     "Student Visa": [
       "Upload Passport",
-      "Upload Academic Transcripts",
-      "Upload Offer Letter",
-      "Upload Financial Proof",
+      "Upload Academic Transcript",
     ],
 
     "Work Visa": [
       "Upload Passport",
       "Upload Resume",
-      "Upload Employment Contract",
-      "Upload Work Permit",
     ],
 
     "Tourist Visa": [
       "Upload Passport",
       "Upload Bank Statement",
-      "Upload Hotel Booking",
-      "Upload Flight Reservation",
     ],
   };
 
@@ -164,7 +149,7 @@ export async function generateVisaAnalysisAI(
       ],
 
       concerns: [
-        "Documents have not been uploaded yet.",
+        "Required documents have not been uploaded yet.",
       ],
 
       recommendation:

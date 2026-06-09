@@ -1,63 +1,51 @@
-const API_URL =
-  "http://localhost:5000/api";
+// src/services/api.js
 
-export async function generateAnalysis(
-  visaType,
-  country,
-  description
-) {
-  const response =
-    await fetch(
-      `${API_URL}/analysis`,
-      {
-        method: "POST",
+const API_URL = "http://localhost:5000/api";
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          visaType,
-          country,
-          description,
-        }),
-      }
-    );
+export async function generateAnalysis(visaType, country, description) {
+  const response = await fetch(`${API_URL}/analysis`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ visaType, country, description }),
+  });
 
   if (!response.ok) {
-    throw new Error(
-      "Failed to generate analysis"
-    );
+    throw new Error("Failed to generate analysis");
   }
 
   return response.json();
 }
 
-export async function uploadPassport(
-  file
-) {
-  const formData =
-    new FormData();
+export async function uploadPassport(file) {
+  const formData = new FormData();
+  formData.append("file", file);
 
-  formData.append(
-    "file",
-    file
-  );
-
-  const response =
-    await fetch(
-      `${API_URL}/documents/passport`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+  const response = await fetch(`${API_URL}/documents/passport`, {
+    method: "POST",
+    body: formData,
+  });
 
   if (!response.ok) {
-    throw new Error(
-      "Passport extraction failed"
-    );
+    throw new Error("Passport extraction failed");
+  }
+
+  return response.json();
+}
+
+export async function verifyDocument(file, documentType) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("documentType", documentType);
+
+  const response = await fetch(`${API_URL}/documents/verify`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Document verification failed");
   }
 
   return response.json();
