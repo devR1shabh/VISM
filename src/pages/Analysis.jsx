@@ -12,6 +12,7 @@ import RiskPanel from "../components/output/RiskPanel";
 import JourneySteps from "../components/output/JourneySteps";
 
 import ComplianceNotes from "../components/output/ComplianceNotes";
+import { generateVisaPDF } from "../utils/pdfGenerator";
 import TimelineEstimate from "../components/output/TimelineEstimate";
 import FollowUpActions from "../components/output/FollowUpActions";
 import AssessmentPanel from "../components/output/AssessmentPanel";
@@ -22,8 +23,9 @@ import { generateAnalysis } from "../services/api";
 
 function Analysis() {
 const {
-caseData,
-setCaseData,
+  caseData,
+  setCaseData,
+  uploadedDocuments,
 } = useCase();
 
 const [analysis, setAnalysis] =
@@ -141,6 +143,19 @@ return ( <div className="min-h-screen bg-gray-100"> <Navbar />
     </h1>
 
     <div className="flex flex-wrap gap-4 mb-8">
+
+      <button
+  onClick={() =>
+    generateVisaPDF(
+      caseData,
+      analysis,
+      uploadedDocuments
+    )
+  }
+  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium"
+>
+  Download PDF
+</button>
 
       <Link
         to="/documents"
