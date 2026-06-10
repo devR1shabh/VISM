@@ -1,12 +1,21 @@
 // src/components/output/DocumentUploadPanel.jsx
 
-import { uploadPassport, verifyDocument } from "../../services/api";
+import {
+  uploadPassport,
+  verifyDocument,
+  addVerifiedDocument,
+} from "../../services/api";
 import { useCase } from "../../context/CaseContext";
 
 const VERIFIABLE_DOCUMENTS = ["Resume", "Academic Transcript", "Bank Statement"];
 
 function DocumentUploadPanel({ documents = [] }) {
-  const { uploadedDocuments, addDocument, addActivity } = useCase();
+  const {
+  caseData,
+  uploadedDocuments,
+  addDocument,
+  addActivity,
+} = useCase();
 
   const handleUpload = async (documentName, event) => {
     const file = event.target.files?.[0];
@@ -27,13 +36,25 @@ function DocumentUploadPanel({ documents = [] }) {
         };
 
         addDocument(documentRecord);
-        addActivity(
-          "upload",
-          result.valid
-            ? "Passport verified successfully"
-            : "Passport verification failed"
-        );
-        return;
+
+if (
+  result.valid &&
+  caseData?._id
+) {
+  await addVerifiedDocument(
+    caseData._id,
+    "Passport"
+  );
+}
+
+addActivity(
+  "upload",
+  result.valid
+    ? "Passport verified successfully"
+    : "Passport verification failed"
+);
+
+return;
       }
 
       // --- Verifiable documents: OCR + keyword scoring ---
@@ -51,13 +72,25 @@ function DocumentUploadPanel({ documents = [] }) {
         };
 
         addDocument(documentRecord);
-        addActivity(
-          "upload",
-          result.valid
-            ? `${documentName} verified successfully (${result.confidence}% confidence)`
-            : `${documentName} verification failed (${result.confidence}% confidence)`
-        );
-        return;
+
+if (
+  result.valid &&
+  caseData?._id
+) {
+  await addVerifiedDocument(
+    caseData._id,
+    documentName
+  );
+}
+
+addActivity(
+  "upload",
+  result.valid
+    ? `${documentName} verified successfully (${result.confidence}% confidence)`
+    : `${documentName} verification failed (${result.confidence}% confidence)`
+);
+
+return;
       }
 
       // --- Fallback for any other document types ---
