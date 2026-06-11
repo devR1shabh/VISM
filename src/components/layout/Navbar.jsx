@@ -27,20 +27,16 @@ const NAV_ITEMS = [
 ];
 
 const LOCK_TITLES = {
-  "/analysis":
-    "Create a case to unlock Analysis",
-  "/documents":
-    "Complete Analysis to unlock Documents",
-  "/journey":
-    "Upload and verify documents to unlock Journey",
-  "/dashboard":
-    "Complete Journey to unlock Dashboard",
+  "/analysis": "Create a case to unlock Analysis",
+  "/documents": "Complete Analysis to unlock Documents",
+  "/journey": "Upload and verify documents to unlock Journey",
+  "/dashboard": "Complete Journey to unlock Dashboard",
 };
 
 function LockIcon() {
   return (
     <svg
-      className="w-3.5 h-3.5 ml-1.5"
+      className="w-3.5 h-3.5 text-slate-400"
       fill="currentColor"
       viewBox="0 0 20 20"
     >
@@ -62,40 +58,35 @@ function Navbar() {
   );
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/90 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-
-        {/* Logo */}
-        <NavLink
-          to="/"
-          className="flex items-center gap-3"
-        >
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-lg shadow-cyan-500/20" />
+    <nav className="sticky top-0 z-50 border-b border-[#143045]/70 bg-[#061A28]/95 backdrop-blur-3xl shadow-[0_22px_60px_-35px_rgba(0,0,0,0.8)]">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
+        <NavLink to="/" className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#22E7C5] to-[#1AC9D6] shadow-[0_18px_40px_-28px_rgba(34,231,197,0.85)]">
+            <span className="text-lg font-black tracking-[0.2em] text-slate-950">
+              V
+            </span>
+          </div>
 
           <div>
-            <h1 className="text-lg font-bold text-white">
+            <h1 className="text-lg font-semibold tracking-tight text-white">
               VISM
             </h1>
-
-            <p className="text-xs text-slate-400">
+            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
               Visa Immigration Services
             </p>
           </div>
         </NavLink>
 
-        {/* Navigation */}
-        <div className="flex items-center gap-2">
-
+        <div className="flex flex-wrap items-center gap-2">
           {NAV_ITEMS.map((item) => {
-            const isUnlocked =
-              workflowStep >= item.requiredStep;
+            const isUnlocked = workflowStep >= item.requiredStep;
 
             if (!isUnlocked) {
               return (
                 <span
                   key={item.to}
                   title={LOCK_TITLES[item.to]}
-                  className="inline-flex items-center rounded-xl border border-white/5 bg-white/5 px-4 py-2 text-sm text-slate-500 cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-400 opacity-80 cursor-not-allowed transition"
                 >
                   {item.label}
                   <LockIcon />
@@ -109,8 +100,8 @@ function Navbar() {
                 to={item.to}
                 className={({ isActive }) =>
                   isActive
-                    ? "rounded-xl bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-300 border border-cyan-500/20"
-                    : "rounded-xl px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition"
+                    ? "rounded-2xl border border-[#22E7C5]/60 bg-[#0F3D54] px-4 py-2 text-sm font-semibold text-[#DDF9F0] shadow-[0_0_0_1px_rgba(34,231,197,0.25)] transition"
+                    : "rounded-2xl border border-transparent px-4 py-2 text-sm font-medium text-slate-200 transition duration-200 ease-out hover:border-[#22E7C5]/30 hover:bg-white/10 hover:text-white"
                 }
               >
                 {item.label}
@@ -119,28 +110,25 @@ function Navbar() {
           })}
         </div>
 
-        {/* Progress */}
-        <div className="hidden lg:block w-48">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider text-slate-400">
+        <div className="hidden lg:flex w-full max-w-[18rem] flex-col gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-[0.28em] text-slate-400">
               Progress
             </span>
-
-            <span className="text-xs font-semibold text-cyan-300">
+            <span className="text-xs font-semibold text-[#22E7C5]">
               {progressPercentage}%
             </span>
           </div>
 
-          <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-900/80">
             <div
-              className="h-full bg-gradient-to-r from-cyan-400 to-teal-400 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-[#22E7C5] via-[#22d5c7] to-[#0ec8c3] transition-all duration-500"
               style={{
                 width: `${progressPercentage}%`,
               }}
             />
           </div>
         </div>
-
       </div>
     </nav>
   );
