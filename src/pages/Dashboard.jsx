@@ -25,163 +25,141 @@ function Dashboard() {
     navigate("/application-ready");
   };
 
+  const caseId = caseData.caseId || caseData.id || "—";
+
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <main className="min-h-screen bg-[#061A28] text-white px-4 py-8 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
 
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
+        {/* Hero */}
+        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.35)] backdrop-blur-xl">
+          <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-center">
+            <div>
+              <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Application Dashboard</p>
+              <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">Application Dashboard</h1>
+              <p className="mt-4 text-lg leading-7 text-[#B8C5D1] max-w-3xl">Real-time visa case monitoring</p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              {[
+                { label: "Case ID", value: caseId },
+                { label: "Visa Type", value: caseData?.visaType || "—" },
+                { label: "Destination", value: caseData?.country || "—" },
+                { label: "Status", value: readiness.label },
+              ].map((card) => (
+                <div key={card.label} className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+                  <p className="text-xs uppercase tracking-[0.28em] text-[#B8C5D1]">{card.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{card.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Summary Metrics */}
+        <div className="grid md:grid-cols-4 gap-6">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <p className="text-sm text-[#B8C5D1]">Completion</p>
+            <h2 className="text-3xl font-bold mt-2 text-white">{readiness.score}%</h2>
+            <p className="text-sm text-[#B8C5D1] mt-1">{readiness.label}</p>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <p className="text-sm text-[#B8C5D1]">Valid Documents</p>
+            <h2 className="text-3xl font-bold mt-2 text-white">{valid}</h2>
+            <p className="text-sm text-[#B8C5D1] mt-1">Verified</p>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <p className="text-sm text-[#B8C5D1]">Missing Documents</p>
+            <h2 className="text-3xl font-bold mt-2 text-white">{missing.length}</h2>
+            <p className="text-sm text-[#B8C5D1] mt-1">Required</p>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <p className="text-sm text-[#B8C5D1]">Activity Events</p>
+            <h2 className="text-3xl font-bold mt-2 text-white">{activityFeed.length}</h2>
+            <p className="text-sm text-[#B8C5D1] mt-1">Logged</p>
+          </div>
+        </div>
+
+        {/* Current Status + Summary */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 shadow-[0_20px_60px_-20px_rgba(34,231,197,0.12)] backdrop-blur-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">Current Status</h2>
+            <div className="space-y-3 text-sm text-[#B8C5D1]">
+              <p><strong className="text-white">Visa Type:</strong> {caseData.visaType}</p>
+              <p><strong className="text-white">Destination:</strong> {caseData.country}</p>
+              <p>
+                <strong className="text-white">Status:</strong>{" "}
+                <span className={`font-semibold ${readiness.score === 100 ? "text-[#22E7C5]" : "text-[#22E7C5]"}`}>
+                  {readiness.label}
+                </span>
+              </p>
+              <p><strong className="text-white">Documents:</strong> {valid} / {requiredDocuments.length} verified</p>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 shadow-[0_20px_60px_-20px_rgba(34,231,197,0.12)] backdrop-blur-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">Application Summary</h2>
+            <div className="space-y-3 text-sm text-[#B8C5D1]">
+              <p><strong className="text-white">Case ID:</strong> {caseData.caseId || caseData.id}</p>
+              <p><strong className="text-white">Invalid Documents:</strong> {invalid}</p>
+              <p><strong className="text-white">Missing Documents:</strong> {missing.length}</p>
+              <p><strong className="text-white">Activity Events:</strong> {activityFeed.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600 mb-1">
-            Step 5 of 6
-          </p>
-          <h1 className="text-4xl font-bold text-gray-800">
-            Application Dashboard
-          </h1>
-          <p className="text-gray-500 mt-2">Real-time visa case monitoring</p>
-        </div>
-        <div className="bg-white px-4 py-2 rounded-lg shadow text-right">
-          <p className="text-sm text-gray-500">Case ID</p>
-          <p className="font-semibold">{caseData.caseId || caseData.id}</p>
-        </div>
-      </div>
-
-      {/* Statistics */}
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500">Completion</p>
-          <h2 className="text-3xl font-bold mt-2 text-blue-600">
-            {readiness.score}%
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">{readiness.label}</p>
+          <ActivityFeed />
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500">Valid Documents</p>
-          <h2 className="text-3xl font-bold mt-2 text-green-600">{valid}</h2>
-          <p className="text-sm text-gray-500 mt-1">Verified</p>
+        {/* Quick Access */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Link to="/analysis" className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <h2 className="text-xl font-semibold text-white">Analysis Report</h2>
+            <p className="mt-2 text-sm text-[#B8C5D1]">View complete visa assessment.</p>
+          </Link>
+
+          <Link to="/documents" className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <h2 className="text-xl font-semibold text-white">Document Upload</h2>
+            <p className="mt-2 text-sm text-[#B8C5D1]">Upload or re-verify documents.</p>
+          </Link>
+
+          <Link to="/journey" className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <h2 className="text-xl font-semibold text-white">Processing Journey</h2>
+            <p className="mt-2 text-sm text-[#B8C5D1]">Review your visa journey timeline.</p>
+          </Link>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500">Missing Documents</p>
-          <h2 className="text-3xl font-bold mt-2 text-orange-600">
-            {missing.length}
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">Required</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500">Activity Events</p>
-          <h2 className="text-3xl font-bold mt-2 text-purple-600">
-            {activityFeed.length}
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">Logged</p>
-        </div>
-      </div>
-
-      {/* Current Status + Summary */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">Current Status</h2>
-          <div className="space-y-3">
-            <p>
-              <strong>Visa Type:</strong> {caseData.visaType}
-            </p>
-            <p>
-              <strong>Destination:</strong> {caseData.country}
-            </p>
-            <p>
-              <strong>Status:</strong>{" "}
-              <span
-                className={`font-semibold ${
-                  readiness.score === 100 ? "text-green-600" : "text-blue-600"
-                }`}
-              >
-                {readiness.label}
-              </span>
-            </p>
-            <p>
-              <strong>Documents:</strong> {valid} / {requiredDocuments.length}{" "}
-              verified
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">Application Summary</h2>
-          <div className="space-y-3">
-            <p>
-              <strong>Case ID:</strong> {caseData.caseId || caseData.id}
-            </p>
-            <p>
-              <strong>Invalid Documents:</strong> {invalid}
-            </p>
-            <p>
-              <strong>Missing Documents:</strong> {missing.length}
-            </p>
-            <p>
-              <strong>Activity Events:</strong> {activityFeed.length}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="mb-8">
-        <ActivityFeed />
-      </div>
-
-      {/* Quick Access */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <Link
-          to="/analysis"
-          className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition"
-        >
-          <h2 className="text-xl font-bold">Analysis Report</h2>
-          <p className="mt-2 text-gray-600">View complete visa assessment.</p>
-        </Link>
-
-        <Link
-          to="/documents"
-          className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition"
-        >
-          <h2 className="text-xl font-bold">Document Upload</h2>
-          <p className="mt-2 text-gray-600">Upload or re-verify documents.</p>
-        </Link>
-
-        <Link
-          to="/journey"
-          className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition"
-        >
-          <h2 className="text-xl font-bold">Processing Journey</h2>
-          <p className="mt-2 text-gray-600">Review your visa journey timeline.</p>
-        </Link>
-      </div>
-
-      {/* Finish Application */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleFinish}
-          className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-semibold text-base shadow transition"
-        >
-          Finish Application
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+        {/* Finish Application */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="inline-flex items-center gap-2 rounded-3xl px-6 py-3 text-sm font-semibold bg-[#22E7C5] text-[#061A28] hover:bg-[#39F5D5] shadow-md transition"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-        </button>
-      </div>
+            Finish Application
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </button>
+        </div>
 
-    </div>
+      </div>
+    </main>
   );
 }
 
