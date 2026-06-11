@@ -1,20 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
 
 import countries from "../../data/countries";
 import visaTypes from "../../data/visaTypes";
 
 import { useCase } from "../../context/CaseContext";
-
 import { createCase } from "../../services/api";
 
 function CaseForm() {
   const navigate = useNavigate();
 
-  const {
-    setCaseData,
-    clearCase,
-  } = useCase();
+  const { setCaseData, clearCase } =
+    useCase();
 
   const [visaType, setVisaType] =
     useState("");
@@ -26,6 +24,18 @@ function CaseForm() {
     description,
     setDescription,
   ] = useState("");
+
+  const visaOptions =
+    visaTypes.map((visa) => ({
+      value: visa,
+      label: visa,
+    }));
+
+  const countryOptions =
+    countries.map((country) => ({
+      value: country,
+      label: country,
+    }));
 
   const handleAnalyze =
     async () => {
@@ -94,30 +104,16 @@ function CaseForm() {
           Visa Type
         </label>
 
-        <select
-          value={visaType}
-          onChange={(e) =>
+        <Select
+          options={visaOptions}
+          placeholder="Search or Select Visa Type"
+          onChange={(selected) =>
             setVisaType(
-              e.target.value
+              selected?.value || ""
             )
           }
-          className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">
-            Select Visa Type
-          </option>
-
-          {visaTypes.map(
-            (visa) => (
-              <option
-                key={visa}
-                value={visa}
-              >
-                {visa}
-              </option>
-            )
-          )}
-        </select>
+          isSearchable
+        />
       </div>
 
       <div>
@@ -125,30 +121,16 @@ function CaseForm() {
           Destination Country
         </label>
 
-        <select
-          value={country}
-          onChange={(e) =>
+        <Select
+          options={countryOptions}
+          placeholder="Search or Select Country"
+          onChange={(selected) =>
             setCountry(
-              e.target.value
+              selected?.value || ""
             )
           }
-          className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">
-            Select Country
-          </option>
-
-          {countries.map(
-            (c) => (
-              <option
-                key={c}
-                value={c}
-              >
-                {c}
-              </option>
-            )
-          )}
-        </select>
+          isSearchable
+        />
       </div>
 
       <div>
