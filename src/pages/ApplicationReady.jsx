@@ -6,40 +6,35 @@ import { generateVisaPDF } from "../utils/pdfGenerator";
 
 const FUTURE_ENHANCEMENTS = [
   {
-    icon: "🤖",
-    title: "AI Success Prediction",
+    icon: "🏢",
+    title: "PROCESSOR DASHBOARD",
+    featured: true,
     description:
-      "Machine learning models trained on thousands of visa outcomes to predict your application's success probability before submission.",
+      "Dedicated immigration processor portal for reviewing applications, validating documents, managing queues, updating statuses, adding processor notes, and communicating with applicants.",
   },
   {
     icon: "🌍",
-    title: "More Visa Types",
+    title: "MORE VISA TYPES",
     description:
-      "Support for Permanent Residency, Working Holiday, Business, Transit, Family Reunion, and Investor visas across additional countries.",
+      "Support for: Permanent Residency Visa, Business Visa, Transit Visa, Family Reunion Visa. Future-ready architecture for additional visa categories.",
   },
   {
-    icon: "🖥️",
-    title: "Processor Dashboard",
+    icon: "📄",
+    title: "MORE DOCUMENT SUPPORT",
     description:
-      "A dedicated immigration officer portal for reviewing applications, managing case queues, and communicating directly with applicants.",
+      "Expanded document verification support for: Employment Letters, Sponsorship Letters, Bank Statements, Marriage Certificates, Property Documents, Invitation Letters.",
   },
   {
-    icon: "📱",
-    title: "Real-Time Status Tracking",
+    icon: "🆔",
+    title: "CASE ID APPLICATION RETRIEVAL",
     description:
-      "Live push notifications for every stage of your application — from submission to embassy decision — with SMS and email alerts.",
+      "Applicants will be able to enter Case ID, retrieve application, track status, and view progress without restarting the application process.",
   },
   {
-    icon: "🔗",
-    title: "Embassy API Integration",
+    icon: "✉️",
+    title: "EMAIL NOTIFICATIONS",
     description:
-      "Direct integration with embassy and consulate systems to auto-submit applications and receive official processing updates.",
-  },
-  {
-    icon: "📊",
-    title: "Multi-Applicant Management",
-    description:
-      "Manage family or group applications together, track dependants, and submit joint sponsorship documentation in a single workflow.",
+      "Automated notifications for: Application Submitted, Passport Verified, Documents Verified, Status Updated, Application Approved, Application Rejected.",
   },
 ];
 
@@ -185,14 +180,36 @@ function ApplicationReady() {
 
         <p className="text-center text-[#B8C5D1] mb-8 max-w-xl mx-auto">The BlueprintAI roadmap — features being built to make visa applications faster, smarter, and more transparent.</p>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {FUTURE_ENHANCEMENTS.map(({ icon, title, description }) => (
-            <div key={title} className="rounded-2xl border border-white/6 bg-white/5 p-5 backdrop-blur transition hover:shadow-lg hover:scale-[1.01]">
-              <div className="text-3xl mb-3">{icon}</div>
-              <h3 className="font-semibold text-white mb-1">{title}</h3>
-              <p className="text-sm text-[#B8C5D1] leading-relaxed">{description}</p>
+        <div className="space-y-6">
+          {/* Featured Processor Dashboard */}
+          {FUTURE_ENHANCEMENTS.filter(f => f.featured).map(({ icon, title, description }) => (
+            <div key={title} className="mx-auto max-w-4xl rounded-3xl border border-[#22E7C5]/12 bg-[#083D4A]/70 p-6 shadow-[0_30px_80px_-20px_rgba(34,231,197,0.2)] backdrop-blur-lg ring-1 ring-[#22E7C5]/8">
+              <div className="flex items-start gap-4 md:gap-6">
+                <div className="flex-none w-20 h-20 rounded-xl bg-gradient-to-br from-[#22E7C5] to-[#39F5D5] flex items-center justify-center shadow-lg text-[#061A28] text-3xl">
+                  {icon}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">{title}</h3>
+                  <p className="mt-2 text-sm text-[#B8C5D1] leading-relaxed">{description}</p>
+                </div>
+              </div>
             </div>
           ))}
+
+          {/* Grid for the remaining roadmap items */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {FUTURE_ENHANCEMENTS.filter(f => !f.featured).map(({ icon, title, description }) => (
+              <div key={title} className="rounded-2xl border border-white/6 bg-white/5 p-5 backdrop-blur transition hover:shadow-lg hover:scale-[1.01]">
+                <div className="flex items-start gap-3">
+                  <div className="flex-none w-12 h-12 rounded-lg bg-[#22E7C5]/10 flex items-center justify-center text-xl">{icon}</div>
+                  <div>
+                    <h4 className="font-semibold text-white">{title}</h4>
+                    <p className="text-sm text-[#B8C5D1] mt-1 leading-relaxed">{description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="mt-10 text-center">
