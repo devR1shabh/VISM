@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 import Home from "./pages/Home";
 import Analysis from "./pages/Analysis";
@@ -22,6 +23,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <ScrollToTop />
       <Navbar />
 
       <Routes>
