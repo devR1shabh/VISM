@@ -3,28 +3,46 @@
 import { NavLink } from "react-router-dom";
 import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 
-// Each nav item requires a minimum workflowStep to be clickable.
 const NAV_ITEMS = [
-  { to: "/analysis",  label: "Analysis",  requiredStep: WORKFLOW_STEPS.CASE_CREATED   },
-  { to: "/documents", label: "Documents", requiredStep: WORKFLOW_STEPS.ANALYSIS_DONE  },
-  { to: "/journey",   label: "Journey",   requiredStep: WORKFLOW_STEPS.DOCUMENTS_DONE },
-  { to: "/dashboard", label: "Dashboard", requiredStep: WORKFLOW_STEPS.JOURNEY_DONE   },
+  {
+    to: "/analysis",
+    label: "Analysis",
+    requiredStep: WORKFLOW_STEPS.CASE_CREATED,
+  },
+  {
+    to: "/documents",
+    label: "Documents",
+    requiredStep: WORKFLOW_STEPS.ANALYSIS_DONE,
+  },
+  {
+    to: "/journey",
+    label: "Journey",
+    requiredStep: WORKFLOW_STEPS.DOCUMENTS_DONE,
+  },
+  {
+    to: "/dashboard",
+    label: "Dashboard",
+    requiredStep: WORKFLOW_STEPS.JOURNEY_DONE,
+  },
 ];
 
 const LOCK_TITLES = {
-  "/analysis":  "Create a case on the Home page to unlock Analysis",
-  "/documents": "Complete Analysis to unlock Document Upload",
-  "/journey":   "Upload and verify documents to unlock Journey",
-  "/dashboard": "Complete the Journey step to unlock Dashboard",
+  "/analysis":
+    "Create a case to unlock Analysis",
+  "/documents":
+    "Complete Analysis to unlock Documents",
+  "/journey":
+    "Upload and verify documents to unlock Journey",
+  "/dashboard":
+    "Complete Journey to unlock Dashboard",
 };
 
 function LockIcon() {
   return (
     <svg
-      className="w-3.5 h-3.5 ml-1.5 shrink-0 opacity-80"
-      viewBox="0 0 20 20"
+      className="w-3.5 h-3.5 ml-1.5"
       fill="currentColor"
-      aria-hidden="true"
+      viewBox="0 0 20 20"
     >
       <path
         fillRule="evenodd"
@@ -35,61 +53,94 @@ function LockIcon() {
   );
 }
 
-function getNavItemClass(isActive, isDisabled) {
-  if (isDisabled) {
-    return "inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-400 cursor-not-allowed select-none";
-  }
-  if (isActive) {
-    return "inline-flex items-center px-3 py-2 rounded-md text-sm font-semibold text-blue-700 bg-blue-50 border-b-2 border-blue-600";
-  }
-  return "inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors";
-}
-
 function Navbar() {
   const { workflowStep } = useCase();
 
+  const progressPercentage = Math.min(
+    Math.round((workflowStep / 4) * 100),
+    100
+  );
+
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-1 sm:gap-2">
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+
+        {/* Logo */}
         <NavLink
           to="/"
-          end
-          className={({ isActive }) =>
-            isActive
-              ? "mr-4 sm:mr-6 text-lg font-bold text-blue-700 border-b-2 border-blue-600 pb-0.5"
-              : "mr-4 sm:mr-6 text-lg font-bold text-blue-600 hover:text-blue-700 transition-colors"
-          }
+          className="flex items-center gap-3"
         >
-          BlueprintAI
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-lg shadow-cyan-500/20" />
+
+          <div>
+            <h1 className="text-lg font-bold text-white">
+              VISM
+            </h1>
+
+            <p className="text-xs text-slate-400">
+              Visa Immigration Services
+            </p>
+          </div>
         </NavLink>
 
-        {NAV_ITEMS.map((item) => {
-          const isUnlocked = workflowStep >= item.requiredStep;
+        {/* Navigation */}
+        <div className="flex items-center gap-2">
 
-          if (!isUnlocked) {
+          {NAV_ITEMS.map((item) => {
+            const isUnlocked =
+              workflowStep >= item.requiredStep;
+
+            if (!isUnlocked) {
+              return (
+                <span
+                  key={item.to}
+                  title={LOCK_TITLES[item.to]}
+                  className="inline-flex items-center rounded-xl border border-white/5 bg-white/5 px-4 py-2 text-sm text-slate-500 cursor-not-allowed"
+                >
+                  {item.label}
+                  <LockIcon />
+                </span>
+              );
+            }
+
             return (
-              <span
+              <NavLink
                 key={item.to}
-                className={getNavItemClass(false, true)}
-                title={LOCK_TITLES[item.to]}
-                aria-disabled="true"
+                to={item.to}
+                className={({ isActive }) =>
+                  isActive
+                    ? "rounded-xl bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-300 border border-cyan-500/20"
+                    : "rounded-xl px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition"
+                }
               >
                 {item.label}
-                <LockIcon />
-              </span>
+              </NavLink>
             );
-          }
+          })}
+        </div>
 
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => getNavItemClass(isActive, false)}
-            >
-              {item.label}
-            </NavLink>
-          );
-        })}
+        {/* Progress */}
+        <div className="hidden lg:block w-48">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wider text-slate-400">
+              Progress
+            </span>
+
+            <span className="text-xs font-semibold text-cyan-300">
+              {progressPercentage}%
+            </span>
+          </div>
+
+          <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-cyan-400 to-teal-400 transition-all duration-500"
+              style={{
+                width: `${progressPercentage}%`,
+              }}
+            />
+          </div>
+        </div>
+
       </div>
     </nav>
   );
