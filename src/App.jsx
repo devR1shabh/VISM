@@ -2,6 +2,9 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Navbar from "./components/layout/Navbar";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
+
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Analysis from "./pages/Analysis";
@@ -13,39 +16,51 @@ import AICopilot from "./components/copilot/AICopilot";
 function App() {
   return (
     <BrowserRouter>
+      <div className="min-h-screen bg-gray-100">
+        <Navbar />
 
-      <Routes>
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        <Route
-          path="/"
-          element={<Home />}
-        />
+          <Route
+            path="/analysis"
+            element={
+              <ProtectedRoute>
+                <Analysis />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/analysis"
-          element={<Analysis />}
-        />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute>
+                <Documents />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/documents"
-          element={<Documents />}
-        />
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <Tasks />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
 
-        <Route
-          path="/tasks"
-          element={<Tasks />}
-        />
-
-      </Routes>
-
-      {/* AI Copilot floats above all pages */}
-      <AICopilot />
-
+        <AICopilot />
+      </div>
     </BrowserRouter>
   );
 }

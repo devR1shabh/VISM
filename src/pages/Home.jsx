@@ -1,21 +1,27 @@
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import CaseForm from "../components/input/CaseForm";
 import { useCase } from "../context/CaseContext";
-import { Link } from "react-router-dom";
-
-import Navbar from "../components/layout/Navbar";
 
 function Home() {
-  const {
-    caseData,
-    clearCase,
-  } = useCase();
+  const { caseData, clearCase } = useCase();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const redirectMessage = location.state?.message;
+
+  useEffect(() => {
+    if (!redirectMessage) return;
+
+    const timer = setTimeout(() => {
+      navigate(location.pathname, { replace: true, state: {} });
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, [redirectMessage, navigate, location.pathname]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      <Navbar />
-
-      <div className="max-w-4xl mx-auto p-8">
+    <div className="max-w-4xl mx-auto p-8">
 
         <h1 className="text-5xl font-bold mb-4">
           VISM
@@ -25,6 +31,15 @@ function Home() {
           Visa Intelligence & Immigration
           Management Platform
         </p>
+
+        {redirectMessage && (
+          <div
+            role="alert"
+            className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-6 text-sm"
+          >
+            {redirectMessage}
+          </div>
+        )}
 
         {caseData && (
           <div className="bg-white p-6 rounded-lg shadow mb-8">
@@ -83,12 +98,7 @@ function Home() {
           </div>
         )}
 
-        {!caseData && (
-          <CaseForm />
-        )}
-
-      </div>
-
+        {!caseData && <CaseForm />}
     </div>
   );
 }

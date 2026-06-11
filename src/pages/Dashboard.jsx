@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
 import { useCase } from "../context/CaseContext";
-import Navbar from "../components/layout/Navbar";
 import ActivityFeed from "../components/output/ActivityFeed";
 
 import {
@@ -15,31 +14,6 @@ function Dashboard() {
     uploadedDocuments,
     activityFeed,
   } = useCase();
-
-  if (!caseData) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Navbar />
-
-        <div className="flex items-center justify-center mt-20">
-          <div className="text-center">
-
-            <h2 className="text-2xl font-semibold mb-4">
-              No Active Case Found
-            </h2>
-
-            <Link
-              to="/"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Create New Case
-            </Link>
-
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const requiredDocuments =
     caseData.analysis?.documents || [];
@@ -97,11 +71,7 @@ function Dashboard() {
     completedTasks;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      <Navbar />
-
-      <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
 
         <div className="flex items-center justify-between mb-8">
 
@@ -319,9 +289,6 @@ function Dashboard() {
           </Link>
 
         </div>
-
-      </div>
-
     </div>
   );
 }

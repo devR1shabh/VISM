@@ -1,8 +1,6 @@
-import { Link } from "react-router-dom";
 import { useCase } from "../context/CaseContext";
 import { deriveDocumentSummary } from "../engines/readinessEngine";
 
-import Navbar from "../components/layout/Navbar";
 import ApplicantProfile from "../components/output/ApplicantProfile";
 
 function Documents() {
@@ -11,33 +9,6 @@ function Documents() {
     uploadedDocuments,
     activityFeed,
   } = useCase();
-
-  if (!caseData) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-
-        <Navbar />
-
-        <div className="flex items-center justify-center mt-20">
-          <div className="text-center">
-
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-              No Active Case Found
-            </h2>
-
-            <Link
-              to="/"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Create New Case
-            </Link>
-
-          </div>
-        </div>
-
-      </div>
-    );
-  }
 
   const requiredDocuments =
     caseData.analysis?.documents || [];
@@ -51,36 +22,11 @@ function Documents() {
   const invalidDocuments = normalizedDocuments.filter((doc) => !doc.valid);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      <Navbar />
-
-      <div className="max-w-7xl mx-auto p-6">
-
-        <div className="flex items-center justify-between mb-8">
-
+    <div className="max-w-7xl mx-auto p-6">
+        <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800">
             Document Repository
           </h1>
-
-          <div className="flex gap-3">
-
-            <Link
-              to="/analysis"
-              className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium"
-            >
-              ← Analysis
-            </Link>
-
-            <Link
-              to="/tasks"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
-            >
-              Tasks →
-            </Link>
-
-          </div>
-
         </div>
 
         {/* Applicant Profile */}
@@ -301,9 +247,6 @@ function Documents() {
           )}
 
         </div>
-
-      </div>
-
     </div>
   );
 }
