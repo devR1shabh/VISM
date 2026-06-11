@@ -19,24 +19,50 @@ function SecondaryDocSection({ documentName }) {
     addActivity,
   } = useCase();
 
+  // preview holds the newly-selected file (src, file, timestamp).
+  // Cleared / reset whenever a new file is selected.
   const [preview, setPreview] = useState(null);
+
+  // verificationDone tracks whether we ran verification for the current preview.
+  // Reset to false whenever a new file is selected.
+  const [verificationDone, setVerificationDone] = useState(false);
+
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState(null);
+
+  // Single hidden file input — always mounted, ref never ambiguous.
   const fileInputRef = useRef(null);
 
   const existingDoc = getDocumentByType(uploadedDocuments, documentName);
   const icon = DOC_ICONS[documentName] || "📄";
 
+  // ── File selection ────────────────────────────────────────────────────────
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Reset so the same filename can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     setError(null);
+    setVerificationDone(false);
+
     const reader = new FileReader();
     reader.onload = (ev) =>
-      setPreview({ src: ev.target.result, file, timestamp: new Date().toISOString() });
+      setPreview({
+        src: ev.target.result,
+        file,
+        timestamp: new Date().toISOString(),
+      });
     reader.readAsDataURL(file);
   };
 
+  // ── Trigger file picker ───────────────────────────────────────────────────
+  const openFilePicker = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  // ── Verify ────────────────────────────────────────────────────────────────
   const handleVerify = async () => {
     if (!preview?.file) return;
     setIsVerifying(true);
@@ -73,25 +99,38 @@ function SecondaryDocSection({ documentName }) {
           `This document could not be verified as a ${documentName}. Please upload the correct document.`
         );
       }
+
+      setVerificationDone(true);
     } catch (err) {
       console.error(err);
       setError("Verification failed. Please check your connection and try again.");
       addActivity("error", `${documentName} verification failed`);
     } finally {
       setIsVerifying(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleReupload = () => {
-    setPreview(null);
-    setError(null);
-    fileInputRef.current?.click();
-  };
+  // ── Derived display state ─────────────────────────────────────────────────
+  const hasNewPreview    = Boolean(preview && !verificationDone);
+  const hasEverUploaded  = Boolean(existingDoc);
+  const uploadButtonLabel = hasEverUploaded ? "Upload Again" : "Upload";
+
+  // Show the verification result card only when no new unverified preview is pending
+  const showVerifiedCard  = Boolean(existingDoc?.valid && !hasNewPreview);
+  const showFailedCard    = Boolean(existingDoc && !existingDoc.valid && !hasNewPreview);
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      {/* Header */}
+      {/* ── Hidden file input — single, always mounted ─────────────────── */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept=".jpg,.jpeg,.png"
+        onChange={handleFileSelect}
+      />
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
           <span className="text-xl">{icon}</span>
@@ -102,7 +141,7 @@ function SecondaryDocSection({ documentName }) {
             Upload and verify your {documentName.toLowerCase()}
           </p>
         </div>
-        {existingDoc?.valid && (
+        {showVerifiedCard && (
           <span className="ml-auto flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
             <svg
               className="w-3.5 h-3.5"
@@ -116,7 +155,7 @@ function SecondaryDocSection({ documentName }) {
             Verified
           </span>
         )}
-        {existingDoc && !existingDoc.valid && (
+        {showFailedCard && (
           <span className="ml-auto flex items-center gap-1.5 bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full">
             Failed
           </span>
@@ -124,10 +163,15 @@ function SecondaryDocSection({ documentName }) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">
-        {/* Upload / Preview */}
+        {/* ── Left column: upload / preview ──────────────────────────── */}
         <div>
-          {!preview && !existingDoc ? (
-            <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-purple-50 hover:border-purple-400 transition group">
+          {/* Initial dropzone — shown only when nothing uploaded yet AND no preview */}
+          {!hasNewPreview && !existingDoc ? (
+            <button
+              type="button"
+              onClick={openFilePicker}
+              className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-purple-50 hover:border-purple-400 transition group"
+            >
               <svg
                 className="w-9 h-9 text-gray-400 group-hover:text-purple-400 mb-2 transition"
                 fill="none"
@@ -145,23 +189,23 @@ function SecondaryDocSection({ documentName }) {
                 Click to upload
               </span>
               <span className="text-xs text-gray-400 mt-1">JPG, JPEG, PNG</span>
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileSelect}
-              />
-            </label>
+            </button>
           ) : (
             <div className="space-y-3">
-              <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-                <img
-                  src={preview?.src}
-                  alt={`${documentName} preview`}
-                  className="w-full object-contain max-h-44"
-                />
-              </div>
+              {/* Image preview */}
+              {preview?.src ? (
+                <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                  <img
+                    src={preview.src}
+                    alt={`${documentName} preview`}
+                    className="w-full object-contain max-h-44"
+                  />
+                </div>
+              ) : existingDoc?.uploadedAt ? (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center h-44 text-gray-400 text-sm">
+                  {documentName} uploaded ✓
+                </div>
+              ) : null}
 
               {(preview?.timestamp || existingDoc?.uploadedAt) && (
                 <p className="text-xs text-gray-500 flex items-center gap-1.5">
@@ -185,7 +229,8 @@ function SecondaryDocSection({ documentName }) {
               )}
 
               <div className="flex gap-2">
-                {preview && !existingDoc && (
+                {/* Verify button — shown whenever there's a fresh preview not yet verified */}
+                {hasNewPreview && (
                   <button
                     type="button"
                     onClick={handleVerify}
@@ -218,10 +263,12 @@ function SecondaryDocSection({ documentName }) {
                   </button>
                 )}
 
+                {/* Upload / Upload Again button */}
                 <button
                   type="button"
-                  onClick={handleReupload}
-                  className="flex items-center justify-center gap-1.5 border border-gray-300 text-gray-600 px-4 py-2.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition"
+                  onClick={openFilePicker}
+                  disabled={isVerifying}
+                  className="flex items-center justify-center gap-1.5 border border-gray-300 text-gray-600 px-4 py-2.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <svg
                     className="w-4 h-4"
@@ -236,16 +283,8 @@ function SecondaryDocSection({ documentName }) {
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                     />
                   </svg>
-                  {existingDoc ? "Replace" : "Change"}
+                  {uploadButtonLabel}
                 </button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={handleFileSelect}
-                />
               </div>
             </div>
           )}
@@ -257,9 +296,9 @@ function SecondaryDocSection({ documentName }) {
           )}
         </div>
 
-        {/* Verification Result */}
+        {/* ── Right column: verification result ──────────────────────── */}
         <div>
-          {existingDoc?.valid ? (
+          {showVerifiedCard ? (
             <div className="h-full bg-green-50 border border-green-200 rounded-xl p-5 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0">
@@ -292,7 +331,7 @@ function SecondaryDocSection({ documentName }) {
                 </p>
               )}
             </div>
-          ) : existingDoc && !existingDoc.valid ? (
+          ) : showFailedCard ? (
             <div className="h-full bg-red-50 border border-red-200 rounded-xl p-5 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-red-400 flex items-center justify-center shrink-0">

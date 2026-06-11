@@ -1,3 +1,5 @@
+// src/context/CaseContext.jsx
+
 import {
   createContext,
   useContext,
@@ -13,10 +15,13 @@ import {
 const CaseContext = createContext();
 
 const STORAGE_KEYS = {
-  caseData: "vism_caseData",
+  caseData:          "vism_caseData",
   uploadedDocuments: "vism_uploadedDocuments",
-  activityFeed: "vism_activityFeed",
-  naviMessages: "vism_naviMessages",
+  activityFeed:      "vism_activityFeed",
+  naviMessages:      "vism_naviMessages",
+  // Stores { fullName, passportNumber } of the last successfully-extracted passport.
+  // Used to detect identity changes on re-upload.
+  applicantIdentity: "vism_applicantIdentity",
 };
 
 function loadFromStorage(key, fallback) {
@@ -55,22 +60,21 @@ export function CaseProvider({ children }) {
     loadFromStorage(STORAGE_KEYS.naviMessages, [])
   );
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.caseData, caseData);
-  }, [caseData]);
+  // { fullName: string | null, passportNumber: string | null }
+  const [applicantIdentity, setApplicantIdentityRaw] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.applicantIdentity, {
+      fullName: null,
+      passportNumber: null,
+    })
+  );
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.uploadedDocuments, uploadedDocuments);
-  }, [uploadedDocuments]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.caseData,          caseData);          }, [caseData]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.uploadedDocuments, uploadedDocuments); }, [uploadedDocuments]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.activityFeed,      activityFeed);      }, [activityFeed]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.naviMessages,      naviMessages);      }, [naviMessages]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.applicantIdentity, applicantIdentity); }, [applicantIdentity]);
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.activityFeed, activityFeed);
-  }, [activityFeed]);
-
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.naviMessages, naviMessages);
-  }, [naviMessages]);
-
+  // ── setCaseData ────────────────────────────────────────────────────────────
   const setCaseData = (updater) => {
     setCaseDataRaw((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
@@ -79,6 +83,8 @@ export function CaseProvider({ children }) {
     });
   };
 
+  // ── addDocument ────────────────────────────────────────────────────────────
+  // Always upserts (one record per requiredDocument type — no duplicates).
   const addDocument = (document) => {
     setUploadedDocumentsRaw((prev) => {
       const next = upsertUploadedDocument(prev, document);
@@ -87,6 +93,7 @@ export function CaseProvider({ children }) {
     });
   };
 
+  // ── addActivity ────────────────────────────────────────────────────────────
   const addActivity = (type, message) => {
     const activity = {
       id: Date.now(),
@@ -97,16 +104,19 @@ export function CaseProvider({ children }) {
     setActivityFeedRaw((prev) => [activity, ...prev]);
   };
 
+  // ── clearDocuments ─────────────────────────────────────────────────────────
   const clearDocuments = () => {
     setUploadedDocumentsRaw([]);
     saveToStorage(STORAGE_KEYS.uploadedDocuments, []);
   };
 
+  // ── clearActivity ──────────────────────────────────────────────────────────
   const clearActivity = () => {
     setActivityFeedRaw([]);
     saveToStorage(STORAGE_KEYS.activityFeed, []);
   };
 
+  // ── setNaviMessages ────────────────────────────────────────────────────────
   const setNaviMessages = (updater) => {
     setNaviMessagesRaw((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
@@ -115,21 +125,61 @@ export function CaseProvider({ children }) {
     });
   };
 
+  // ── clearNaviMessages ──────────────────────────────────────────────────────
   const clearNaviMessages = () => {
     setNaviMessagesRaw([]);
     saveToStorage(STORAGE_KEYS.naviMessages, []);
   };
 
+  // ── onPassportReplaced ─────────────────────────────────────────────────────
   /**
-   * Called by DocumentUploadPanel when a passport with a DIFFERENT
-   * passport number is detected. Wipes the Navi conversation only —
-   * all other case data (case info, documents, activity) is preserved.
+   * Called by PassportUploadSection when a passport with a DIFFERENT identity
+   * (name OR passport number) is detected.
+   *
+   * Behaviour:
+   *  - Clears Navi conversation so a fresh personalised greeting is shown.
+   *  - Updates the stored applicant identity to the new passport.
+   *  - All other case data (case info, documents, activity) is preserved.
+   *
+   * When the SAME passport is re-uploaded (same name + number), this function
+   * is NOT called — the conversation is preserved.
+   *
+   * @param {{ fullName: string, passportNumber: string } | null} newIdentity
    */
-  const onPassportReplaced = () => {
+  const onPassportReplaced = (newIdentity = null) => {
+    // Wipe Navi conversation
     setNaviMessagesRaw([]);
     saveToStorage(STORAGE_KEYS.naviMessages, []);
+
+    // Update stored identity
+    if (newIdentity) {
+      const updated = {
+        fullName:       newIdentity.fullName       ?? null,
+        passportNumber: newIdentity.passportNumber ?? null,
+      };
+      setApplicantIdentityRaw(updated);
+      saveToStorage(STORAGE_KEYS.applicantIdentity, updated);
+    }
   };
 
+  // ── updateApplicantIdentity ────────────────────────────────────────────────
+  /**
+   * Called by PassportUploadSection after successful extraction when the
+   * identity has NOT changed (same applicant re-uploading their passport).
+   * Keeps the stored identity fresh without touching Navi messages.
+   *
+   * @param {{ fullName: string, passportNumber: string }} identity
+   */
+  const updateApplicantIdentity = (identity) => {
+    const updated = {
+      fullName:       identity.fullName       ?? null,
+      passportNumber: identity.passportNumber ?? null,
+    };
+    setApplicantIdentityRaw(updated);
+    saveToStorage(STORAGE_KEYS.applicantIdentity, updated);
+  };
+
+  // ── clearCase ──────────────────────────────────────────────────────────────
   const clearCase = () => {
     setCaseDataRaw(null);
     saveToStorage(STORAGE_KEYS.caseData, null);
@@ -142,6 +192,10 @@ export function CaseProvider({ children }) {
 
     setNaviMessagesRaw([]);
     saveToStorage(STORAGE_KEYS.naviMessages, []);
+
+    const emptyIdentity = { fullName: null, passportNumber: null };
+    setApplicantIdentityRaw(emptyIdentity);
+    saveToStorage(STORAGE_KEYS.applicantIdentity, emptyIdentity);
   };
 
   return (
@@ -161,7 +215,10 @@ export function CaseProvider({ children }) {
         naviMessages,
         setNaviMessages,
         clearNaviMessages,
+
+        applicantIdentity,
         onPassportReplaced,
+        updateApplicantIdentity,
 
         clearCase,
       }}

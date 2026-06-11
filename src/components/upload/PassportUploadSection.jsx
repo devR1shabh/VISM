@@ -12,25 +12,54 @@ function PassportUploadSection() {
     addDocument,
     addActivity,
     onPassportReplaced,
+    updateApplicantIdentity,
   } = useCase();
 
+  // preview holds the newly-selected file (src, file, timestamp).
+  // It is cleared when the user clicks "Upload Again" and a new file is chosen.
   const [preview, setPreview] = useState(null);
+
+  // extractionDone tracks whether we have already run extraction for the
+  // current preview. Reset to false whenever a new file is selected.
+  const [extractionDone, setExtractionDone] = useState(false);
+
   const [isExtracting, setIsExtracting] = useState(false);
   const [error, setError] = useState(null);
+
+  // Single hidden file input — always mounted, ref never ambiguous.
   const fileInputRef = useRef(null);
 
   const existingPassport = getDocumentByType(uploadedDocuments, "Passport");
 
+  // ── File selection ────────────────────────────────────────────────────────
+  // Called every time the user picks a file (first upload OR re-upload).
+  // Clears ALL previous state so the flow restarts from scratch.
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Reset input value so selecting the same file name again still fires onChange
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     setError(null);
+    setExtractionDone(false);
+
     const reader = new FileReader();
     reader.onload = (ev) =>
-      setPreview({ src: ev.target.result, file, timestamp: new Date().toISOString() });
+      setPreview({
+        src: ev.target.result,
+        file,
+        timestamp: new Date().toISOString(),
+      });
     reader.readAsDataURL(file);
   };
 
+  // ── Trigger file picker ───────────────────────────────────────────────────
+  const openFilePicker = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  // ── Extract ───────────────────────────────────────────────────────────────
   const handleExtract = async () => {
     if (!preview?.file) return;
     setIsExtracting(true);
@@ -39,11 +68,31 @@ function PassportUploadSection() {
     try {
       const result = await uploadPassport(preview.file);
 
-      if (result.valid && result.passportData?.passportNumber) {
+      // ── Identity change detection ─────────────────────────────────────────
+      // Reset Navi session if EITHER the name OR passport number changes.
+      // Same passport re-uploaded → preserve conversation.
+      if (result.valid && result.passportData) {
         const existingNumber = existingPassport?.passportData?.passportNumber;
+        const existingName   = existingPassport?.passportData?.fullName;
         const incomingNumber = result.passportData.passportNumber;
-        if (existingNumber && existingNumber !== incomingNumber) {
-          onPassportReplaced();
+        const incomingName   = result.passportData.fullName;
+
+        const identityChanged =
+          existingPassport &&
+          (existingNumber !== incomingNumber || existingName !== incomingName);
+
+        if (identityChanged) {
+          // Pass new identity so CaseContext can update stored identity too
+          onPassportReplaced({
+            fullName:       incomingName   ?? null,
+            passportNumber: incomingNumber ?? null,
+          });
+        } else {
+          // Same applicant — just keep stored identity fresh
+          updateApplicantIdentity({
+            fullName:       incomingName   ?? null,
+            passportNumber: incomingNumber ?? null,
+          });
         }
       }
 
@@ -74,27 +123,43 @@ function PassportUploadSection() {
           "Could not verify this passport. Please ensure the MRZ zone is clearly visible and try again."
         );
       }
+
+      setExtractionDone(true);
     } catch (err) {
       console.error(err);
       setError("Extraction failed. Please check your connection and try again.");
       addActivity("error", "Passport extraction failed");
     } finally {
       setIsExtracting(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleReupload = () => {
-    setPreview(null);
-    setError(null);
-    fileInputRef.current?.click();
-  };
+  // ── Derived display state ─────────────────────────────────────────────────
+  // After extraction, show the context-record (existingPassport) as the card.
+  // While a new preview is pending (not yet extracted), show preview image.
+  const hasNewPreview = Boolean(preview && !extractionDone);
+  const showCard      = Boolean(existingPassport?.valid && existingPassport?.passportData && !hasNewPreview);
 
-  const passport = existingPassport;
+  // The image to show: new preview takes priority, then fall back to nothing
+  // (we don't store the image blob across reloads, so no stale image shown).
+  const previewSrc = preview?.src ?? null;
+
+  // Button label: "Upload" before any upload, "Upload Again" after.
+  const hasEverUploaded = Boolean(existingPassport);
+  const uploadButtonLabel = hasEverUploaded ? "Upload Again" : "Upload";
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-8">
-      {/* Header */}
+      {/* ── Hidden file input — single, always mounted ─────────────────── */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept=".jpg,.jpeg,.png"
+        onChange={handleFileSelect}
+      />
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
           <span className="text-xl">🛂</span>
@@ -105,7 +170,7 @@ function PassportUploadSection() {
             Upload the biographical page of your passport
           </p>
         </div>
-        {passport?.valid && (
+        {existingPassport?.valid && !hasNewPreview && (
           <span className="ml-auto flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
             <svg
               className="w-3.5 h-3.5"
@@ -122,10 +187,15 @@ function PassportUploadSection() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Upload / Preview */}
+        {/* ── Left column: upload / preview ──────────────────────────── */}
         <div>
-          {!preview && !passport ? (
-            <label className="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-blue-50 hover:border-blue-400 transition group">
+          {/* Initial dropzone — shown only when nothing uploaded yet AND no preview */}
+          {!hasNewPreview && !existingPassport ? (
+            <button
+              type="button"
+              onClick={openFilePicker}
+              className="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-blue-50 hover:border-blue-400 transition group"
+            >
               <svg
                 className="w-10 h-10 text-gray-400 group-hover:text-blue-400 mb-3 transition"
                 fill="none"
@@ -143,25 +213,25 @@ function PassportUploadSection() {
                 Click to upload passport image
               </span>
               <span className="text-xs text-gray-400 mt-1">JPG, JPEG, PNG</span>
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileSelect}
-              />
-            </label>
+            </button>
           ) : (
             <div className="space-y-3">
-              <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-                <img
-                  src={preview?.src}
-                  alt="Passport preview"
-                  className="w-full object-contain max-h-52"
-                />
-              </div>
+              {/* Image preview — shows new selection OR placeholder after extraction */}
+              {previewSrc ? (
+                <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                  <img
+                    src={previewSrc}
+                    alt="Passport preview"
+                    className="w-full object-contain max-h-52"
+                  />
+                </div>
+              ) : existingPassport?.uploadedAt ? (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center h-52 text-gray-400 text-sm">
+                  Passport uploaded ✓
+                </div>
+              ) : null}
 
-              {(preview?.timestamp || passport?.uploadedAt) && (
+              {(preview?.timestamp || existingPassport?.uploadedAt) && (
                 <p className="text-xs text-gray-500 flex items-center gap-1.5">
                   <svg
                     className="w-3.5 h-3.5"
@@ -177,13 +247,14 @@ function PassportUploadSection() {
                     />
                   </svg>
                   {new Date(
-                    preview?.timestamp || passport?.uploadedAt
+                    preview?.timestamp || existingPassport?.uploadedAt
                   ).toLocaleString()}
                 </p>
               )}
 
               <div className="flex gap-2">
-                {preview && !passport && (
+                {/* Extract button — shown whenever there's a fresh preview not yet extracted */}
+                {hasNewPreview && (
                   <button
                     type="button"
                     onClick={handleExtract}
@@ -216,10 +287,12 @@ function PassportUploadSection() {
                   </button>
                 )}
 
+                {/* Upload / Upload Again button */}
                 <button
                   type="button"
-                  onClick={handleReupload}
-                  className="flex items-center justify-center gap-1.5 border border-gray-300 text-gray-600 px-4 py-2.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition"
+                  onClick={openFilePicker}
+                  disabled={isExtracting}
+                  className="flex items-center justify-center gap-1.5 border border-gray-300 text-gray-600 px-4 py-2.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <svg
                     className="w-4 h-4"
@@ -234,16 +307,8 @@ function PassportUploadSection() {
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                     />
                   </svg>
-                  {passport ? "Replace" : "Change"}
+                  {uploadButtonLabel}
                 </button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={handleFileSelect}
-                />
               </div>
             </div>
           )}
@@ -255,9 +320,9 @@ function PassportUploadSection() {
           )}
         </div>
 
-        {/* Extracted Details Card */}
+        {/* ── Right column: extracted details card ───────────────────── */}
         <div>
-          {passport?.valid && passport?.passportData ? (
+          {showCard ? (
             <div className="h-full bg-green-50 border border-green-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <svg
@@ -278,11 +343,11 @@ function PassportUploadSection() {
 
               <div className="space-y-3">
                 {[
-                  { label: "Full Name", value: passport.passportData.fullName },
-                  { label: "Passport Number", value: passport.passportData.passportNumber },
-                  { label: "Nationality", value: passport.passportData.nationality },
-                  { label: "Date of Birth", value: passport.passportData.dateOfBirth },
-                  { label: "Expiry Date", value: passport.passportData.expiryDate },
+                  { label: "Full Name",        value: existingPassport.passportData.fullName },
+                  { label: "Passport Number",  value: existingPassport.passportData.passportNumber },
+                  { label: "Nationality",      value: existingPassport.passportData.nationality },
+                  { label: "Date of Birth",    value: existingPassport.passportData.dateOfBirth },
+                  { label: "Expiry Date",      value: existingPassport.passportData.expiryDate },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col">
                     <span className="text-xs font-medium text-green-700 uppercase tracking-wide">
