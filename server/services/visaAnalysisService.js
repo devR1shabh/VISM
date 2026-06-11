@@ -1,162 +1,79 @@
-export async function generateVisaAnalysisAI(
+export function generateRuleBasedAnalysis(
   visaType,
-  country,
-  description
+  country
 ) {
   const documentMap = {
     "Student Visa": [
       "Passport",
       "Academic Transcript",
     ],
-
     "Work Visa": [
       "Passport",
       "Resume",
     ],
-
     "Tourist Visa": [
       "Passport",
       "Bank Statement",
     ],
   };
 
-  const overviewMap = {
-    "Student Visa":
-      `A student visa for ${country} allows international students to pursue education at approved institutions.`,
-
-    "Work Visa":
-      `A work visa for ${country} allows qualified professionals to work legally for an approved employer.`,
-
-    "Tourist Visa":
-      `A tourist visa for ${country} allows visitors to travel for leisure, tourism, and short-term stays.`,
-  };
-
   const complianceMap = {
     "Student Visa": [
-      "Maintain enrollment at an approved institution.",
-      "Keep passport valid throughout studies.",
-      "Meet attendance requirements.",
+      "Maintain full-time enrollment at an approved institution.",
+      "Keep passport valid for the entire duration of studies.",
+      "Meet minimum attendance requirements set by the institution.",
+      "Do not engage in unauthorized employment.",
     ],
-
     "Work Visa": [
-      "Work only for authorized employers.",
-      "Maintain valid employment records.",
-      "Comply with local labor laws.",
+      "Work only for the authorized employer named on the visa.",
+      "Maintain valid employment records throughout the visa period.",
+      "Comply with all local labor laws and regulations.",
+      "Notify authorities of any change in employment status.",
     ],
-
     "Tourist Visa": [
-      "Do not overstay visa duration.",
-      "Maintain valid travel documents.",
-      "Follow destination entry regulations.",
+      "Do not overstay the permitted visa duration.",
+      "Maintain valid travel documents at all times.",
+      "Do not engage in employment or paid activities.",
+      "Follow all destination-country entry and exit regulations.",
     ],
   };
 
-  const followUpMap = {
+  const journeyMap = {
     "Student Visa": [
-      "Upload Passport",
-      "Upload Academic Transcript",
+      { stage: "Document Collection", duration: "1–2 Weeks" },
+      { stage: "Application Preparation", duration: "2–3 Days" },
+      { stage: "Submission", duration: "1 Day" },
+      { stage: "Biometrics Appointment", duration: "1–2 Weeks" },
+      { stage: "Processing", duration: "4–8 Weeks" },
+      { stage: "Decision", duration: "Final Outcome" },
     ],
-
     "Work Visa": [
-      "Upload Passport",
-      "Upload Resume",
+      { stage: "Document Collection", duration: "1–2 Weeks" },
+      { stage: "Employer Verification", duration: "3–5 Days" },
+      { stage: "Submission", duration: "1 Day" },
+      { stage: "Processing", duration: "6–12 Weeks" },
+      { stage: "Decision", duration: "Final Outcome" },
     ],
-
     "Tourist Visa": [
-      "Upload Passport",
-      "Upload Bank Statement",
+      { stage: "Document Collection", duration: "3–5 Days" },
+      { stage: "Application Preparation", duration: "1 Day" },
+      { stage: "Submission", duration: "1 Day" },
+      { stage: "Processing", duration: "2–4 Weeks" },
+      { stage: "Decision", duration: "Final Outcome" },
     ],
   };
+
+  const defaultJourney = [
+    { stage: "Document Collection", duration: "1–2 Weeks" },
+    { stage: "Application Preparation", duration: "2–3 Days" },
+    { stage: "Submission", duration: "1 Day" },
+    { stage: "Processing", duration: "4–8 Weeks" },
+    { stage: "Decision", duration: "Final Outcome" },
+  ];
 
   return {
-    overview:
-      overviewMap[visaType] ||
-      `${visaType} application for ${country}.`,
-
-    documents:
-      documentMap[visaType] || [],
-
-    risks: [
-      {
-        level: "MEDIUM",
-        message:
-          "Required documents must be uploaded before submission.",
-      },
-    ],
-
-    journey: [
-      {
-        stage:
-          "Document Collection",
-        duration:
-          "1 Week",
-      },
-      {
-        stage:
-          "Application Preparation",
-        duration:
-          "2 Days",
-      },
-      {
-        stage:
-          "Submission",
-        duration:
-          "1 Day",
-      },
-      {
-        stage:
-          "Processing",
-        duration:
-          "4-8 Weeks",
-      },
-      {
-        stage:
-          "Decision",
-        duration:
-          "Final Outcome",
-      },
-    ],
-
-    timeline: [
-      {
-        stage:
-          "Preparation",
-        duration:
-          "1 Week",
-      },
-      {
-        stage:
-          "Submission",
-        duration:
-          "1 Day",
-      },
-      {
-        stage:
-          "Processing",
-        duration:
-          "4-8 Weeks",
-      },
-    ],
-
-    complianceNotes:
-      complianceMap[visaType] || [],
-
-    assessment: {
-      score: 0,
-
-      strengths: [
-        "Case created successfully.",
-      ],
-
-      concerns: [
-        "Required documents have not been uploaded yet.",
-      ],
-
-      recommendation:
-        "Upload all required documents to proceed.",
-    },
-
-    followUpActions:
-      followUpMap[visaType] || [],
+    documents: documentMap[visaType] || [],
+    complianceNotes: complianceMap[visaType] || [],
+    visaJourney: journeyMap[visaType] || defaultJourney,
   };
 }

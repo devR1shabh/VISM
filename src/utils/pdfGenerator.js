@@ -285,7 +285,7 @@ export function generateVisaPDF(
   y += 10;
 
   const overview =
-    analysis?.overview ||
+    analysis?.aiOverview ||
     "No application overview available.";
 
   const wrappedText =

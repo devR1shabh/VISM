@@ -128,7 +128,7 @@ return;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4">Document Upload Center</h2>
+      <h2 className="text-xl font-bold mb-4">Document Upload</h2>
 
       <div className="mb-6">
         <p className="font-medium">

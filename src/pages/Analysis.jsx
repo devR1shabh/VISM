@@ -2,20 +2,18 @@ import { useEffect, useState } from "react";
 
 import { useCase } from "../context/CaseContext";
 
-import ApplicationOverview from "../components/output/ApplicationOverview";
+import AIApplicationOverview from "../components/output/AIApplicationOverview";
+import AIRiskPanel from "../components/output/AIRiskPanel";
+import AIRecommendations from "../components/output/AIRecommendations";
+import VisaJourneyTimeline from "../components/output/VisaJourneyTimeline";
+
 import DocumentUploadPanel from "../components/output/DocumentUploadPanel";
 import CaseSummary from "../components/output/CaseSummary";
-import RiskPanel from "../components/output/RiskPanel";
-import JourneySteps from "../components/output/JourneySteps";
-
 import ComplianceNotes from "../components/output/ComplianceNotes";
-import { generateVisaPDF } from "../utils/pdfGenerator";
-import TimelineEstimate from "../components/output/TimelineEstimate";
-import FollowUpActions from "../components/output/FollowUpActions";
-import AssessmentPanel from "../components/output/AssessmentPanel";
 
 import VisaJourneyDiagram from "../components/diagram/VisaJourneyDiagram";
 
+import { generateVisaPDF } from "../utils/pdfGenerator";
 import { generateAnalysis } from "../services/api";
 
 function Analysis() {
@@ -66,13 +64,11 @@ function Analysis() {
       <div className="flex items-center justify-center mt-20">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-
           <h2 className="text-2xl font-semibold text-gray-700">
             Generating Visa Analysis...
           </h2>
-
           <p className="text-gray-500 mt-2">
-            Preparing application insights and document requirements
+            AI is preparing your case overview, risks, and recommendations
           </p>
         </div>
       </div>
@@ -87,10 +83,10 @@ function Analysis() {
         Visa Case Analysis
       </h1>
 
+      {/* Case Information */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
         <div className="flex items-start justify-between gap-4 mb-4">
           <h2 className="text-2xl font-semibold">Case Information</h2>
-
           <button
             type="button"
             onClick={() =>
@@ -105,42 +101,37 @@ function Analysis() {
         <p className="mb-3">
           <strong>Case ID:</strong> {caseId}
         </p>
-
         <p className="mb-3">
           <strong>Visa Type:</strong> {caseData.visaType}
         </p>
-
         <p className="mb-3">
           <strong>Destination Country:</strong> {caseData.country}
         </p>
-
         <div>
           <strong>Case Description:</strong>
-
           <p className="mt-2 text-gray-700">{caseData.description}</p>
         </div>
       </div>
 
+      {/* Analysis Grid */}
       <div className="grid md:grid-cols-2 gap-6">
-        <ApplicationOverview overview={analysis.overview} />
+        {/* LLM-generated */}
+        <AIApplicationOverview aiOverview={analysis.aiOverview} />
 
+        <AIRiskPanel aiRisks={analysis.aiRisks || []} />
+
+        <AIRecommendations aiRecommendations={analysis.aiRecommendations || []} />
+
+        {/* Rule-based */}
         <DocumentUploadPanel documents={analysis.documents || []} />
 
         <CaseSummary documents={analysis.documents || []} />
 
-        <RiskPanel risks={analysis.risks || []} />
-
-        <JourneySteps journey={analysis.journey || []} />
-
-        <VisaJourneyDiagram />
-
-        <TimelineEstimate timeline={analysis.timeline || []} />
-
         <ComplianceNotes notes={analysis.complianceNotes || []} />
 
-        <FollowUpActions actions={analysis.followUpActions || []} />
+        <VisaJourneyTimeline visaJourney={analysis.visaJourney || []} />
 
-        <AssessmentPanel assessment={analysis.assessment} />
+        <VisaJourneyDiagram />
       </div>
     </div>
   );

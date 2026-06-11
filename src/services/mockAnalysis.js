@@ -1,67 +1,34 @@
-export function generateMockAnalysis(
-  visaType,
-  country,
-  description
-) {
-  let score = 50;
-
-  if (visaType) score += 15;
-  if (country) score += 15;
-  if (description && description.length > 20) score += 20;
-
+export function generateMockAnalysis(visaType, country) {
   return {
-    overview: `${visaType} application for ${country}.`,
+    // LLM-generated (mocked for offline use)
+    aiOverview: `${visaType} application for ${country}. This is a mock overview used for offline testing. AI-generated content is unavailable without a running backend.`,
 
-    score,
-
-    documents: [
-      "Valid Passport",
-      "Financial Documents",
-      "Application Form",
-      "Supporting Evidence"
+    aiRisks: [
+      { level: "MEDIUM", message: "Mock risk: financial sufficiency has not been assessed." },
+      { level: "LOW", message: "Mock risk: travel intent documentation pending review." },
     ],
 
-    risks: [
-      "Incomplete documentation",
-      "Insufficient financial proof"
+    aiRecommendations: [
+      "Verify that all personal information is consistent across documents.",
+      `Review ${country}'s current visa entry requirements.`,
+      "Prepare a clear and detailed cover letter explaining the purpose of travel.",
     ],
+
+    // Rule-based
+    documents: ["Passport", "Bank Statement"],
 
     complianceNotes: [
-      "Passport should remain valid for at least 6 months.",
-      "Financial evidence must be verifiable.",
+      "Passport should remain valid for at least 6 months beyond the intended stay.",
+      "Financial evidence must be verifiable and recent.",
       "All supporting documents should be translated into English if required.",
-      "Country-specific immigration requirements should be reviewed before submission."
     ],
 
-    timeline: [
-      {
-        stage: "Document Collection",
-        duration: "1 - 2 Weeks"
-      },
-      {
-        stage: "Application Preparation",
-        duration: "3 - 5 Days"
-      },
-      {
-        stage: "Submission",
-        duration: "1 Day"
-      },
-      {
-        stage: "Biometrics",
-        duration: "1 - 3 Weeks"
-      },
-      {
-        stage: "Decision",
-        duration: "4 - 12 Weeks"
-      }
+    visaJourney: [
+      { stage: "Document Collection", duration: "1–2 Weeks" },
+      { stage: "Application Preparation", duration: "2–3 Days" },
+      { stage: "Submission", duration: "1 Day" },
+      { stage: "Processing", duration: "4–8 Weeks" },
+      { stage: "Decision", duration: "Final Outcome" },
     ],
-
-    journey: [
-      "Document Collection",
-      "Application Preparation",
-      "Submission",
-      "Biometrics",
-      "Decision"
-    ]
   };
 }
