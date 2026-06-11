@@ -25,24 +25,17 @@ function DocumentUploadPanel({ documents = [] }) {
     if (!file) return;
 
     try {
-      // --- Passport: full extraction ---
       if (documentName === "Passport") {
         const result = await uploadPassport(file);
 
-        // ── Passport replacement detection ──────────────────────────────
-        // Only runs when OCR succeeds and returns a passport number.
         if (result.valid && result.passportData?.passportNumber) {
           const existingPassport = getDocumentByType(uploadedDocuments, "Passport");
           const existingNumber = existingPassport?.passportData?.passportNumber;
           const incomingNumber = result.passportData.passportNumber;
-
-          // A different (non-empty) passport number means a new applicant.
-          // Wipe Navi's conversation so the old identity is not visible.
           if (existingNumber && existingNumber !== incomingNumber) {
             onPassportReplaced();
           }
         }
-        // ────────────────────────────────────────────────────────────────
 
         const documentRecord = {
           requiredDocument: "Passport",
@@ -69,7 +62,6 @@ function DocumentUploadPanel({ documents = [] }) {
         return;
       }
 
-      // --- Verifiable documents: OCR + keyword scoring ---
       if (VERIFIABLE_DOCUMENTS.includes(documentName)) {
         const result = await verifyDocument(file, documentName);
 
@@ -92,14 +84,13 @@ function DocumentUploadPanel({ documents = [] }) {
         addActivity(
           "upload",
           result.valid
-            ? `${documentName} verified successfully (${result.confidence}% confidence)`
-            : `${documentName} verification failed (${result.confidence}% confidence)`
+            ? `${documentName} verified successfully`
+            : `${documentName} verification failed`
         );
 
         return;
       }
 
-      // --- Fallback for any other document types ---
       const documentRecord = {
         requiredDocument: documentName,
         fileName: file.name,
@@ -138,14 +129,12 @@ function DocumentUploadPanel({ documents = [] }) {
         <p className="font-medium">
           Uploaded: {uploadedCount} / {totalCount}
         </p>
-
         <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
           <div
             className="bg-blue-600 h-3 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
-
         <p className="text-sm text-gray-600 mt-2">{progress}% Complete</p>
       </div>
 
@@ -167,7 +156,6 @@ function DocumentUploadPanel({ documents = [] }) {
                         Uploaded: {uploadedDoc.fileName}
                       </p>
 
-                      {/* Passport: show extracted fields */}
                       {doc === "Passport" && uploadedDoc.passportData && (
                         <div className="mt-3 text-sm bg-gray-50 p-3 rounded">
                           <p>
@@ -193,27 +181,20 @@ function DocumentUploadPanel({ documents = [] }) {
                         </div>
                       )}
 
-                      {/* Resume / Transcript / Bank Statement: show confidence only */}
-                      {VERIFIABLE_DOCUMENTS.includes(doc) &&
-                        uploadedDoc.confidence !== undefined && (
-                          <div className="mt-3 text-sm bg-green-50 p-3 rounded border border-green-100">
-                            <p className="text-green-700 font-semibold">
-                              {doc} Verified
-                            </p>
-                            <p className="text-green-600 mt-1">
-                              ✓ Validation Passed
-                            </p>
-                            <p className="text-gray-600 mt-1">
-                              Confidence:{" "}
-                              <span className="font-semibold text-blue-600">
-                                {uploadedDoc.confidence}%
-                              </span>
-                            </p>
-                          </div>
-                        )}
+                      {VERIFIABLE_DOCUMENTS.includes(doc) && (
+                        <div className="mt-3 text-sm bg-green-50 p-3 rounded border border-green-100">
+                          <p className="text-green-700 font-semibold">
+                            ✓ Verified
+                          </p>
+                          <p className="text-green-600 mt-1">
+                            ✓ Document Accepted
+                          </p>
+                        </div>
+                      )}
 
                       <p className="text-xs text-gray-500 mt-1">
-                        Uploaded: {new Date(uploadedDoc.uploadedAt).toLocaleString()}
+                        Uploaded:{" "}
+                        {new Date(uploadedDoc.uploadedAt).toLocaleString()}
                       </p>
                     </>
                   ) : (
@@ -222,27 +203,21 @@ function DocumentUploadPanel({ documents = [] }) {
                         Invalid Upload
                       </p>
 
-                      {VERIFIABLE_DOCUMENTS.includes(doc) &&
-                        uploadedDoc.confidence !== undefined && (
-                          <div className="mt-2 text-sm bg-red-50 p-3 rounded border border-red-100">
-                            <p className="text-red-700 font-semibold">
-                              Verification Failed
-                            </p>
-                            <p className="text-gray-600 mt-1">
-                              Confidence:{" "}
-                              <span className="font-semibold text-red-600">
-                                {uploadedDoc.confidence}%
-                              </span>
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              Document does not appear to be a {doc}. Please
-                              upload the correct file.
-                            </p>
-                          </div>
-                        )}
+                      {VERIFIABLE_DOCUMENTS.includes(doc) && (
+                        <div className="mt-2 text-sm bg-red-50 p-3 rounded border border-red-100">
+                          <p className="text-red-700 font-semibold">
+                            Verification Failed
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Document does not appear to be a {doc}. Please
+                            upload the correct file.
+                          </p>
+                        </div>
+                      )}
 
                       <p className="text-xs text-gray-500 mt-1">
-                        Uploaded: {new Date(uploadedDoc.uploadedAt).toLocaleString()}
+                        Uploaded:{" "}
+                        {new Date(uploadedDoc.uploadedAt).toLocaleString()}
                       </p>
                     </>
                   )}

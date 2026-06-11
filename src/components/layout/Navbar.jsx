@@ -1,10 +1,12 @@
+// src/components/layout/Navbar.jsx
+
 import { NavLink } from "react-router-dom";
 import { useCase } from "../../context/CaseContext";
 
 const NAV_ITEMS = [
   { to: "/analysis", label: "Analysis" },
   { to: "/documents", label: "Documents" },
-  { to: "/tasks", label: "Tasks" },
+  { to: "/journey", label: "Journey" },
   { to: "/dashboard", label: "Dashboard" },
 ];
 
@@ -29,11 +31,9 @@ function getNavItemClass(isActive, isDisabled) {
   if (isDisabled) {
     return "inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-400 cursor-not-allowed select-none";
   }
-
   if (isActive) {
     return "inline-flex items-center px-3 py-2 rounded-md text-sm font-semibold text-blue-700 bg-blue-50 border-b-2 border-blue-600";
   }
-
   return "inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors";
 }
 
@@ -75,9 +75,7 @@ function Navbar() {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) =>
-                getNavItemClass(isActive, false)
-              }
+              className={({ isActive }) => getNavItemClass(isActive, false)}
             >
               {item.label}
             </NavLink>

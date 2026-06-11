@@ -1,253 +1,63 @@
-import { useCase } from "../context/CaseContext";
-import { deriveDocumentSummary } from "../engines/readinessEngine";
+// src/pages/Documents.jsx
 
-import ApplicantProfile from "../components/output/ApplicantProfile";
+import { useCase } from "../context/CaseContext";
+import DocumentGuidelines from "../components/upload/DocumentGuidelines";
+import PassportUploadSection from "../components/upload/PassportUploadSection";
+import SecondaryDocSection from "../components/upload/SecondaryDocSection";
+import DocumentProgress from "../components/upload/DocumentProgress";
+
+const SECONDARY_DOCS = {
+  "Student Visa": "Academic Transcript",
+  "Work Visa": "Resume",
+  "Tourist Visa": "Bank Statement",
+};
 
 function Documents() {
-  const {
-    caseData,
-    uploadedDocuments,
-    activityFeed,
-  } = useCase();
-
-  const requiredDocuments =
-    caseData.analysis?.documents || [];
-
-  const {
-    documents: normalizedDocuments,
-    missing: missingDocuments,
-  } = deriveDocumentSummary(requiredDocuments, uploadedDocuments);
-
-  const validDocuments = normalizedDocuments.filter((doc) => doc.valid);
-  const invalidDocuments = normalizedDocuments.filter((doc) => !doc.valid);
+  const { caseData } = useCase();
+  const secondaryDoc = SECONDARY_DOCS[caseData?.visaType] || null;
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">
-            Document Repository
-          </h1>
-        </div>
+    <main className="max-w-5xl mx-auto p-6">
+      {/* Page Header */}
+      <div className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-wide text-blue-600 mb-1">
+          Step 3 of 6
+        </p>
+        <h1 className="text-4xl font-bold text-gray-800">Document Upload</h1>
+        <p className="text-gray-500 mt-2">
+          Upload and verify all required documents for your{" "}
+          <strong>{caseData?.visaType}</strong> application to{" "}
+          <strong>{caseData?.country}</strong>.
+        </p>
+      </div>
 
-        {/* Applicant Profile */}
+      {/* Section 1 — Guidelines */}
+      <DocumentGuidelines />
 
-        <div className="mb-6">
-          <ApplicantProfile
-            caseData={caseData}
-            uploadedDocuments={uploadedDocuments}
-          />
-        </div>
+      {/* Section 2 — Passport */}
+      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+        Section 2 — Passport
+      </p>
+      <PassportUploadSection />
 
-        {/* Documents Grid */}
-
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-
-          {/* Valid Documents */}
-
-          <div className="bg-white rounded-lg shadow p-6">
-
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-3 h-3 rounded-full bg-green-500" />
-
-              <h2 className="text-lg font-bold text-green-700">
-                Valid Documents
-              </h2>
-
-              <span className="ml-auto bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                {validDocuments.length}
-              </span>
-            </div>
-
-            {validDocuments.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                No valid documents uploaded yet.
-              </p>
-            ) : (
-              <div className="space-y-3">
-
-                {validDocuments.map((doc) => (
-                  <div
-                    key={doc.requiredDocument}
-                    className="border border-green-100 bg-green-50 rounded-lg p-3"
-                  >
-
-                    <p className="text-sm font-semibold">
-                      {doc.requiredDocument}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      {doc.fileName}
-                    </p>
-
-                    <p className="text-xs text-green-600 mt-1 font-medium">
-                      ✓ Validated
-                    </p>
-
-                    {doc.uploadedAt && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        Uploaded:
-                        {" "}
-                        {new Date(
-                          doc.uploadedAt
-                        ).toLocaleString()}
-                      </p>
-                    )}
-
-                  </div>
-                ))}
-
-              </div>
-            )}
-
+      {/* Section 3 — Secondary Document */}
+      {secondaryDoc && (
+        <>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+            Section 3 — {secondaryDoc}
+          </p>
+          <div className="mb-8">
+            <SecondaryDocSection documentName={secondaryDoc} />
           </div>
+        </>
+      )}
 
-          {/* Invalid Documents */}
-
-          <div className="bg-white rounded-lg shadow p-6">
-
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-3 h-3 rounded-full bg-red-500" />
-
-              <h2 className="text-lg font-bold text-red-700">
-                Invalid Documents
-              </h2>
-
-              <span className="ml-auto bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                {invalidDocuments.length}
-              </span>
-            </div>
-
-            {invalidDocuments.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                No invalid documents.
-              </p>
-            ) : (
-              <div className="space-y-3">
-
-                {invalidDocuments.map((doc) => (
-                  <div
-                    key={doc.requiredDocument}
-                    className="border border-red-100 bg-red-50 rounded-lg p-3"
-                  >
-
-                    <p className="text-sm font-semibold">
-                      {doc.requiredDocument}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      Uploaded: {doc.fileName}
-                    </p>
-
-                    <p className="text-xs text-red-600">
-                      Detected as: {doc.detectedType}
-                    </p>
-
-                    {doc.uploadedAt && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        Uploaded:
-                        {" "}
-                        {new Date(
-                          doc.uploadedAt
-                        ).toLocaleString()}
-                      </p>
-                    )}
-
-                  </div>
-                ))}
-
-              </div>
-            )}
-
-          </div>
-
-          {/* Missing Documents */}
-
-          <div className="bg-white rounded-lg shadow p-6">
-
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-3 h-3 rounded-full bg-orange-500" />
-
-              <h2 className="text-lg font-bold text-orange-700">
-                Missing Documents
-              </h2>
-
-              <span className="ml-auto bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                {missingDocuments.length}
-              </span>
-            </div>
-
-            {missingDocuments.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                All required documents uploaded.
-              </p>
-            ) : (
-              <div className="space-y-3">
-
-                {missingDocuments.map((doc, i) => (
-                  <div
-                    key={i}
-                    className="border border-orange-100 bg-orange-50 rounded-lg p-3"
-                  >
-
-                    <p className="text-sm font-semibold">
-                      {doc}
-                    </p>
-
-                    <p className="text-xs text-orange-600 mt-1">
-                      ⚠ Not yet uploaded
-                    </p>
-
-                  </div>
-                ))}
-
-              </div>
-            )}
-
-          </div>
-
-        </div>
-
-        {/* Activity Feed */}
-
-        <div className="bg-white rounded-lg shadow p-6">
-
-          <h2 className="text-xl font-bold mb-4">
-            Recent Activity
-          </h2>
-
-          {activityFeed.length === 0 ? (
-            <p className="text-gray-500">
-              No activity recorded yet.
-            </p>
-          ) : (
-            <div className="space-y-3">
-
-              {activityFeed
-                .slice(0, 10)
-                .map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 rounded-r"
-                  >
-
-                    <p className="font-medium">
-                      {activity.message}
-                    </p>
-
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(
-                        activity.timestamp
-                      ).toLocaleString()}
-                    </p>
-
-                  </div>
-                ))}
-
-            </div>
-          )}
-
-        </div>
-    </div>
+      {/* Section 4 — Progress */}
+      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+        Section 4 — Progress
+      </p>
+      <DocumentProgress />
+    </main>
   );
 }
 
