@@ -23,10 +23,10 @@ function RequirementsChecklist() {
   const metCount = checks.filter((c) => c.met).length;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 shadow-[0_20px_60px_-20px_rgba(34,231,197,0.18)] backdrop-blur-xl">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold text-gray-800">Requirements Checklist</h2>
-        <span className="text-sm font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+        <h2 className="text-lg font-semibold text-white">Requirements Checklist</h2>
+        <span className="text-sm font-semibold px-3 py-1 rounded-full bg-white/5 text-[#B8C5D1]">
           {metCount} / {checks.length} Complete
         </span>
       </div>
@@ -35,20 +35,20 @@ function RequirementsChecklist() {
         {checks.map(({ label, met }) => (
           <li
             key={label}
-            className={`flex items-center gap-3 p-3 rounded-lg border ${
+            className={`flex items-center gap-3 p-3 rounded-xl border ${
               met
-                ? "border-green-100 bg-green-50"
-                : "border-gray-100 bg-gray-50"
+                ? "border-[#22E7C5] bg-[#22E7C5]/8"
+                : "border-white/6 bg-white/3"
             }`}
           >
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                met ? "bg-green-500" : "bg-gray-300"
+              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
+                met ? "bg-[#22E7C5]" : "bg-white/10"
               }`}
             >
               {met ? (
                 <svg
-                  className="w-3.5 h-3.5 text-white"
+                  className="w-4 h-4 text-[#061A28]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -62,7 +62,7 @@ function RequirementsChecklist() {
                 </svg>
               ) : (
                 <svg
-                  className="w-3.5 h-3.5 text-white"
+                  className="w-4 h-4 text-[#B8C5D1]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -76,12 +76,7 @@ function RequirementsChecklist() {
                 </svg>
               )}
             </div>
-            <span
-              className={`text-sm font-medium ${
-                met ? "text-green-800" : "text-gray-500"
-              }`}
-            >
-              {met ? "✓ " : ""}
+            <span className={`text-sm font-medium ${met ? "text-white" : "text-[#B8C5D1]"}`}>
               {label}
             </span>
           </li>
@@ -104,73 +99,71 @@ function Journey() {
     navigate("/dashboard");
   };
 
+  const caseId = caseData?.caseId || caseData?.id || "—";
+  const status = caseData?.status || "In Progress";
+
   return (
-    <main className="max-w-5xl mx-auto p-6">
-      {/* Page Header */}
-      <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-wide text-blue-600 mb-1">
-          Step 4 of 6
-        </p>
-        <h1 className="text-4xl font-bold text-gray-800">
-          Visa Processing Journey
-        </h1>
-        <p className="text-gray-500 mt-2">
-          Your complete processing timeline, compliance requirements, and
-          application checklist for your <strong>{caseData?.visaType}</strong>{" "}
-          to <strong>{caseData?.country}</strong>.
-        </p>
-      </div>
+    <main className="min-h-screen bg-[#061A28] text-white px-4 py-8 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        {/* Hero */}
+        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.35)] backdrop-blur-xl">
+          <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-center">
+            <div>
+              <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Immigration Journey Tracker</p>
+              <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">Immigration Journey Tracker</h1>
+              <p className="mt-4 text-lg leading-7 text-[#B8C5D1] max-w-3xl">
+                Track every milestone of your visa application journey from assessment to approval.
+              </p>
+            </div>
 
-      {/* Case reference strip */}
-      <div className="bg-white rounded-lg shadow px-5 py-3 mb-8 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <span className="text-gray-500">
-          Case ID:{" "}
-          <strong className="text-gray-800">
-            {caseData?.caseId || caseData?.id}
-          </strong>
-        </span>
-        <span className="text-gray-300 hidden sm:inline">|</span>
-        <span className="text-gray-500">
-          Visa: <strong className="text-gray-800">{caseData?.visaType}</strong>
-        </span>
-        <span className="text-gray-300 hidden sm:inline">|</span>
-        <span className="text-gray-500">
-          Country:{" "}
-          <strong className="text-gray-800">{caseData?.country}</strong>
-        </span>
-      </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              {[
+                { label: "Case ID", value: caseId },
+                { label: "Visa Type", value: caseData?.visaType || "—" },
+                { label: "Destination", value: caseData?.country || "—" },
+              ].map((card) => (
+                <div key={card.label} className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+                  <p className="text-xs uppercase tracking-[0.28em] text-[#B8C5D1]">{card.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{card.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* Main Grid */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <div className="md:col-span-2">
-          <VisaJourneyTimeline visaJourney={visaJourney} />
+        {/* Main Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <VisaJourneyTimeline visaJourney={visaJourney} />
+          </div>
+
+          <ComplianceNotes notes={complianceNotes} />
+          <RequirementsChecklist />
         </div>
-        <ComplianceNotes notes={complianceNotes} />
-        <RequirementsChecklist />
-      </div>
 
-      {/* Proceed To Dashboard */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleProceed}
-          className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-semibold text-base shadow transition"
-        >
-          Proceed To Dashboard
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+        {/* Proceed To Dashboard */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleProceed}
+            className="inline-flex items-center gap-2 rounded-3xl px-6 py-3 text-sm font-semibold bg-[#22E7C5] text-[#061A28] hover:bg-[#39F5D5] shadow-md transition"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13 7l5 5m0 0l-5 5m5-5H6"
-            />
-          </svg>
-        </button>
+            Proceed To Dashboard
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </main>
   );
