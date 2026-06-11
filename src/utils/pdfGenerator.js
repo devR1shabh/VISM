@@ -1,10 +1,12 @@
 import jsPDF from "jspdf";
+import { normalizeUploadedDocuments } from "./documentUtils.js";
 
 export function generateVisaPDF(
   caseData,
   analysis,
   uploadedDocuments
 ) {
+  const normalizedDocuments = normalizeUploadedDocuments(uploadedDocuments);
   const doc = new jsPDF();
 
   const primaryBlue = [30, 64, 175];
@@ -136,7 +138,7 @@ export function generateVisaPDF(
   y += 10;
 
   const passport =
-    uploadedDocuments.find(
+    normalizedDocuments.find(
       (docItem) =>
         docItem.requiredDocument ===
           "Passport" &&
@@ -239,7 +241,7 @@ export function generateVisaPDF(
 
   doc.setFontSize(11);
 
-  uploadedDocuments.forEach(
+  normalizedDocuments.forEach(
     (document) => {
       const statusText =
         document.valid

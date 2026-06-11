@@ -9,6 +9,8 @@
  * by extending or replacing calculateReadiness.
  */
 
+import { normalizeUploadedDocuments } from "../utils/documentUtils.js";
+
 /**
  * @param {number} validDocumentCount  — documents that passed validation
  * @param {number} requiredDocumentCount — total documents required for visa type
@@ -67,15 +69,23 @@ export function deriveDocumentSummary(
   requiredDocuments = [],
   uploadedDocuments = []
 ) {
-  const validDocs = uploadedDocuments.filter((d) => d.valid);
-  const invalidDocs = uploadedDocuments.filter((d) => !d.valid);
+  const normalized = normalizeUploadedDocuments(uploadedDocuments);
 
-  const uploadedRequiredNames = validDocs.map(
-    (d) => d.requiredDocument
+  const validDocs = normalized.filter(
+    (d) =>
+      d.valid &&
+      requiredDocuments.includes(d.requiredDocument)
+  );
+
+  const invalidDocs = normalized.filter(
+    (d) =>
+      !d.valid &&
+      requiredDocuments.includes(d.requiredDocument)
   );
 
   const missing = requiredDocuments.filter(
-    (doc) => !uploadedRequiredNames.includes(doc)
+    (doc) =>
+      !validDocs.some((d) => d.requiredDocument === doc)
   );
 
   return {
@@ -83,5 +93,6 @@ export function deriveDocumentSummary(
     valid: validDocs.length,
     invalid: invalidDocs.length,
     missing,
+    documents: normalized,
   };
 }

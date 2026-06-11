@@ -5,6 +5,8 @@
 // When new features are added (tasks, notes, readiness score, etc.),
 // add them here and the copilot gains access automatically.
 
+import { normalizeUploadedDocuments } from "./documentUtils.js";
+
 export function buildCaseContext(caseData, uploadedDocuments) {
   if (!caseData) {
     return {
@@ -19,16 +21,18 @@ export function buildCaseContext(caseData, uploadedDocuments) {
     };
   }
 
+  const normalizedDocuments = normalizeUploadedDocuments(uploadedDocuments);
+
   // Extract passport data from uploaded documents
   // Passport is the ONLY trusted identity source
-  const passportDoc = uploadedDocuments.find(
+  const passportDoc = normalizedDocuments.find(
     (doc) => doc.requiredDocument === "Passport" && doc.valid && doc.passportData
   );
 
   const passportData = passportDoc ? passportDoc.passportData : null;
 
   // Build document summary — generic, works for any document type
-  const documentSummary = uploadedDocuments.map((doc) => ({
+  const documentSummary = normalizedDocuments.map((doc) => ({
     requiredDocument: doc.requiredDocument,
     fileName: doc.fileName,
     valid: doc.valid,

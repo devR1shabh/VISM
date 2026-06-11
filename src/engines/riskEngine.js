@@ -1,3 +1,5 @@
+import { normalizeUploadedDocuments } from "../utils/documentUtils.js";
+
 export function calculateRisks(
   requiredDocuments = [],
   uploadedDocuments = []
@@ -5,7 +7,7 @@ export function calculateRisks(
   const risks = [];
 
   const validDocuments =
-    uploadedDocuments.filter(
+    normalizeUploadedDocuments(uploadedDocuments).filter(
       (doc) => doc.valid
     );
 

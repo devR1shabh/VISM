@@ -5,6 +5,11 @@ import {
   useEffect,
 } from "react";
 
+import {
+  normalizeUploadedDocuments,
+  upsertUploadedDocument,
+} from "../utils/documentUtils.js";
+
 const CaseContext = createContext();
 
 const STORAGE_KEYS = {
@@ -48,9 +53,11 @@ export function CaseProvider({
     uploadedDocuments,
     setUploadedDocumentsRaw,
   ] = useState(() =>
-    loadFromStorage(
-      STORAGE_KEYS.uploadedDocuments,
-      []
+    normalizeUploadedDocuments(
+      loadFromStorage(
+        STORAGE_KEYS.uploadedDocuments,
+        []
+      )
     )
   );
 
@@ -104,24 +111,17 @@ export function CaseProvider({
     });
   };
 
-  const addDocument = (
-    document
-  ) => {
-    setUploadedDocumentsRaw(
-      (prev) => {
-        const next = [
-          ...prev,
-          document,
-        ];
+  const addDocument = (document) => {
+    setUploadedDocumentsRaw((prev) => {
+      const next = upsertUploadedDocument(prev, document);
 
-        saveToStorage(
-          STORAGE_KEYS.uploadedDocuments,
-          next
-        );
+      saveToStorage(
+        STORAGE_KEYS.uploadedDocuments,
+        next
+      );
 
-        return next;
-      }
-    );
+      return next;
+    });
   };
 
   const addActivity = (

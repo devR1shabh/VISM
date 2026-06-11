@@ -6,6 +6,8 @@ import {
   addVerifiedDocument,
 } from "../../services/api";
 import { useCase } from "../../context/CaseContext";
+import { deriveDocumentSummary } from "../../engines/readinessEngine";
+import { getDocumentByType } from "../../utils/documentUtils";
 
 const VERIFIABLE_DOCUMENTS = ["Resume", "Academic Transcript", "Bank Statement"];
 
@@ -107,19 +109,21 @@ return;
     } catch (error) {
       console.error(error);
       addActivity("error", `${documentName} upload failed`);
+    } finally {
+      event.target.value = "";
     }
   };
 
-  const validUploads = uploadedDocuments.filter((doc) => doc.valid);
-  const uploadedCount = validUploads.length;
-  const totalCount = documents.length;
+  const { valid: uploadedCount, required: totalCount } = deriveDocumentSummary(
+    documents,
+    uploadedDocuments
+  );
+
   const progress =
     totalCount === 0 ? 0 : Math.round((uploadedCount / totalCount) * 100);
 
   const getDocumentStatus = (documentName) => {
-    return uploadedDocuments.find(
-      (doc) => doc.requiredDocument === documentName
-    );
+    return getDocumentByType(uploadedDocuments, documentName);
   };
 
   return (

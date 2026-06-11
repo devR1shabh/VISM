@@ -87,28 +87,42 @@ export async function addVerifiedDocument(
       documentType,
     } = req.body;
 
-    const updatedCase =
-      await Case.findByIdAndUpdate(
-        req.params.id,
+    const caseId = req.params.id;
+    const uploadedAt = new Date();
+
+    let updatedCase =
+      await Case.findOneAndUpdate(
         {
-          $push: {
-            uploadedDocuments:
-              {
-                type: documentType,
-                verified: true,
-                uploadedAt:
-                  new Date(),
-              },
-          },
+          _id: caseId,
+          "uploadedDocuments.type": documentType,
         },
         {
-          new: true,
-        }
+          $set: {
+            "uploadedDocuments.$.verified": true,
+            "uploadedDocuments.$.uploadedAt": uploadedAt,
+          },
+        },
+        { new: true }
       );
 
-    res.json(
-      updatedCase
-    );
+    if (!updatedCase) {
+      updatedCase =
+        await Case.findByIdAndUpdate(
+          caseId,
+          {
+            $push: {
+              uploadedDocuments: {
+                type: documentType,
+                verified: true,
+                uploadedAt,
+              },
+            },
+          },
+          { new: true }
+        );
+    }
+
+    res.json(updatedCase);
   } catch (error) {
     console.error(error);
 

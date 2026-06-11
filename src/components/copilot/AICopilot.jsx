@@ -48,9 +48,11 @@ function AICopilot() {
 
     lines.push("");
 
-    if (uploadedDocuments && uploadedDocuments.length > 0) {
+    const documentList = caseContext.uploadedDocuments || [];
+
+    if (documentList.length > 0) {
       lines.push("**Document Status:**");
-      uploadedDocuments.forEach((doc) => {
+      documentList.forEach((doc) => {
         const icon = doc.valid ? "✓" : "✗";
         lines.push(`${icon} ${doc.requiredDocument}`);
       });

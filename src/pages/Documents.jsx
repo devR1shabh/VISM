@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCase } from "../context/CaseContext";
+import { deriveDocumentSummary } from "../engines/readinessEngine";
 
 import Navbar from "../components/layout/Navbar";
 import ApplicantProfile from "../components/output/ApplicantProfile";
@@ -38,29 +39,16 @@ function Documents() {
     );
   }
 
-  const validDocuments =
-    uploadedDocuments.filter(
-      (doc) => doc.valid
-    );
-
-  const invalidDocuments =
-    uploadedDocuments.filter(
-      (doc) => !doc.valid
-    );
-
   const requiredDocuments =
     caseData.analysis?.documents || [];
 
-  const uploadedRequiredNames =
-    validDocuments.map(
-      (d) => d.requiredDocument
-    );
+  const {
+    documents: normalizedDocuments,
+    missing: missingDocuments,
+  } = deriveDocumentSummary(requiredDocuments, uploadedDocuments);
 
-  const missingDocuments =
-    requiredDocuments.filter(
-      (doc) =>
-        !uploadedRequiredNames.includes(doc)
-    );
+  const validDocuments = normalizedDocuments.filter((doc) => doc.valid);
+  const invalidDocuments = normalizedDocuments.filter((doc) => !doc.valid);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -131,9 +119,9 @@ function Documents() {
             ) : (
               <div className="space-y-3">
 
-                {validDocuments.map((doc, i) => (
+                {validDocuments.map((doc) => (
                   <div
-                    key={i}
+                    key={doc.requiredDocument}
                     className="border border-green-100 bg-green-50 rounded-lg p-3"
                   >
 
@@ -190,9 +178,9 @@ function Documents() {
             ) : (
               <div className="space-y-3">
 
-                {invalidDocuments.map((doc, i) => (
+                {invalidDocuments.map((doc) => (
                   <div
-                    key={i}
+                    key={doc.requiredDocument}
                     className="border border-red-100 bg-red-50 rounded-lg p-3"
                   >
 
