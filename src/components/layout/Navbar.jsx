@@ -42,7 +42,7 @@ function Navbar() {
   const isCaseReady = Boolean(caseData);
 
   return (
-    <nav className="bg-white shadow sticky top-0 z-40">
+    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-1 sm:gap-2">
         <NavLink
           to="/"
@@ -53,7 +53,7 @@ function Navbar() {
               : "mr-4 sm:mr-6 text-lg font-bold text-blue-600 hover:text-blue-700 transition-colors"
           }
         >
-          VISM
+          BlueprintAI
         </NavLink>
 
         {NAV_ITEMS.map((item) => {
