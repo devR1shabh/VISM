@@ -57,9 +57,24 @@ export const WORKFLOW_STEPS = {
 };
 
 export function CaseProvider({ children }) {
-  const [caseData, setCaseDataRaw] = useState(() =>
-    loadFromStorage(STORAGE_KEYS.caseData, null)
-  );
+  // ── Initialize state from localStorage, but only if no "fresh session" flag is set
+  // This ensures that on app startup, old demo/test cases don't persist.
+  const [caseData, setCaseDataRaw] = useState(() => {
+    // Check if this is a fresh session (first load after app refresh)
+    const freshSession = sessionStorage.getItem("_vism_fresh_session");
+    if (!freshSession) {
+      // Mark this as a fresh session to prevent repeated clears
+      sessionStorage.setItem("_vism_fresh_session", "true");
+      // Clear all old case data on fresh app startup
+      localStorage.removeItem(STORAGE_KEYS.caseData);
+      localStorage.removeItem(STORAGE_KEYS.uploadedDocuments);
+      localStorage.removeItem(STORAGE_KEYS.activityFeed);
+      localStorage.removeItem(STORAGE_KEYS.naviMessages);
+      return null;
+    }
+    // Otherwise, restore from storage as normal
+    return loadFromStorage(STORAGE_KEYS.caseData, null);
+  });
 
   const [uploadedDocuments, setUploadedDocumentsRaw] = useState(() =>
     normalizeUploadedDocuments(
