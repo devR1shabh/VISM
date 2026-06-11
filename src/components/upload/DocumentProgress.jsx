@@ -1,4 +1,4 @@
-// src/components/upload/DocumentProgress.jsx
+﻿// src/components/upload/DocumentProgress.jsx
 
 import { useNavigate } from "react-router-dom";
 import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
@@ -24,109 +24,73 @@ function DocumentProgress() {
   };
 
   return (
-    <div
-      className={`rounded-xl shadow p-6 border-2 transition ${
-        allVerified ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
-      }`}
-    >
-      <div className="flex items-center justify-between mb-4">
+    <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_30px_90px_-30px_rgba(34,231,197,0.3)] backdrop-blur-xl">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold text-gray-800">Document Progress</h3>
-          <p
-            className={`text-sm mt-0.5 font-semibold ${
-              allVerified ? "text-green-700" : "text-gray-500"
-            }`}
-          >
+          <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-2">
+            Document Progress
+          </p>
+          <h2 className="text-2xl font-semibold text-white">Application Document Status</h2>
+          <p className={`mt-2 text-sm font-medium ${allVerified ? "text-[#39F5D5]" : "text-[#B8C5D1]"}`}>
             {allVerified
               ? "✓ Ready For Next Step"
               : `${missing.length} document${missing.length !== 1 ? "s" : ""} remaining`}
           </p>
         </div>
 
-        <div className="text-right">
-          <span
-            className={`text-4xl font-extrabold ${
-              allVerified ? "text-green-600" : "text-blue-600"
-            }`}
-          >
-            {verifiedCount}
-          </span>
-          <span className="text-2xl font-bold text-gray-400"> / {totalCount}</span>
-          <p className="text-xs text-gray-500 mt-0.5">Documents Verified</p>
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-4 text-right">
+          <p className="text-xs uppercase tracking-[0.28em] text-[#B8C5D1]">Verified Documents</p>
+          <p className="mt-2 text-4xl font-bold text-white">{verifiedCount}</p>
+          <p className="text-sm text-[#B8C5D1]">/ {totalCount}</p>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-        <div
-          className={`h-3 rounded-full transition-all duration-500 ${
-            allVerified ? "bg-green-500" : "bg-blue-600"
-          }`}
-          style={{ width: `${progress}%` }}
-        />
+      <div className="space-y-4">
+        <div className="rounded-full bg-white/10 h-3 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[#22E7C5] transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between text-sm text-[#B8C5D1]">
+          <span>{progress}% complete</span>
+          <span>{totalCount === 0 ? "No documents required" : `${verifiedCount} of ${totalCount}`}</span>
+        </div>
       </div>
 
-      {/* Document status chips */}
-      <div className="flex flex-wrap gap-2 mb-5">
+      <div className="mt-6 flex flex-wrap gap-3">
         {requiredDocuments.map((doc) => {
           const uploaded = uploadedDocuments.find(
             (u) => u.requiredDocument === doc && u.valid
           );
           return (
-            <span
+            <div
               key={doc}
-              className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full ${
+              className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium ${
                 uploaded
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-500"
+                  ? "border-[#22E7C5] bg-[#22E7C5]/10 text-white"
+                  : "border-white/10 bg-white/5 text-[#B8C5D1]"
               }`}
             >
-              {uploaded ? (
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              )}
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs">
+                {uploaded ? "✓" : "!"}
+              </span>
               {doc}
-            </span>
+            </div>
           );
         })}
       </div>
 
-      {/* Proceed button */}
-      <div className="flex justify-end">
+      <div className="mt-8 flex justify-end">
         <button
           type="button"
           onClick={handleProceed}
           disabled={!allVerified}
           title={!allVerified ? "Please verify all documents to continue" : ""}
-          className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition shadow ${
+          className={`inline-flex items-center gap-2 rounded-3xl px-6 py-3 text-sm font-semibold transition shadow ${
             allVerified
-              ? "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              ? "bg-[#22E7C5] text-[#061A28] hover:bg-[#39F5D5] cursor-pointer"
+              : "bg-white/10 text-[#B8C5D1] cursor-not-allowed"
           }`}
         >
           Proceed To Journey
@@ -145,7 +109,7 @@ function DocumentProgress() {
           </svg>
         </button>
       </div>
-    </div>
+    </section>
   );
 }
 
