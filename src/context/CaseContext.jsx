@@ -4,7 +4,6 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
 } from "react";
 
 import {
@@ -41,6 +40,22 @@ function saveToStorage(key, value) {
   }
 }
 
+// ── Workflow step constants (exported for use in guards) ─────────────────────
+// 0 = no active case
+// 1 = case created  → unlocks /analysis
+// 2 = analysis done → unlocks /documents
+// 3 = documents done → unlocks /journey
+// 4 = journey done  → unlocks /dashboard
+// 5 = all done      → unlocks /application-ready + PDF download
+export const WORKFLOW_STEPS = {
+  NONE:           0,
+  CASE_CREATED:   1,
+  ANALYSIS_DONE:  2,
+  DOCUMENTS_DONE: 3,
+  JOURNEY_DONE:   4,
+  ALL_DONE:       5,
+};
+
 export function CaseProvider({ children }) {
   const [caseData, setCaseDataRaw] = useState(() =>
     loadFromStorage(STORAGE_KEYS.caseData, null)
@@ -68,16 +83,24 @@ export function CaseProvider({ children }) {
     })
   );
 
-  useEffect(() => { saveToStorage(STORAGE_KEYS.caseData,          caseData);          }, [caseData]);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.uploadedDocuments, uploadedDocuments); }, [uploadedDocuments]);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.activityFeed,      activityFeed);      }, [activityFeed]);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.naviMessages,      naviMessages);      }, [naviMessages]);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.applicantIdentity, applicantIdentity); }, [applicantIdentity]);
-
   // ── setCaseData ────────────────────────────────────────────────────────────
   const setCaseData = (updater) => {
     setCaseDataRaw((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
+      saveToStorage(STORAGE_KEYS.caseData, next);
+      return next;
+    });
+  };
+
+  // ── setWorkflowStep ────────────────────────────────────────────────────────
+  // Advances (or sets) the workflowStep on the current caseData.
+  // Only advances forward — never regresses.
+  const setWorkflowStep = (step) => {
+    setCaseDataRaw((prev) => {
+      if (!prev) return prev;
+      // Only advance, never regress
+      if ((prev.workflowStep ?? 0) >= step) return prev;
+      const next = { ...prev, workflowStep: step };
       saveToStorage(STORAGE_KEYS.caseData, next);
       return next;
     });
@@ -101,7 +124,11 @@ export function CaseProvider({ children }) {
       message,
       timestamp: new Date().toISOString(),
     };
-    setActivityFeedRaw((prev) => [activity, ...prev]);
+    setActivityFeedRaw((prev) => {
+      const next = [activity, ...prev];
+      saveToStorage(STORAGE_KEYS.activityFeed, next);
+      return next;
+    });
   };
 
   // ── clearDocuments ─────────────────────────────────────────────────────────
@@ -198,11 +225,17 @@ export function CaseProvider({ children }) {
     saveToStorage(STORAGE_KEYS.applicantIdentity, emptyIdentity);
   };
 
+  // ── Derived: current workflow step ─────────────────────────────────────────
+  const workflowStep = caseData?.workflowStep ?? WORKFLOW_STEPS.NONE;
+
   return (
     <CaseContext.Provider
       value={{
         caseData,
         setCaseData,
+
+        workflowStep,
+        setWorkflowStep,
 
         uploadedDocuments,
         addDocument,

@@ -1,12 +1,12 @@
 // src/components/upload/DocumentProgress.jsx
 
 import { useNavigate } from "react-router-dom";
-import { useCase } from "../../context/CaseContext";
+import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 import { deriveDocumentSummary } from "../../engines/readinessEngine";
 
 function DocumentProgress() {
   const navigate = useNavigate();
-  const { caseData, uploadedDocuments } = useCase();
+  const { caseData, uploadedDocuments, setWorkflowStep } = useCase();
 
   const requiredDocuments = caseData?.analysis?.documents || [];
 
@@ -16,6 +16,12 @@ function DocumentProgress() {
   const allVerified = verifiedCount === totalCount && totalCount > 0;
   const progress =
     totalCount === 0 ? 0 : Math.round((verifiedCount / totalCount) * 100);
+
+  const handleProceed = () => {
+    // Advance workflow: documents done → unlock Journey
+    setWorkflowStep(WORKFLOW_STEPS.DOCUMENTS_DONE);
+    navigate("/journey");
+  };
 
   return (
     <div
@@ -114,7 +120,7 @@ function DocumentProgress() {
       <div className="flex justify-end">
         <button
           type="button"
-          onClick={() => navigate("/journey")}
+          onClick={handleProceed}
           disabled={!allVerified}
           title={!allVerified ? "Please verify all documents to continue" : ""}
           className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition shadow ${

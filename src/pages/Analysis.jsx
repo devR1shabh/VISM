@@ -1,9 +1,9 @@
 // src/pages/Analysis.jsx
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import { useCase } from "../context/CaseContext";
+import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 
 import AIApplicationOverview from "../components/output/AIApplicationOverview";
 import AIRiskPanel from "../components/output/AIRiskPanel";
@@ -14,11 +14,15 @@ import { generateAnalysis } from "../services/api";
 
 function Analysis() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { caseData, setCaseData } = useCase();
+  const { caseData, setCaseData, setWorkflowStep } = useCase();
 
   const [analysis, setAnalysis] = useState(() => caseData?.analysis || null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Show redirect message from ProtectedRoute if any
+  const redirectMessage = location.state?.message;
 
   useEffect(() => {
     if (analysis) return;
@@ -40,6 +44,9 @@ function Analysis() {
           ...prev,
           analysis: result,
         }));
+
+        // Advance workflow: analysis is now complete → unlock Documents
+        setWorkflowStep(WORKFLOW_STEPS.ANALYSIS_DONE);
       } catch (error) {
         console.error("Analysis failed:", error);
       } finally {
@@ -48,7 +55,7 @@ function Analysis() {
     }
 
     runAnalysis();
-  }, [caseData, analysis, setCaseData]);
+  }, [caseData, analysis, setCaseData, setWorkflowStep]);
 
   if (isLoading || !analysis) {
     return (
@@ -70,6 +77,15 @@ function Analysis() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {redirectMessage && (
+        <div
+          role="alert"
+          className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+          {redirectMessage}
+        </div>
+      )}
+
       <p className="text-sm font-semibold uppercase tracking-wide text-blue-600 mb-1">
         Step 2 of 6
       </p>

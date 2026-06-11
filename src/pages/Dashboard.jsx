@@ -1,14 +1,14 @@
 // src/pages/Dashboard.jsx
 
 import { Link, useNavigate } from "react-router-dom";
-import { useCase } from "../context/CaseContext";
+import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 import ActivityFeed from "../components/output/ActivityFeed";
 import { calculateReadiness, deriveDocumentSummary } from "../engines/readinessEngine";
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const { caseData, uploadedDocuments, activityFeed } = useCase();
+  const { caseData, uploadedDocuments, activityFeed, setWorkflowStep } = useCase();
 
   const requiredDocuments = caseData.analysis?.documents || [];
 
@@ -18,6 +18,12 @@ function Dashboard() {
   );
 
   const readiness = calculateReadiness(valid, requiredDocuments.length);
+
+  const handleFinish = () => {
+    // Advance workflow: all done → unlock ApplicationReady + PDF
+    setWorkflowStep(WORKFLOW_STEPS.ALL_DONE);
+    navigate("/application-ready");
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -155,7 +161,7 @@ function Dashboard() {
       <div className="flex justify-end">
         <button
           type="button"
-          onClick={() => navigate("/application-ready")}
+          onClick={handleFinish}
           className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-semibold text-base shadow transition"
         >
           Finish Application

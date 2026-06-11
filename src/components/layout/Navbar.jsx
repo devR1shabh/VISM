@@ -1,14 +1,22 @@
 // src/components/layout/Navbar.jsx
 
 import { NavLink } from "react-router-dom";
-import { useCase } from "../../context/CaseContext";
+import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 
+// Each nav item requires a minimum workflowStep to be clickable.
 const NAV_ITEMS = [
-  { to: "/analysis", label: "Analysis" },
-  { to: "/documents", label: "Documents" },
-  { to: "/journey", label: "Journey" },
-  { to: "/dashboard", label: "Dashboard" },
+  { to: "/analysis",  label: "Analysis",  requiredStep: WORKFLOW_STEPS.CASE_CREATED   },
+  { to: "/documents", label: "Documents", requiredStep: WORKFLOW_STEPS.ANALYSIS_DONE  },
+  { to: "/journey",   label: "Journey",   requiredStep: WORKFLOW_STEPS.DOCUMENTS_DONE },
+  { to: "/dashboard", label: "Dashboard", requiredStep: WORKFLOW_STEPS.JOURNEY_DONE   },
 ];
+
+const LOCK_TITLES = {
+  "/analysis":  "Create a case on the Home page to unlock Analysis",
+  "/documents": "Complete Analysis to unlock Document Upload",
+  "/journey":   "Upload and verify documents to unlock Journey",
+  "/dashboard": "Complete the Journey step to unlock Dashboard",
+};
 
 function LockIcon() {
   return (
@@ -38,8 +46,7 @@ function getNavItemClass(isActive, isDisabled) {
 }
 
 function Navbar() {
-  const { caseData } = useCase();
-  const isCaseReady = Boolean(caseData);
+  const { workflowStep } = useCase();
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
@@ -57,12 +64,14 @@ function Navbar() {
         </NavLink>
 
         {NAV_ITEMS.map((item) => {
-          if (!isCaseReady) {
+          const isUnlocked = workflowStep >= item.requiredStep;
+
+          if (!isUnlocked) {
             return (
               <span
                 key={item.to}
                 className={getNavItemClass(false, true)}
-                title="Create and analyze a case to unlock this section"
+                title={LOCK_TITLES[item.to]}
                 aria-disabled="true"
               >
                 {item.label}

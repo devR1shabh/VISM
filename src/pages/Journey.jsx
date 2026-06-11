@@ -1,7 +1,7 @@
 // src/pages/Journey.jsx
 
 import { useNavigate } from "react-router-dom";
-import { useCase } from "../context/CaseContext";
+import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 import VisaJourneyTimeline from "../components/output/VisaJourneyTimeline";
 import ComplianceNotes from "../components/output/ComplianceNotes";
 
@@ -93,10 +93,16 @@ function RequirementsChecklist() {
 
 function Journey() {
   const navigate = useNavigate();
-  const { caseData } = useCase();
+  const { caseData, setWorkflowStep } = useCase();
 
   const visaJourney = caseData?.analysis?.visaJourney || [];
   const complianceNotes = caseData?.analysis?.complianceNotes || [];
+
+  const handleProceed = () => {
+    // Advance workflow: journey done → unlock Dashboard
+    setWorkflowStep(WORKFLOW_STEPS.JOURNEY_DONE);
+    navigate("/dashboard");
+  };
 
   return (
     <main className="max-w-5xl mx-auto p-6">
@@ -147,7 +153,7 @@ function Journey() {
       <div className="flex justify-end">
         <button
           type="button"
-          onClick={() => navigate("/dashboard")}
+          onClick={handleProceed}
           className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-semibold text-base shadow transition"
         >
           Proceed To Dashboard

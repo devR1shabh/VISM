@@ -1,7 +1,7 @@
 // src/pages/ApplicationReady.jsx
 
 import { useNavigate } from "react-router-dom";
-import { useCase } from "../context/CaseContext";
+import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 import { generateVisaPDF } from "../utils/pdfGenerator";
 
 const FUTURE_ENHANCEMENTS = [
@@ -45,7 +45,7 @@ const FUTURE_ENHANCEMENTS = [
 
 function ApplicationReady() {
   const navigate = useNavigate();
-  const { caseData, uploadedDocuments } = useCase();
+  const { caseData, uploadedDocuments, workflowStep, clearCase } = useCase();
 
   const caseId = caseData?.caseId || caseData?.id || "—";
   const completionDate = new Date().toLocaleDateString("en-GB", {
@@ -54,9 +54,18 @@ function ApplicationReady() {
     year: "numeric",
   });
 
+  // PDF download only available once all steps are done
+  const canDownload = workflowStep >= WORKFLOW_STEPS.ALL_DONE && Boolean(caseData);
+
   const handleDownloadPDF = () => {
-    if (!caseData) return;
+    if (!canDownload) return;
     generateVisaPDF(caseData, caseData.analysis, uploadedDocuments);
+  };
+
+  const handleStartNew = () => {
+    // Clear all state so the app returns to a clean initial state
+    clearCase();
+    navigate("/");
   };
 
   return (
@@ -92,11 +101,17 @@ function ApplicationReady() {
             Download your summary PDF to review and submit.
           </p>
 
-          {/* Download PDF — only available on this page */}
+          {/* Download PDF — only available on this page after all steps complete */}
           <button
             type="button"
             onClick={handleDownloadPDF}
-            className="mt-7 inline-flex items-center gap-2 bg-white text-green-700 px-7 py-3 rounded-xl font-bold text-base hover:bg-green-50 shadow-lg transition"
+            disabled={!canDownload}
+            title={!canDownload ? "Complete all steps to enable PDF download" : ""}
+            className={`mt-7 inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-base shadow-lg transition ${
+              canDownload
+                ? "bg-white text-green-700 hover:bg-green-50"
+                : "bg-white/40 text-white/60 cursor-not-allowed"
+            }`}
           >
             <svg
               className="w-5 h-5"
@@ -230,7 +245,7 @@ function ApplicationReady() {
           </p>
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={handleStartNew}
             className="inline-flex items-center gap-2 border border-blue-300 text-blue-600 px-6 py-2.5 rounded-lg hover:bg-blue-50 font-semibold text-sm transition"
           >
             <svg
