@@ -16,6 +16,7 @@ const STORAGE_KEYS = {
   caseData: "vism_caseData",
   uploadedDocuments: "vism_uploadedDocuments",
   activityFeed: "vism_activityFeed",
+  naviMessages: "vism_naviMessages",
 };
 
 function loadFromStorage(key, fallback) {
@@ -71,6 +72,16 @@ export function CaseProvider({
     )
   );
 
+  const [
+    naviMessages,
+    setNaviMessagesRaw,
+  ] = useState(() =>
+    loadFromStorage(
+      STORAGE_KEYS.naviMessages,
+      []
+    )
+  );
+
   useEffect(() => {
     saveToStorage(
       STORAGE_KEYS.caseData,
@@ -91,6 +102,13 @@ export function CaseProvider({
       activityFeed
     );
   }, [activityFeed]);
+
+  useEffect(() => {
+    saveToStorage(
+      STORAGE_KEYS.naviMessages,
+      naviMessages
+    );
+  }, [naviMessages]);
 
   const setCaseData = (
     updater
@@ -166,6 +184,35 @@ export function CaseProvider({
       );
     };
 
+  const setNaviMessages = (
+    updater
+  ) => {
+    setNaviMessagesRaw((prev) => {
+      const next =
+        typeof updater ===
+        "function"
+          ? updater(prev)
+          : updater;
+
+      saveToStorage(
+        STORAGE_KEYS.naviMessages,
+        next
+      );
+
+      return next;
+    });
+  };
+
+  const clearNaviMessages =
+    () => {
+      setNaviMessagesRaw([]);
+
+      saveToStorage(
+        STORAGE_KEYS.naviMessages,
+        []
+      );
+    };
+
   const clearCase = () => {
     setCaseDataRaw(null);
 
@@ -189,6 +236,13 @@ export function CaseProvider({
       STORAGE_KEYS.activityFeed,
       []
     );
+
+    setNaviMessagesRaw([]);
+
+    saveToStorage(
+      STORAGE_KEYS.naviMessages,
+      []
+    );
   };
 
   return (
@@ -204,6 +258,10 @@ export function CaseProvider({
         activityFeed,
         addActivity,
         clearActivity,
+
+        naviMessages,
+        setNaviMessages,
+        clearNaviMessages,
 
         clearCase,
       }}

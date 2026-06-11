@@ -11,7 +11,7 @@ import Analysis from "./pages/Analysis";
 import Documents from "./pages/Documents";
 import Tasks from "./pages/Tasks";
 
-import AICopilot from "./components/copilot/AICopilot";
+import Navi from "./components/navi/Navi";
 
 function App() {
   return (
@@ -59,7 +59,7 @@ function App() {
           />
         </Routes>
 
-        <AICopilot />
+        <Navi />
       </div>
     </BrowserRouter>
   );

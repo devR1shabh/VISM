@@ -225,10 +225,10 @@ export async function addVerifiedDocument(
 }
 
 /* =========================
-   AI COPILOT
+   NAVI
 ========================= */
 
-export async function sendCopilotMessage(
+export async function sendNaviMessage(
   caseContext,
   message
 ) {
@@ -256,7 +256,7 @@ export async function sendCopilotMessage(
 
     throw new Error(
       error.error ||
-      "Copilot request failed"
+      "Navi request failed"
     );
   }
 

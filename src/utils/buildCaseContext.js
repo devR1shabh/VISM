@@ -3,9 +3,20 @@
 // Generic case context builder.
 // Always reads the full CaseContext state.
 // When new features are added (tasks, notes, readiness score, etc.),
-// add them here and the copilot gains access automatically.
+// add them here and Navi gains access automatically.
 
 import { normalizeUploadedDocuments } from "./documentUtils.js";
+
+const QUICK_TEMPLATES = [
+  "What are the risks associated with this application?",
+  "What should I prepare before submitting?",
+  "What common mistakes should I avoid?",
+  "What are the next steps in my visa journey?",
+  "Explain the visa process for my visa type.",
+  "Give me a checklist for this application.",
+  "What should I know about living in this destination country?",
+  "What can cause delays?",
+];
 
 export function buildCaseContext(caseData, uploadedDocuments) {
   if (!caseData) {
@@ -22,6 +33,7 @@ export function buildCaseContext(caseData, uploadedDocuments) {
   }
 
   const normalizedDocuments = normalizeUploadedDocuments(uploadedDocuments);
+  const requiredDocuments = caseData.analysis?.documents || [];
 
   // Extract passport data from uploaded documents
   // Passport is the ONLY trusted identity source
@@ -42,6 +54,14 @@ export function buildCaseContext(caseData, uploadedDocuments) {
     // to prevent personal info leakage into the prompt
   }));
 
+  const validUploadedDocuments = documentSummary
+    .filter((doc) => doc.valid && requiredDocuments.includes(doc.requiredDocument))
+    .map((doc) => doc.requiredDocument);
+
+  const missingRequiredDocuments = requiredDocuments.filter(
+    (requiredDocument) => !validUploadedDocuments.includes(requiredDocument)
+  );
+
   return {
     caseId: caseData.id || null,
     visaType: caseData.visaType || caseData.caseDetails?.visaType || null,
@@ -49,51 +69,14 @@ export function buildCaseContext(caseData, uploadedDocuments) {
     description: caseData.description || caseData.caseDetails?.description || null,
     status: caseData.status || "In Progress",
     passportData,
+    requiredDocuments,
+    missingRequiredDocuments,
+    validUploadedDocuments,
     uploadedDocuments: documentSummary,
     analysis: caseData.analysis || null,
   };
 }
 
-// Returns suggested questions based on visa type
-export function getSuggestedQuestions(visaType) {
-  const universal = [
-    "Summarize my application",
-    "What documents have I uploaded?",
-    "What documents are missing?",
-    "Am I ready for submission?",
-    "What risks currently exist?",
-    "What should I do next?",
-  ];
-
-  const byVisaType = {
-    "Student Visa": [
-      "Can I work while studying?",
-      "What are common student visa requirements?",
-      "What is the processing time?",
-    ],
-    "Work Visa": [
-      "What are work visa requirements?",
-      "What could delay my application?",
-      "What additional documents are commonly requested?",
-    ],
-    "Tourist Visa": [
-      "Why is a hotel reservation requested?",
-      "What documents are commonly required?",
-      "What are common reasons for rejection?",
-    ],
-    "Permanent Residency": [
-      "What are the eligibility requirements?",
-      "How long does permanent residency processing take?",
-      "What documents are typically required?",
-    ],
-    "Family Sponsorship": [
-      "What is required from the sponsor?",
-      "How long does family sponsorship take?",
-      "What documents does the applicant need?",
-    ],
-  };
-
-  const specific = byVisaType[visaType] || [];
-
-  return { universal, specific };
+export function getSuggestedQuestions() {
+  return QUICK_TEMPLATES;
 }
