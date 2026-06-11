@@ -1,9 +1,7 @@
 const visaTypes = [
   "Tourist Visa",
   "Student Visa",
-  "Work Visa",
-  "Permanent Residency",
-  "Family Sponsorship"
+  "Work Visa"
 ];
 
 export default visaTypes;

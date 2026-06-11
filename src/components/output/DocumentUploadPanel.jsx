@@ -13,11 +13,12 @@ const VERIFIABLE_DOCUMENTS = ["Resume", "Academic Transcript", "Bank Statement"]
 
 function DocumentUploadPanel({ documents = [] }) {
   const {
-  caseData,
-  uploadedDocuments,
-  addDocument,
-  addActivity,
-} = useCase();
+    caseData,
+    uploadedDocuments,
+    addDocument,
+    addActivity,
+    onPassportReplaced,
+  } = useCase();
 
   const handleUpload = async (documentName, event) => {
     const file = event.target.files?.[0];
@@ -27,6 +28,21 @@ function DocumentUploadPanel({ documents = [] }) {
       // --- Passport: full extraction ---
       if (documentName === "Passport") {
         const result = await uploadPassport(file);
+
+        // ── Passport replacement detection ──────────────────────────────
+        // Only runs when OCR succeeds and returns a passport number.
+        if (result.valid && result.passportData?.passportNumber) {
+          const existingPassport = getDocumentByType(uploadedDocuments, "Passport");
+          const existingNumber = existingPassport?.passportData?.passportNumber;
+          const incomingNumber = result.passportData.passportNumber;
+
+          // A different (non-empty) passport number means a new applicant.
+          // Wipe Navi's conversation so the old identity is not visible.
+          if (existingNumber && existingNumber !== incomingNumber) {
+            onPassportReplaced();
+          }
+        }
+        // ────────────────────────────────────────────────────────────────
 
         const documentRecord = {
           requiredDocument: "Passport",
@@ -39,24 +55,18 @@ function DocumentUploadPanel({ documents = [] }) {
 
         addDocument(documentRecord);
 
-if (
-  result.valid &&
-  caseData?._id
-) {
-  await addVerifiedDocument(
-    caseData._id,
-    "Passport"
-  );
-}
+        if (result.valid && caseData?._id) {
+          await addVerifiedDocument(caseData._id, "Passport");
+        }
 
-addActivity(
-  "upload",
-  result.valid
-    ? "Passport verified successfully"
-    : "Passport verification failed"
-);
+        addActivity(
+          "upload",
+          result.valid
+            ? "Passport verified successfully"
+            : "Passport verification failed"
+        );
 
-return;
+        return;
       }
 
       // --- Verifiable documents: OCR + keyword scoring ---
@@ -75,24 +85,18 @@ return;
 
         addDocument(documentRecord);
 
-if (
-  result.valid &&
-  caseData?._id
-) {
-  await addVerifiedDocument(
-    caseData._id,
-    documentName
-  );
-}
+        if (result.valid && caseData?._id) {
+          await addVerifiedDocument(caseData._id, documentName);
+        }
 
-addActivity(
-  "upload",
-  result.valid
-    ? `${documentName} verified successfully (${result.confidence}% confidence)`
-    : `${documentName} verification failed (${result.confidence}% confidence)`
-);
+        addActivity(
+          "upload",
+          result.valid
+            ? `${documentName} verified successfully (${result.confidence}% confidence)`
+            : `${documentName} verification failed (${result.confidence}% confidence)`
+        );
 
-return;
+        return;
       }
 
       // --- Fallback for any other document types ---
@@ -218,7 +222,6 @@ return;
                         Invalid Upload
                       </p>
 
-                      {/* Show confidence even on failure for verifiable docs */}
                       {VERIFIABLE_DOCUMENTS.includes(doc) &&
                         uploadedDoc.confidence !== undefined && (
                           <div className="mt-2 text-sm bg-red-50 p-3 rounded border border-red-100">

@@ -30,101 +30,51 @@ function loadFromStorage(key, fallback) {
 
 function saveToStorage(key, value) {
   try {
-    localStorage.setItem(
-      key,
-      JSON.stringify(value)
-    );
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // localStorage unavailable
   }
 }
 
-export function CaseProvider({
-  children,
-}) {
-  const [caseData, setCaseDataRaw] =
-    useState(() =>
-      loadFromStorage(
-        STORAGE_KEYS.caseData,
-        null
-      )
-    );
+export function CaseProvider({ children }) {
+  const [caseData, setCaseDataRaw] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.caseData, null)
+  );
 
-  const [
-    uploadedDocuments,
-    setUploadedDocumentsRaw,
-  ] = useState(() =>
+  const [uploadedDocuments, setUploadedDocumentsRaw] = useState(() =>
     normalizeUploadedDocuments(
-      loadFromStorage(
-        STORAGE_KEYS.uploadedDocuments,
-        []
-      )
+      loadFromStorage(STORAGE_KEYS.uploadedDocuments, [])
     )
   );
 
-  const [
-    activityFeed,
-    setActivityFeedRaw,
-  ] = useState(() =>
-    loadFromStorage(
-      STORAGE_KEYS.activityFeed,
-      []
-    )
+  const [activityFeed, setActivityFeedRaw] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.activityFeed, [])
   );
 
-  const [
-    naviMessages,
-    setNaviMessagesRaw,
-  ] = useState(() =>
-    loadFromStorage(
-      STORAGE_KEYS.naviMessages,
-      []
-    )
+  const [naviMessages, setNaviMessagesRaw] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.naviMessages, [])
   );
 
   useEffect(() => {
-    saveToStorage(
-      STORAGE_KEYS.caseData,
-      caseData
-    );
+    saveToStorage(STORAGE_KEYS.caseData, caseData);
   }, [caseData]);
 
   useEffect(() => {
-    saveToStorage(
-      STORAGE_KEYS.uploadedDocuments,
-      uploadedDocuments
-    );
+    saveToStorage(STORAGE_KEYS.uploadedDocuments, uploadedDocuments);
   }, [uploadedDocuments]);
 
   useEffect(() => {
-    saveToStorage(
-      STORAGE_KEYS.activityFeed,
-      activityFeed
-    );
+    saveToStorage(STORAGE_KEYS.activityFeed, activityFeed);
   }, [activityFeed]);
 
   useEffect(() => {
-    saveToStorage(
-      STORAGE_KEYS.naviMessages,
-      naviMessages
-    );
+    saveToStorage(STORAGE_KEYS.naviMessages, naviMessages);
   }, [naviMessages]);
 
-  const setCaseData = (
-    updater
-  ) => {
+  const setCaseData = (updater) => {
     setCaseDataRaw((prev) => {
-      const next =
-        typeof updater ===
-        "function"
-          ? updater(prev)
-          : updater;
-
-      saveToStorage(
-        STORAGE_KEYS.caseData,
-        next
-      );
-
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      saveToStorage(STORAGE_KEYS.caseData, next);
       return next;
     });
   };
@@ -132,117 +82,66 @@ export function CaseProvider({
   const addDocument = (document) => {
     setUploadedDocumentsRaw((prev) => {
       const next = upsertUploadedDocument(prev, document);
-
-      saveToStorage(
-        STORAGE_KEYS.uploadedDocuments,
-        next
-      );
-
+      saveToStorage(STORAGE_KEYS.uploadedDocuments, next);
       return next;
     });
   };
 
-  const addActivity = (
-    type,
-    message
-  ) => {
+  const addActivity = (type, message) => {
     const activity = {
       id: Date.now(),
       type,
       message,
-      timestamp:
-        new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     };
-
-    setActivityFeedRaw(
-      (prev) => [
-        activity,
-        ...prev,
-      ]
-    );
+    setActivityFeedRaw((prev) => [activity, ...prev]);
   };
 
-  const clearDocuments =
-    () => {
-      setUploadedDocumentsRaw(
-        []
-      );
+  const clearDocuments = () => {
+    setUploadedDocumentsRaw([]);
+    saveToStorage(STORAGE_KEYS.uploadedDocuments, []);
+  };
 
-      saveToStorage(
-        STORAGE_KEYS.uploadedDocuments,
-        []
-      );
-    };
+  const clearActivity = () => {
+    setActivityFeedRaw([]);
+    saveToStorage(STORAGE_KEYS.activityFeed, []);
+  };
 
-  const clearActivity =
-    () => {
-      setActivityFeedRaw([]);
-
-      saveToStorage(
-        STORAGE_KEYS.activityFeed,
-        []
-      );
-    };
-
-  const setNaviMessages = (
-    updater
-  ) => {
+  const setNaviMessages = (updater) => {
     setNaviMessagesRaw((prev) => {
-      const next =
-        typeof updater ===
-        "function"
-          ? updater(prev)
-          : updater;
-
-      saveToStorage(
-        STORAGE_KEYS.naviMessages,
-        next
-      );
-
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      saveToStorage(STORAGE_KEYS.naviMessages, next);
       return next;
     });
   };
 
-  const clearNaviMessages =
-    () => {
-      setNaviMessagesRaw([]);
+  const clearNaviMessages = () => {
+    setNaviMessagesRaw([]);
+    saveToStorage(STORAGE_KEYS.naviMessages, []);
+  };
 
-      saveToStorage(
-        STORAGE_KEYS.naviMessages,
-        []
-      );
-    };
+  /**
+   * Called by DocumentUploadPanel when a passport with a DIFFERENT
+   * passport number is detected. Wipes the Navi conversation only —
+   * all other case data (case info, documents, activity) is preserved.
+   */
+  const onPassportReplaced = () => {
+    setNaviMessagesRaw([]);
+    saveToStorage(STORAGE_KEYS.naviMessages, []);
+  };
 
   const clearCase = () => {
     setCaseDataRaw(null);
+    saveToStorage(STORAGE_KEYS.caseData, null);
 
-    saveToStorage(
-      STORAGE_KEYS.caseData,
-      null
-    );
-
-    setUploadedDocumentsRaw(
-      []
-    );
-
-    saveToStorage(
-      STORAGE_KEYS.uploadedDocuments,
-      []
-    );
+    setUploadedDocumentsRaw([]);
+    saveToStorage(STORAGE_KEYS.uploadedDocuments, []);
 
     setActivityFeedRaw([]);
-
-    saveToStorage(
-      STORAGE_KEYS.activityFeed,
-      []
-    );
+    saveToStorage(STORAGE_KEYS.activityFeed, []);
 
     setNaviMessagesRaw([]);
-
-    saveToStorage(
-      STORAGE_KEYS.naviMessages,
-      []
-    );
+    saveToStorage(STORAGE_KEYS.naviMessages, []);
   };
 
   return (
@@ -262,6 +161,7 @@ export function CaseProvider({
         naviMessages,
         setNaviMessages,
         clearNaviMessages,
+        onPassportReplaced,
 
         clearCase,
       }}
@@ -272,7 +172,5 @@ export function CaseProvider({
 }
 
 export function useCase() {
-  return useContext(
-    CaseContext
-  );
+  return useContext(CaseContext);
 }

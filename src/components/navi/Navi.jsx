@@ -1,6 +1,6 @@
 // src/components/navi/Navi.jsx
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useCase } from "../../context/CaseContext";
 import { buildCaseContext, getSuggestedQuestions } from "../../utils/buildCaseContext";
 import { sendNaviMessage } from "../../services/api";
@@ -25,30 +25,75 @@ function Navi() {
   const inputRef = useRef(null);
   const messages = naviMessages ?? EMPTY_MESSAGES;
 
-  // Recompute context on every render - always fresh
+  // Recompute context on every render — always fresh
   const caseContext = buildCaseContext(caseData, uploadedDocuments);
 
   const visaType = caseContext.visaType;
   const country = caseContext.country;
+  const passportData = caseContext.passportData;
   const quickTemplates = getSuggestedQuestions();
 
-  useEffect(() => {
-    if (isOpen) return;
+  // ── Greeting builder ──────────────────────────────────────────────────────
+  // Uses passport name when available; generic otherwise.
+  // Passport is the ONLY trusted identity source.
+  const buildIntroMessage = useCallback(() => {
+    if (passportData?.fullName) {
+      const firstName = passportData.fullName.trim().split(" ")[0];
+      const caseDetail =
+        visaType && country
+          ? `I can see you're currently preparing a ${visaType} application for ${country}.`
+          : visaType
+          ? `I can see you're currently preparing a ${visaType} application.`
+          : "";
 
-    const timer = window.setTimeout(() => {
-      setShowLauncherGreeting(false);
-    }, 6500);
+      return [
+        `Hi ${firstName} 👋`,
+        "",
+        `I'm Navi, your visa and immigration assistant.${caseDetail ? " " + caseDetail : ""}`,
+        "",
+        "I can help explain your visa process, identify potential risks, answer application questions, and guide you through your visa journey.",
+      ].join("\n");
+    }
 
-    return () => window.clearTimeout(timer);
-  }, [isOpen]);
-
-  function buildIntroMessage() {
+    // No passport — fully generic, no identity assumptions
     return [
       "Hi, I'm Navi 👋",
       "",
       "I'm your visa and immigration assistant. I can help explain your visa process, identify potential risks, answer application questions, and guide you through your visa journey.",
     ].join("\n");
-  }
+  }, [passportData, visaType, country]);
+
+  // ── Launcher bubble auto-hide ────────────────────────────────────────────
+  useEffect(() => {
+    if (isOpen) return;
+    const timer = window.setTimeout(() => setShowLauncherGreeting(false), 6500);
+    return () => window.clearTimeout(timer);
+  }, [isOpen]);
+
+  // ── Passport-aware greeting refresh ──────────────────────────────────────
+  // When naviMessages is cleared externally (passport replaced → onPassportReplaced),
+  // and the drawer is open, immediately inject a fresh personalised greeting.
+  // Also fires when a first-time passport arrives and messages is still empty.
+  useEffect(() => {
+    if (messages.length > 0) return;
+
+    if (isOpen) {
+      setNaviMessages([
+        {
+          id: INTRO_MESSAGE_ID,
+          role: "assistant",
+          text: buildIntroMessage(),
+        },
+      ]);
+    }
+  }, [messages.length, isOpen, buildIntroMessage, setNaviMessages]);
+
+  // ── Passport arrives while drawer is closed ──────────────────────────────
+  // When a passport is uploaded (or replaced) with the drawer closed,
+  // we don't inject yet — handleOpen will build the greeting from scratch.
+  // But if messages were cleared by onPassportReplaced we need the greeting
+  // ready for the next open. Nothing extra needed: handleOpen already calls
+  // buildIntroMessage() which now reads the latest passportData.
 
   function handleOpen() {
     setIsOpen(true);
@@ -82,15 +127,16 @@ function Navi() {
     if (!text || isLoading) return;
 
     setNaviMessages((prev) => {
-      const current = prev.length > 0
-        ? prev
-        : [
-            {
-              id: INTRO_MESSAGE_ID,
-              role: "assistant",
-              text: buildIntroMessage(),
-            },
-          ];
+      const current =
+        prev.length > 0
+          ? prev
+          : [
+              {
+                id: INTRO_MESSAGE_ID,
+                role: "assistant",
+                text: buildIntroMessage(),
+              },
+            ];
 
       return [
         ...current,
@@ -198,9 +244,7 @@ function Navi() {
               🤖
             </div>
             <div>
-              <p className="font-semibold text-sm leading-tight">
-                Navi
-              </p>
+              <p className="font-semibold text-sm leading-tight">Navi</p>
               <p className="text-xs text-blue-100">
                 {visaType && country
                   ? `${visaType} · ${country}`
