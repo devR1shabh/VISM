@@ -2,72 +2,40 @@ function AssessmentPanel({ assessment }) {
   if (!assessment) return null;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
 
-      <h2 className="text-xl font-bold mb-4">
-        Case Assessment
-      </h2>
+      <h2 className="text-lg font-bold text-[var(--c-text)] mb-5">Case Assessment</h2>
 
-      <div className="mb-6">
-
-        <span className="text-4xl font-bold text-blue-600">
+      <div className="mb-5">
+        <span className="font-display text-4xl font-bold text-[var(--c-green)]">
           {assessment.score}%
         </span>
-
-        <p className="text-gray-600 mt-1">
-          Application Completion Score
-        </p>
-
+        <p className="text-sm text-[var(--c-text-muted)] mt-1">Application Completion Score</p>
       </div>
 
-      <div className="mb-5">
-
-        <h3 className="font-semibold text-green-700 mb-2">
-          Strengths
-        </h3>
-
-        <ul className="list-disc ml-5 space-y-1">
-          {assessment.strengths?.map(
-            (item) => (
-              <li key={item}>
-                {item}
-              </li>
-            )
-          )}
+      <div className="mb-4">
+        <h3 className="text-sm font-bold text-[var(--c-success)] mb-2">Strengths</h3>
+        <ul className="list-disc ml-5 space-y-1 text-sm text-[var(--c-text-mid)]">
+          {assessment.strengths?.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
-
       </div>
 
-      <div className="mb-5">
-
-        <h3 className="font-semibold text-orange-700 mb-2">
-          Areas Requiring Attention
-        </h3>
-
-        <ul className="list-disc ml-5 space-y-1">
-          {assessment.concerns?.map(
-            (item) => (
-              <li key={item}>
-                {item}
-              </li>
-            )
-          )}
+      <div className="mb-4">
+        <h3 className="text-sm font-bold text-[var(--c-warning)] mb-2">Areas Requiring Attention</h3>
+        <ul className="list-disc ml-5 space-y-1 text-sm text-[var(--c-text-mid)]">
+          {assessment.concerns?.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
-
       </div>
 
       <div>
-
-        <h3 className="font-semibold text-blue-700 mb-2">
-          Recommended Next Step
-        </h3>
-
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-gray-700">
-            {assessment.recommendation}
-          </p>
+        <h3 className="text-sm font-bold text-[var(--c-info)] mb-2">Recommended Next Step</h3>
+        <div className="bg-[var(--c-info-bg)] border border-[var(--c-info-border)] rounded-[var(--r-md)] p-3">
+          <p className="text-sm text-[var(--c-text-mid)]">{assessment.recommendation}</p>
         </div>
-
       </div>
 
     </div>

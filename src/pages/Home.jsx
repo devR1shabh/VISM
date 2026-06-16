@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import airportPassport    from "../assets/hero/airport-passport.jpg";
 import immigrationOfficer from "../assets/hero/immigration-officer.jpg";
+import heroVideo from "../assets/hero/hero-video.mp4";
 import CaseForm from "../components/input/CaseForm";
 
 function Home() {
@@ -29,12 +30,20 @@ function Home() {
           The image is the hero — not a background.
       ──────────────────────────────────────────────────────────────────────── */}
       <div className="relative">
-        <img
-          src={airportPassport}
-          alt="Passport and identity documents"
-          className="w-full object-cover object-center"
-          style={{ height: "68vh", minHeight: "420px", maxHeight: "680px" }}
-        />
+        <video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full object-cover object-center"
+  style={{
+    height: "68vh",
+    minHeight: "420px",
+    maxHeight: "680px",
+  }}
+>
+  <source src={heroVideo} type="video/mp4" />
+</video>
         {/* Subtle gradient at bottom so stat band reads cleanly below */}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent" />
         {/* Overline label — editorial style */}

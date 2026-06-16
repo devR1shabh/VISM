@@ -1,26 +1,27 @@
 ﻿function AIRiskPanel({ aiRisks = [] }) {
+  // ── Risk level styles — logic completely unchanged ──────────────
   const getRiskStyles = (level) => {
     switch (level) {
       case "HIGH":
         return {
-          border: "border-red-400",
-          text: "text-red-200",
-          badge: "border-red-400 bg-red-500/10 text-red-300",
-          marker: "bg-red-500/10 text-red-300 border-red-400",
+          border: "border-l-[var(--c-error)]",
+          bg:     "bg-[var(--c-error-bg)]",
+          badge:  "bg-[var(--c-error-bg)] text-[var(--c-error)] border-[var(--c-error-border)]",
+          text:   "text-[var(--c-error)]",
         };
       case "MEDIUM":
         return {
-          border: "border-orange-400",
-          text: "text-orange-200",
-          badge: "border-orange-400 bg-orange-500/10 text-orange-300",
-          marker: "bg-orange-500/10 text-orange-300 border-orange-400",
+          border: "border-l-[var(--c-warning)]",
+          bg:     "bg-[var(--c-warning-bg)]",
+          badge:  "bg-[var(--c-warning-bg)] text-[var(--c-warning)] border-[var(--c-warning-border)]",
+          text:   "text-[var(--c-warning)]",
         };
       default:
         return {
-          border: "border-emerald-400",
-          text: "text-emerald-200",
-          badge: "border-emerald-400 bg-emerald-500/10 text-emerald-300",
-          marker: "bg-emerald-500/10 text-emerald-300 border-emerald-400",
+          border: "border-l-[var(--c-success)]",
+          bg:     "bg-[var(--c-success-bg)]",
+          badge:  "bg-[var(--c-success-bg)] text-[var(--c-success)] border-[var(--c-success-border)]",
+          text:   "text-[var(--c-success)]",
         };
     }
   };
@@ -28,44 +29,41 @@
   const isLoading = aiRisks.length === 0;
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[#083D4A]/80 p-6 shadow-[0_25px_80px_-40px_rgba(34,231,197,0.35)] backdrop-blur-xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
         <div>
-          <h2 className="text-xl font-bold text-white">AI Risk Assessment</h2>
+          <h2 className="text-lg font-bold text-[var(--c-text)]">AI Risk Assessment</h2>
           {!isLoading && (
-            <p className="text-sm text-[#B8C5D1] mt-1">
-              {aiRisks.length} Risk{aiRisks.length !== 1 ? "s" : ""}
+            <p className="text-xs text-[var(--c-text-muted)] mt-0.5">
+              {aiRisks.length} Risk{aiRisks.length !== 1 ? "s" : ""} identified
             </p>
           )}
         </div>
-        <span className="inline-flex items-center rounded-full border border-[#22E7C5]/20 bg-[#22E7C5]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#22E7C5]">
+        <span className="inline-flex items-center rounded-full border border-[var(--c-green-light)] bg-[var(--c-green-bg)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--c-green)]">
           AI Generated
         </span>
       </div>
 
       {isLoading ? (
         <div className="space-y-3">
-          <div className="h-16 rounded-3xl bg-white/5 animate-pulse" />
-          <div className="h-16 rounded-3xl bg-white/5 animate-pulse" />
+          <div className="h-14 rounded-[var(--r-lg)] bg-[var(--c-border)] animate-pulse" />
+          <div className="h-14 rounded-[var(--r-lg)] bg-[var(--c-border)] animate-pulse" />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {aiRisks.map((risk, index) => {
             const styles = getRiskStyles(risk.level);
             return (
               <div
                 key={index}
-                className={`rounded-[24px] border-l-4 ${styles.border} bg-white/5 p-4 shadow-sm backdrop-blur`}
+                className={`rounded-[var(--r-lg)] border-l-4 ${styles.border} ${styles.bg} px-4 py-3`}
               >
-                <div className="flex items-center justify-between gap-4 mb-3">
-                  <span className={`inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${styles.badge}`}>
-                    {risk.level}
-                  </span>
-                  <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${styles.marker}`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${styles.badge}`}>
                     {risk.level}
                   </span>
                 </div>
-                <p className={`text-[#B8C5D1] ${styles.text} leading-relaxed`}>{risk.message}</p>
+                <p className={`text-sm leading-relaxed ${styles.text}`}>{risk.message}</p>
               </div>
             );
           })}
