@@ -1,0 +1,154 @@
+/* src/styles/tokens.css */
+/* VISM Design System — Vistolane-inspired premium immigration platform */
+/* Loaded via @import in index.css — after the Tailwind import */
+
+/* ── Google Fonts ─────────────────────────────────────────────────────────
+   Playfair Display: premium serif for display headings
+   Inter: clean sans-serif for all body and UI text
+   The @import must be the very first declaration in this file.
+   ──────────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ── Design Tokens ────────────────────────────────────────────────────────
+   All values are CSS custom properties on :root.
+   Components reference these through Tailwind arbitrary value notation
+   e.g. bg-[var(--c-navy)] or text-[var(--c-text)]
+   ──────────────────────────────────────────────────────────────────────── */
+:root {
+
+  /* ── Colour Palette ───────────────────────────────────────────────────── */
+
+  /* Navy — primary brand colour for navbar, heroes, CTAs */
+  --c-navy:        #0A2E57;
+  --c-navy-mid:    #0F3D6E;
+  --c-navy-dark:   #071E3D;
+
+  /* Cyan — accent colour for icons, active states, highlights */
+  --c-cyan:        #4DC7F7;
+  --c-cyan-dim:    #2AA6D8;
+  --c-cyan-bg:     #E8F4FD;
+
+  /* Backgrounds */
+  --c-bg:          #F7F8FA;   /* page background — all content sections */
+  --c-card:        #FFFFFF;   /* card surfaces */
+
+  /* Borders */
+  --c-border:      #E6E8EB;   /* all card and input borders */
+
+  /* Text */
+  --c-text:        #111827;   /* primary text — headings */
+  --c-text-mid:    #374151;   /* body text, descriptions */
+  --c-text-muted:  #6B7280;   /* labels, captions, metadata */
+
+  /* Semantic — status colours */
+  --c-success:     #16A34A;
+  --c-success-bg:  #DCFCE7;
+  --c-success-border: #BBF7D0;
+
+  --c-warning:     #D97706;
+  --c-warning-bg:  #FEF3C7;
+  --c-warning-border: #FDE68A;
+
+  --c-error:       #DC2626;
+  --c-error-bg:    #FEE2E2;
+  --c-error-border: #FECACA;
+
+  --c-info:        #2563EB;
+  --c-info-bg:     #DBEAFE;
+  --c-info-border: #BFDBFE;
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                  Roboto, Helvetica, Arial, sans-serif;
+
+  /* ── Border Radius Scale ──────────────────────────────────────────────── */
+  --r-sm:   6px;    /* badges, pills, small tags */
+  --r-md:   8px;    /* buttons, inputs */
+  --r-lg:   12px;   /* inner cards, secondary containers */
+  --r-xl:   16px;   /* primary page/section cards */
+  --r-2xl:  24px;   /* hero sections, upload areas, large modals */
+
+  /* ── Shadows ──────────────────────────────────────────────────────────── */
+  --shadow-card:   0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.10), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-modal:  0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-nav:    0 2px 8px rgba(10, 46, 87, 0.20);
+
+  /* ── Spacing ──────────────────────────────────────────────────────────── */
+  --max-w:        1280px;
+  --section-py:   96px;
+  --card-p:       24px;
+
+}
+
+/* ── Global Base ──────────────────────────────────────────────────────────
+   Applied to every page. Sets the font and background.
+   These are low-specificity — any component className overrides them.
+   ──────────────────────────────────────────────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Utility Classes ──────────────────────────────────────────────────────
+   These extend Tailwind — used via className="font-display" etc.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Display font — Playfair Display for hero headings */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Premium white card base */
+.card {
+  background-color: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────
+   Used in Phase 10 (polish). Defined here so they're available
+   immediately but not applied until explicitly added to className.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Fade-in-up entrance animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.3s ease both;
+}
+
+/* ── Skeleton Loader ──────────────────────────────────────────────────────
+   Used in Phase 10 on Analysis page loading state.
+   Applied via className="skeleton h-N rounded-xl"
+   ──────────────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #E6E8EB 25%,
+    #F0F2F5 50%,
+    #E6E8EB 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--r-sm);
+}

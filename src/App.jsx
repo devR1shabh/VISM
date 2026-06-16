@@ -18,7 +18,7 @@ import ProcessorCaseDetail from "./pages/ProcessorCaseDetail";
 
 import Navi from "./components/navi/Navi";
 
-const NAVI_ROUTES           = ["/analysis", "/documents", "/journey"];
+const NAVI_ROUTES            = ["/analysis", "/documents", "/journey"];
 const PROCESSOR_ROUTE_PREFIX = "/processor";
 
 function AppContent() {
@@ -29,7 +29,7 @@ function AppContent() {
   const showApplicantNav = !isProcessorRoute;
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#F7F8FA]">
       <ScrollToTop />
 
       {showApplicantNav && <Navbar />}

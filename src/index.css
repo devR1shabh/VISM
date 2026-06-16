@@ -1,1 +1,9 @@
+/* src/index.css */
+/* Entry point for all styles. Import order matters:
+   1. Tailwind v4 (provides all utility classes)
+   2. tokens.css (design system — custom properties + global base)
+   Nothing else should be imported here. All component styling
+   is done via Tailwind className strings in JSX. */
+
 @import "tailwindcss";
+@import "./styles/tokens.css";
