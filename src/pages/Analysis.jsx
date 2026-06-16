@@ -18,6 +18,7 @@ import AIApplicationOverview from "../components/output/AIApplicationOverview";
 import AIRiskPanel           from "../components/output/AIRiskPanel";
 import AIRecommendations     from "../components/output/AIRecommendations";
 import CaseSummary           from "../components/output/CaseSummary";
+import { PageHeader }        from "../components/ui";
 
 import { generateAnalysis, updateCase } from "../services/api";
 
@@ -28,6 +29,7 @@ const visaIconMap = {
 };
 
 function Analysis() {
+  // ── Logic completely unchanged ────────────────────────────────────────────
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,15 +56,11 @@ function Analysis() {
 
         setAnalysis(result);
 
-        // 1. Save to localStorage via CaseContext (existing behaviour)
         setCaseData((prev) => ({
           ...prev,
           analysis: result,
         }));
 
-        // 2. Persist analysis to MongoDB so the processor dashboard can display it.
-        //    This is the fix for "AI Analysis Not Available" on the processor side.
-        //    Fire-and-forget: errors are logged but do not block the applicant flow.
         if (caseData._id) {
           updateCase(caseData._id, { analysis: result }).catch((err) =>
             console.error("Failed to persist analysis to server:", err)
@@ -80,134 +78,139 @@ function Analysis() {
     runAnalysis();
   }, [caseData, analysis, setCaseData, setWorkflowStep]);
 
+  // ── Loading state — skeleton cards on light background ────────────────────
   if (isLoading || !analysis) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center bg-[#061A28] px-6 py-24">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#22E7C5] border-t-transparent rounded-full animate-spin mx-auto mb-5" />
-          <h2 className="text-3xl font-semibold text-white mb-3">
-            Generating BlueprintAI Analysis...
-          </h2>
-          <p className="text-[#B8C5D1] max-w-xl mx-auto">
-            AI is synthesizing your visa profile, risks, and recommended next steps.
-          </p>
+      <div className="min-h-screen bg-[#F7F8FA]">
+        <PageHeader
+          eyebrow="BlueprintAI Assessment Report"
+          title="Generating Your Analysis..."
+          description="AI is synthesizing your visa profile, risks, and recommended next steps."
+        />
+        <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 space-y-4">
+          <div className="skeleton h-48 rounded-xl" />
+          <div className="skeleton h-36 rounded-xl" />
+          <div className="skeleton h-36 rounded-xl" />
         </div>
       </div>
     );
   }
 
-  const caseId  = caseData?.caseId || caseData?.id || "—";
-  const status  = caseData?.status || "In Progress";
+  const caseId   = caseData?.caseId || caseData?.id || "—";
+  const status   = caseData?.status || "In Progress";
   const VisaIcon = visaIconMap[caseData?.visaType] || Globe;
 
   return (
-    <main className="min-h-screen bg-[#061A28] text-white px-4 py-8 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <main className="min-h-screen bg-[#F7F8FA]">
+
+      {/* Compact navy page header */}
+      <PageHeader
+        eyebrow="BlueprintAI Assessment Report"
+        title="AI Analysis & Eligibility Report"
+        description="Review your case status, eligibility view, and key recommendations so you can move forward with confidence."
+      />
+
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
+
+        {/* Redirect message */}
         {redirectMessage && (
-          <div className="rounded-3xl border border-[#22E7C5]/20 bg-[#083D4A]/80 p-4 text-sm text-[#B8C5D1] shadow-lg shadow-[#22E7C5]/10">
+          <div className="rounded-lg border border-[#4DC7F7]/30 bg-[#E8F4FD] px-5 py-3 text-sm text-[#2AA6D8]">
             {redirectMessage}
           </div>
         )}
 
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.35)] backdrop-blur-xl">
-          <div className="grid gap-8 lg:grid-cols-[1.4fr_0.8fr] lg:items-center">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-3">
-                BlueprintAI Assessment Report
+        {/* Case context stat cards */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { label: "Visa Type",   value: caseData.visaType, Icon: VisaIcon },
+            { label: "Destination", value: caseData.country,  Icon: Globe    },
+            { label: "Status",      value: status,            Icon: FileText },
+            { label: "Case ID",     value: caseId,            Icon: Sparkles },
+          ].map(({ label, value, Icon }) => (
+            <div
+              key={label}
+              className="bg-white border border-[#E6E8EB] rounded-xl p-4 shadow-sm"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E8F4FD] text-[#2AA6D8] mb-3">
+                <Icon size={18} />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+                {label}
               </p>
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                AI-powered visa eligibility and immigration intelligence analysis.
-              </h1>
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-[#B8C5D1]">
-                Review your case status, eligibility view, and key recommendations from BlueprintAI so you can move forward with confidence.
+              <p className="mt-1 text-sm font-bold text-[#0A2E57] leading-tight">
+                {value}
               </p>
             </div>
+          ))}
+        </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                { label: "Visa Type",    value: caseData.visaType, icon: VisaIcon },
-                { label: "Destination", value: caseData.country,  icon: Globe    },
-                { label: "Status",      value: status,            icon: FileText },
-                { label: "Case ID",     value: caseId,            icon: Sparkles },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur transition hover:-translate-y-1"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#22E7C5]/15 text-[#22E7C5] shadow-lg shadow-[#22E7C5]/10">
-                      <item.icon size={20} />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.32em] text-[#B8C5D1]">{item.label}</p>
-                      <p className="mt-2 font-semibold text-white">{item.value}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Case details */}
+        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#2AA6D8] mb-1">
+            Case Information
+          </p>
+          <h2 className="text-xl font-bold text-[#0A2E57] mb-5">
+            Visa Case Details
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {[
+              { label: "Case ID",             value: caseId            },
+              { label: "Visa Type",           value: caseData.visaType },
+              { label: "Destination Country", value: caseData.country  },
+              { label: "Case Status",         value: status            },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-lg bg-[#F7F8FA] border border-[#E6E8EB] px-4 py-3"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280] mb-1">
+                  {label}
+                </p>
+                <p className="text-base font-semibold text-[#111827]">{value}</p>
+              </div>
+            ))}
           </div>
-        </section>
-
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_30px_90px_-30px_rgba(34,231,197,0.3)] backdrop-blur-xl">
-          <div className="flex flex-col gap-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Case Information</p>
-              <h2 className="text-2xl font-bold text-white">Visa Case Details</h2>
+          {caseData.description && (
+            <div className="mt-4 rounded-lg bg-[#F7F8FA] border border-[#E6E8EB] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280] mb-1">
+                Case Description
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed">
+                {caseData.description}
+              </p>
             </div>
+          )}
+        </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
-                <p className="text-sm uppercase tracking-[0.32em] text-[#B8C5D1] mb-2">Case ID</p>
-                <p className="text-lg font-semibold text-white">{caseId}</p>
-              </div>
-              <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
-                <p className="text-sm uppercase tracking-[0.32em] text-[#B8C5D1] mb-2">Visa Type</p>
-                <p className="text-lg font-semibold text-white">{caseData.visaType}</p>
-              </div>
-              <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
-                <p className="text-sm uppercase tracking-[0.32em] text-[#B8C5D1] mb-2">Destination Country</p>
-                <p className="text-lg font-semibold text-white">{caseData.country}</p>
-              </div>
-              <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
-                <p className="text-sm uppercase tracking-[0.32em] text-[#B8C5D1] mb-2">Case Status</p>
-                <p className="text-lg font-semibold text-white">{status}</p>
-              </div>
-            </div>
-
-            <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
-              <p className="text-sm uppercase tracking-[0.32em] text-[#B8C5D1] mb-2">Case Description</p>
-              <p className="text-[#B8C5D1] leading-relaxed">{caseData.description}</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_30px_90px_-30px_rgba(34,231,197,0.3)] backdrop-blur-xl">
+        {/* AI output components — each in a white card */}
+        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
           <AIApplicationOverview aiOverview={analysis.aiOverview} />
-        </section>
+        </div>
 
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_30px_90px_-30px_rgba(34,231,197,0.3)] backdrop-blur-xl">
+        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
           <AIRiskPanel aiRisks={analysis.aiRisks || []} />
-        </section>
+        </div>
 
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_30px_90px_-30px_rgba(34,231,197,0.3)] backdrop-blur-xl">
+        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
           <CaseSummary documents={analysis.documents || []} />
-        </section>
+        </div>
 
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_30px_90px_-30px_rgba(34,231,197,0.3)] backdrop-blur-xl">
+        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
           <AIRecommendations aiRecommendations={analysis.aiRecommendations || []} />
-        </section>
+        </div>
 
-        <div className="flex justify-end">
+        {/* Proceed button */}
+        <div className="flex justify-end pb-4">
           <button
             type="button"
             onClick={() => navigate("/documents")}
-            className="inline-flex items-center gap-2 rounded-3xl bg-[#22E7C5] px-8 py-3 text-base font-semibold text-[#061A28] shadow-lg shadow-[#22E7C5]/20 transition hover:bg-[#39F5D5]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
           >
             Proceed To Documents
-            <ArrowRight size={18} />
+            <ArrowRight size={16} />
           </button>
         </div>
+
       </div>
     </main>
   );

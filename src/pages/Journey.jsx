@@ -3,15 +3,17 @@
 import { useNavigate } from "react-router-dom";
 import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 import VisaJourneyTimeline from "../components/output/VisaJourneyTimeline";
-import ComplianceNotes from "../components/output/ComplianceNotes";
+import ComplianceNotes     from "../components/output/ComplianceNotes";
+import { PageHeader }      from "../components/ui";
 
+// ── RequirementsChecklist — all logic completely unchanged ─────────────────
 function RequirementsChecklist() {
   const { caseData, uploadedDocuments } = useCase();
   const requiredDocuments = caseData?.analysis?.documents || [];
 
   const checks = [
-    { label: "Visa Type Selected", met: Boolean(caseData?.visaType) },
-    { label: "Destination Country Selected", met: Boolean(caseData?.country) },
+    { label: "Visa Type Selected",          met: Boolean(caseData?.visaType) },
+    { label: "Destination Country Selected", met: Boolean(caseData?.country)  },
     ...requiredDocuments.map((doc) => ({
       label: `${doc} Verified`,
       met: uploadedDocuments.some(
@@ -23,32 +25,32 @@ function RequirementsChecklist() {
   const metCount = checks.filter((c) => c.met).length;
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 shadow-[0_20px_60px_-20px_rgba(34,231,197,0.18)] backdrop-blur-xl">
+    <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-white">Requirements Checklist</h2>
-        <span className="text-sm font-semibold px-3 py-1 rounded-full bg-white/5 text-[#B8C5D1]">
+        <h2 className="text-base font-bold text-[#0A2E57]">Requirements Checklist</h2>
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#F7F8FA] border border-[#E6E8EB] text-[#6B7280]">
           {metCount} / {checks.length} Complete
         </span>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="space-y-2.5">
         {checks.map(({ label, met }) => (
           <li
             key={label}
-            className={`flex items-center gap-3 p-3 rounded-xl border ${
+            className={`flex items-center gap-3 p-3 rounded-lg border ${
               met
-                ? "border-[#22E7C5] bg-[#22E7C5]/8"
-                : "border-white/6 bg-white/3"
+                ? "border-[#BBF7D0] bg-[#DCFCE7]"
+                : "border-[#E6E8EB] bg-[#F7F8FA]"
             }`}
           >
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                met ? "bg-[#22E7C5]" : "bg-white/10"
+              className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                met ? "bg-[#16A34A]" : "bg-[#E6E8EB]"
               }`}
             >
               {met ? (
                 <svg
-                  className="w-4 h-4 text-[#061A28]"
+                  className="w-3.5 h-3.5 text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -62,7 +64,7 @@ function RequirementsChecklist() {
                 </svg>
               ) : (
                 <svg
-                  className="w-4 h-4 text-[#B8C5D1]"
+                  className="w-3.5 h-3.5 text-[#9CA3AF]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -76,7 +78,11 @@ function RequirementsChecklist() {
                 </svg>
               )}
             </div>
-            <span className={`text-sm font-medium ${met ? "text-white" : "text-[#B8C5D1]"}`}>
+            <span
+              className={`text-sm font-medium ${
+                met ? "text-[#14532D]" : "text-[#374151]"
+              }`}
+            >
               {label}
             </span>
           </li>
@@ -87,14 +93,14 @@ function RequirementsChecklist() {
 }
 
 function Journey() {
+  // ── Logic completely unchanged ────────────────────────────────────────────
   const navigate = useNavigate();
   const { caseData, setWorkflowStep } = useCase();
 
-  const visaJourney = caseData?.analysis?.visaJourney || [];
+  const visaJourney     = caseData?.analysis?.visaJourney     || [];
   const complianceNotes = caseData?.analysis?.complianceNotes || [];
 
   const handleProceed = () => {
-    // Advance workflow: journey done → unlock Dashboard
     setWorkflowStep(WORKFLOW_STEPS.JOURNEY_DONE);
     navigate("/dashboard");
   };
@@ -103,50 +109,55 @@ function Journey() {
   const status = caseData?.status || "In Progress";
 
   return (
-    <main className="min-h-screen bg-[#061A28] text-white px-4 py-8 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Hero */}
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.35)] backdrop-blur-xl">
-          <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-center">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Immigration Journey Tracker</p>
-              <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">Immigration Journey Tracker</h1>
-              <p className="mt-4 text-lg leading-7 text-[#B8C5D1] max-w-3xl">
-                Track every milestone of your visa application journey from assessment to approval.
-              </p>
-            </div>
+    <main className="min-h-screen bg-[#F7F8FA]">
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              {[
-                { label: "Case ID", value: caseId },
-                { label: "Visa Type", value: caseData?.visaType || "—" },
-                { label: "Destination", value: caseData?.country || "—" },
-              ].map((card) => (
-                <div key={card.label} className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#B8C5D1]">{card.label}</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{card.value}</p>
-                </div>
-              ))}
+      {/* Compact navy page header with stat pills */}
+      <PageHeader
+        eyebrow="Immigration Journey Tracker"
+        title="Your Visa Journey"
+        description="Track every milestone of your visa application from assessment to approval."
+      >
+        <div className="flex flex-wrap gap-3 mt-4">
+          {[
+            { label: "Case ID",     value: caseId                    },
+            { label: "Visa Type",   value: caseData?.visaType || "—" },
+            { label: "Destination", value: caseData?.country  || "—" },
+            { label: "Status",      value: status                     },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="flex items-center gap-2 rounded-lg bg-white/10 border border-white/15 px-4 py-2"
+            >
+              <span className="text-xs text-white/60 uppercase tracking-wide font-semibold">
+                {label}:
+              </span>
+              <span className="text-sm font-semibold text-white">{value}</span>
             </div>
-          </div>
-        </section>
+          ))}
+        </div>
+      </PageHeader>
 
-        {/* Main Grid */}
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
+
+        {/* Journey timeline */}
+        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+          <VisaJourneyTimeline visaJourney={visaJourney} />
+        </div>
+
+        {/* Compliance + Checklist */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="md:col-span-2">
-            <VisaJourneyTimeline visaJourney={visaJourney} />
+          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+            <ComplianceNotes notes={complianceNotes} />
           </div>
-
-          <ComplianceNotes notes={complianceNotes} />
           <RequirementsChecklist />
         </div>
 
-        {/* Proceed To Dashboard */}
-        <div className="flex justify-end">
+        {/* Proceed — onClick unchanged: handleProceed → setWorkflowStep → navigate */}
+        <div className="flex justify-end pb-4">
           <button
             type="button"
             onClick={handleProceed}
-            className="inline-flex items-center gap-2 rounded-3xl px-6 py-3 text-sm font-semibold bg-[#22E7C5] text-[#061A28] hover:bg-[#39F5D5] shadow-md transition"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
           >
             Proceed To Dashboard
             <svg
@@ -164,6 +175,7 @@ function Journey() {
             </svg>
           </button>
         </div>
+
       </div>
     </main>
   );
