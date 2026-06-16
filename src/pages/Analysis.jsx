@@ -15,15 +15,15 @@ import {
 
 import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 import AIApplicationOverview from "../components/output/AIApplicationOverview";
-import AIRiskPanel from "../components/output/AIRiskPanel";
-import AIRecommendations from "../components/output/AIRecommendations";
-import CaseSummary from "../components/output/CaseSummary";
+import AIRiskPanel           from "../components/output/AIRiskPanel";
+import AIRecommendations     from "../components/output/AIRecommendations";
+import CaseSummary           from "../components/output/CaseSummary";
 
-import { generateAnalysis } from "../services/api";
+import { generateAnalysis, updateCase } from "../services/api";
 
 const visaIconMap = {
   "Student Visa": GraduationCap,
-  "Work Visa": Briefcase,
+  "Work Visa":    Briefcase,
   "Tourist Visa": Plane,
 };
 
@@ -33,10 +33,9 @@ function Analysis() {
 
   const { caseData, setCaseData, setWorkflowStep } = useCase();
 
-  const [analysis, setAnalysis] = useState(() => caseData?.analysis || null);
+  const [analysis, setAnalysis]   = useState(() => caseData?.analysis || null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Show redirect message from ProtectedRoute if any
   const redirectMessage = location.state?.message;
 
   useEffect(() => {
@@ -55,12 +54,21 @@ function Analysis() {
 
         setAnalysis(result);
 
+        // 1. Save to localStorage via CaseContext (existing behaviour)
         setCaseData((prev) => ({
           ...prev,
           analysis: result,
         }));
 
-        // Advance workflow: analysis is now complete → unlock Documents
+        // 2. Persist analysis to MongoDB so the processor dashboard can display it.
+        //    This is the fix for "AI Analysis Not Available" on the processor side.
+        //    Fire-and-forget: errors are logged but do not block the applicant flow.
+        if (caseData._id) {
+          updateCase(caseData._id, { analysis: result }).catch((err) =>
+            console.error("Failed to persist analysis to server:", err)
+          );
+        }
+
         setWorkflowStep(WORKFLOW_STEPS.ANALYSIS_DONE);
       } catch (error) {
         console.error("Analysis failed:", error);
@@ -88,8 +96,8 @@ function Analysis() {
     );
   }
 
-  const caseId = caseData?.caseId || caseData?.id || "—";
-  const status = caseData?.status || "In Progress";
+  const caseId  = caseData?.caseId || caseData?.id || "—";
+  const status  = caseData?.status || "In Progress";
   const VisaIcon = visaIconMap[caseData?.visaType] || Globe;
 
   return (
@@ -117,12 +125,15 @@ function Analysis() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { label: "Visa Type", value: caseData.visaType, icon: VisaIcon },
-                { label: "Destination", value: caseData.country, icon: Globe },
-                { label: "Status", value: status, icon: FileText },
-                { label: "Case ID", value: caseId, icon: Sparkles },
+                { label: "Visa Type",    value: caseData.visaType, icon: VisaIcon },
+                { label: "Destination", value: caseData.country,  icon: Globe    },
+                { label: "Status",      value: status,            icon: FileText },
+                { label: "Case ID",     value: caseId,            icon: Sparkles },
               ].map((item) => (
-                <div key={item.label} className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur transition hover:-translate-y-1">
+                <div
+                  key={item.label}
+                  className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur transition hover:-translate-y-1"
+                >
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#22E7C5]/15 text-[#22E7C5] shadow-lg shadow-[#22E7C5]/10">
                       <item.icon size={20} />

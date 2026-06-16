@@ -7,6 +7,7 @@ import {
   getCase,
   updateCase,
   addVerifiedDocument,
+  savePassportData,
   getAllCases,
   getCaseById,
   processorAction,
@@ -14,11 +15,12 @@ import {
 
 const router = express.Router();
 
-router.post("/",                    createCase);
-router.get("/",                     getAllCases);
-router.get("/:id",                  getCaseById);
-router.put("/:id",                  updateCase);
-router.put("/:id/documents",        addVerifiedDocument);
-router.post("/:id/processor-action", processorAction);
+router.post("/",                       createCase);
+router.get("/",                        getAllCases);
+router.get("/:id",                     getCaseById);
+router.put("/:id",                     updateCase);
+router.put("/:id/documents",           addVerifiedDocument);
+router.post("/:id/passport-data",      savePassportData);
+router.post("/:id/processor-action",   processorAction);
 
 export default router;

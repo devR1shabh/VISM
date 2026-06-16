@@ -42,7 +42,7 @@ export async function updateCase(req, res) {
 export async function addVerifiedDocument(req, res) {
   try {
     const { documentType } = req.body;
-    const caseId = req.params.id;
+    const caseId   = req.params.id;
     const uploadedAt = new Date();
 
     let updatedCase = await Case.findOneAndUpdate(
@@ -52,7 +52,7 @@ export async function addVerifiedDocument(req, res) {
       },
       {
         $set: {
-          "uploadedDocuments.$.verified": true,
+          "uploadedDocuments.$.verified":  true,
           "uploadedDocuments.$.uploadedAt": uploadedAt,
         },
       },
@@ -79,6 +79,60 @@ export async function addVerifiedDocument(req, res) {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to save document" });
+  }
+}
+
+// ── NEW: savePassportData ──────────────────────────────────────────────────
+// Called after successful passport extraction on the applicant side.
+// Persists the full extracted passportData object to MongoDB so the
+// processor dashboard can display it.
+//
+// Body: { passportData: { fullName, passportNumber, nationality, dateOfBirth, expiryDate, ... } }
+export async function savePassportData(req, res) {
+  try {
+    const { passportData } = req.body;
+    const caseId = req.params.id;
+
+    if (!passportData) {
+      return res.status(400).json({ error: "passportData is required" });
+    }
+
+    // Map the full extracted fields AND populate the legacy partial fields
+    // (name, passportLast4) that CasePassportPanel already reads.
+    const passportLast4 = passportData.passportNumber
+      ? String(passportData.passportNumber).slice(-4)
+      : undefined;
+
+    const update = {
+      passportData: {
+        // Full fields for processor display
+        fullName:       passportData.fullName       || "",
+        passportNumber: passportData.passportNumber || "",
+        nationality:    passportData.nationality    || "",
+        dateOfBirth:    passportData.dateOfBirth    || "",
+        expiryDate:     passportData.expiryDate     || "",
+        issuingCountry: passportData.issuingCountry || "",
+        sex:            passportData.sex            || "",
+        // Legacy partial fields (kept for backwards compat)
+        name:           passportData.fullName       || "",
+        passportLast4:  passportLast4               || "",
+      },
+    };
+
+    const updatedCase = await Case.findByIdAndUpdate(
+      caseId,
+      { $set: update },
+      { new: true }
+    );
+
+    if (!updatedCase) {
+      return res.status(404).json({ error: "Case not found" });
+    }
+
+    res.json(updatedCase);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save passport data" });
   }
 }
 
@@ -124,8 +178,8 @@ export async function processorAction(req, res) {
       view_case:         "Processor Viewed Case",
     };
 
-    const updates  = {};
-    const pushOps  = {};
+    const updates = {};
+    const pushOps = {};
 
     if (STATUS_MAP[action]) {
       updates.processorStatus = STATUS_MAP[action];

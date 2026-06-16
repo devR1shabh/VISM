@@ -37,11 +37,26 @@ const caseSchema = new mongoose.Schema(
     country: { type: String, required: true },
     description: { type: String, default: "" },
 
+    // Populated after passport extraction completes.
+    // Stores the full extracted passport fields so the processor can see them.
     passportData: {
-      name: String,
-      nationality: String,
-      passportLast4: String,
-      expiryDate: String,
+      name:           String,
+      nationality:    String,
+      passportLast4:  String,
+      expiryDate:     String,
+      // Full fields — written when passport is extracted on the applicant side
+      fullName:       String,
+      passportNumber: String,
+      dateOfBirth:    String,
+      issuingCountry: String,
+      sex:            String,
+    },
+
+    // Populated after AI analysis completes on the applicant side.
+    // mongoose.Schema.Types.Mixed accepts the full nested analysis object.
+    analysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
 
     uploadedDocuments: [uploadedDocumentSchema],
@@ -63,7 +78,7 @@ const caseSchema = new mongoose.Schema(
     },
 
     activityFeed: { type: Array, default: [] },
-    chatHistory: { type: Array, default: [] },
+    chatHistory:  { type: Array, default: [] },
   },
   { timestamps: true }
 );

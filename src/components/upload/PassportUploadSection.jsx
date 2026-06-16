@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useCase } from "../../context/CaseContext";
-import { uploadPassport, addVerifiedDocument } from "../../services/api";
+import { uploadPassport, addVerifiedDocument, savePassportData } from "../../services/api";
 import { getDocumentByType } from "../../utils/documentUtils";
 
 function PassportUploadSection() {
@@ -15,30 +15,19 @@ function PassportUploadSection() {
     updateApplicantIdentity,
   } = useCase();
 
-  // preview holds the newly-selected file (src, file, timestamp).
-  // It is cleared when the user clicks "Upload Again" and a new file is chosen.
-  const [preview, setPreview] = useState(null);
-
-  // extractionDone tracks whether we have already run extraction for the
-  // current preview. Reset to false whenever a new file is selected.
+  const [preview, setPreview]           = useState(null);
   const [extractionDone, setExtractionDone] = useState(false);
-
   const [isExtracting, setIsExtracting] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]               = useState(null);
 
-  // Single hidden file input — always mounted, ref never ambiguous.
   const fileInputRef = useRef(null);
 
   const existingPassport = getDocumentByType(uploadedDocuments, "Passport");
 
-  // ── File selection ────────────────────────────────────────────────────────
-  // Called every time the user picks a file (first upload OR re-upload).
-  // Clears ALL previous state so the flow restarts from scratch.
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset input value so selecting the same file name again still fires onChange
     if (fileInputRef.current) fileInputRef.current.value = "";
 
     setError(null);
@@ -47,19 +36,17 @@ function PassportUploadSection() {
     const reader = new FileReader();
     reader.onload = (ev) =>
       setPreview({
-        src: ev.target.result,
+        src:       ev.target.result,
         file,
         timestamp: new Date().toISOString(),
       });
     reader.readAsDataURL(file);
   };
 
-  // ── Trigger file picker ───────────────────────────────────────────────────
   const openFilePicker = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // ── Extract ───────────────────────────────────────────────────────────────
   const handleExtract = async () => {
     if (!preview?.file) return;
     setIsExtracting(true);
@@ -68,9 +55,7 @@ function PassportUploadSection() {
     try {
       const result = await uploadPassport(preview.file);
 
-      // ── Identity change detection ─────────────────────────────────────────
-      // Reset Navi session if EITHER the name OR passport number changes.
-      // Same passport re-uploaded → preserve conversation.
+      // ── Identity change detection ──────────────────────────────────────
       if (result.valid && result.passportData) {
         const existingNumber = existingPassport?.passportData?.passportNumber;
         const existingName   = existingPassport?.passportData?.fullName;
@@ -82,13 +67,11 @@ function PassportUploadSection() {
           (existingNumber !== incomingNumber || existingName !== incomingName);
 
         if (identityChanged) {
-          // Pass new identity so CaseContext can update stored identity too
           onPassportReplaced({
             fullName:       incomingName   ?? null,
             passportNumber: incomingNumber ?? null,
           });
         } else {
-          // Same applicant — just keep stored identity fresh
           updateApplicantIdentity({
             fullName:       incomingName   ?? null,
             passportNumber: incomingNumber ?? null,
@@ -96,19 +79,34 @@ function PassportUploadSection() {
         }
       }
 
+      // ── Save to localStorage (existing behaviour) ──────────────────────
       const documentRecord = {
         requiredDocument: "Passport",
-        fileName: preview.file.name,
-        detectedType: result.documentType,
-        valid: result.valid,
-        passportData: result.passportData,
-        uploadedAt: preview.timestamp,
+        fileName:         preview.file.name,
+        detectedType:     result.documentType,
+        valid:            result.valid,
+        passportData:     result.passportData,
+        uploadedAt:       preview.timestamp,
       };
 
       addDocument(documentRecord);
 
+      // ── Persist to MongoDB ─────────────────────────────────────────────
+      // Both calls are fire-and-forget from the UX perspective.
+      // Errors are logged but do not block the applicant flow.
       if (result.valid && caseData?._id) {
-        await addVerifiedDocument(caseData._id, "Passport");
+        // 1. Mark document as verified in uploadedDocuments array
+        addVerifiedDocument(caseData._id, "Passport").catch((err) =>
+          console.error("addVerifiedDocument failed:", err)
+        );
+
+        // 2. Persist the full extracted passportData so the processor can see it.
+        //    This is the fix for "No Passport Data Available" on the processor side.
+        if (result.passportData) {
+          savePassportData(caseData._id, result.passportData).catch((err) =>
+            console.error("savePassportData failed:", err)
+          );
+        }
       }
 
       addActivity(
@@ -134,23 +132,14 @@ function PassportUploadSection() {
     }
   };
 
-  // ── Derived display state ─────────────────────────────────────────────────
-  // After extraction, show the context-record (existingPassport) as the card.
-  // While a new preview is pending (not yet extracted), show preview image.
-  const hasNewPreview = Boolean(preview && !extractionDone);
-  const showCard      = Boolean(existingPassport?.valid && existingPassport?.passportData && !hasNewPreview);
-
-  // The image to show: new preview takes priority, then fall back to nothing
-  // (we don't store the image blob across reloads, so no stale image shown).
-  const previewSrc = preview?.src ?? null;
-
-  // Button label: "Upload" before any upload, "Upload Again" after.
-  const hasEverUploaded = Boolean(existingPassport);
+  const hasNewPreview     = Boolean(preview && !extractionDone);
+  const showCard          = Boolean(existingPassport?.valid && existingPassport?.passportData && !hasNewPreview);
+  const previewSrc        = preview?.src ?? null;
+  const hasEverUploaded   = Boolean(existingPassport);
   const uploadButtonLabel = hasEverUploaded ? "Upload Again" : "Upload";
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-8">
-      {/* ── Hidden file input — single, always mounted ─────────────────── */}
       <input
         ref={fileInputRef}
         type="file"
@@ -159,7 +148,6 @@ function PassportUploadSection() {
         onChange={handleFileSelect}
       />
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
           <span className="text-xl">🛂</span>
@@ -187,9 +175,8 @@ function PassportUploadSection() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* ── Left column: upload / preview ──────────────────────────── */}
+        {/* Left: upload / preview */}
         <div>
-          {/* Initial dropzone — shown only when nothing uploaded yet AND no preview */}
           {!hasNewPreview && !existingPassport ? (
             <button
               type="button"
@@ -216,7 +203,6 @@ function PassportUploadSection() {
             </button>
           ) : (
             <div className="space-y-3">
-              {/* Image preview — shows new selection OR placeholder after extraction */}
               {previewSrc ? (
                 <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
                   <img
@@ -253,7 +239,6 @@ function PassportUploadSection() {
               )}
 
               <div className="flex gap-2">
-                {/* Extract button — shown whenever there's a fresh preview not yet extracted */}
                 {hasNewPreview && (
                   <button
                     type="button"
@@ -287,7 +272,6 @@ function PassportUploadSection() {
                   </button>
                 )}
 
-                {/* Upload / Upload Again button */}
                 <button
                   type="button"
                   onClick={openFilePicker}
@@ -320,7 +304,7 @@ function PassportUploadSection() {
           )}
         </div>
 
-        {/* ── Right column: extracted details card ───────────────────── */}
+        {/* Right: extracted details card */}
         <div>
           {showCard ? (
             <div className="h-full bg-green-50 border border-green-200 rounded-xl p-5">
@@ -343,11 +327,11 @@ function PassportUploadSection() {
 
               <div className="space-y-3">
                 {[
-                  { label: "Full Name",        value: existingPassport.passportData.fullName },
-                  { label: "Passport Number",  value: existingPassport.passportData.passportNumber },
-                  { label: "Nationality",      value: existingPassport.passportData.nationality },
-                  { label: "Date of Birth",    value: existingPassport.passportData.dateOfBirth },
-                  { label: "Expiry Date",      value: existingPassport.passportData.expiryDate },
+                  { label: "Full Name",       value: existingPassport.passportData.fullName },
+                  { label: "Passport Number", value: existingPassport.passportData.passportNumber },
+                  { label: "Nationality",     value: existingPassport.passportData.nationality },
+                  { label: "Date of Birth",   value: existingPassport.passportData.dateOfBirth },
+                  { label: "Expiry Date",     value: existingPassport.passportData.expiryDate },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col">
                     <span className="text-xs font-medium text-green-700 uppercase tracking-wide">

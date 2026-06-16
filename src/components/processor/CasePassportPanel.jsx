@@ -1,4 +1,7 @@
 // src/components/processor/CasePassportPanel.jsx
+// Updated to read both the full fields (fullName, passportNumber, dateOfBirth)
+// written by the new savePassportData endpoint AND the legacy partial fields
+// (name, passportLast4) for backwards compatibility with older case records.
 
 function PassportField({ label, value, note }) {
   return (
@@ -18,7 +21,24 @@ function CasePassportPanel({ caseRecord }) {
   if (!caseRecord) return null;
 
   const pd = caseRecord.passportData;
-  const hasAnyData = pd && (pd.name || pd.nationality || pd.passportLast4 || pd.expiryDate);
+
+  // Resolve display values:
+  // Prefer the full fields written by savePassportData (fullName, passportNumber, dateOfBirth).
+  // Fall back to legacy partial fields (name, passportLast4) for older records.
+  const displayName     = pd?.fullName       || pd?.name           || "";
+  const displayNation   = pd?.nationality    || "";
+  const displayDOB      = pd?.dateOfBirth    || "";
+  const displayExpiry   = pd?.expiryDate     || "";
+
+  // Passport number: show full if available, masked last-4 if only partial stored
+  let displayPassport   = "";
+  if (pd?.passportNumber) {
+    displayPassport = pd.passportNumber;
+  } else if (pd?.passportLast4) {
+    displayPassport = `••••••••${pd.passportLast4}`;
+  }
+
+  const hasAnyData = Boolean(displayName || displayNation || displayPassport || displayExpiry);
 
   return (
     <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 backdrop-blur-xl">
@@ -44,20 +64,24 @@ function CasePassportPanel({ caseRecord }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <PassportField
             label="Full Name"
-            value={pd.name}
+            value={displayName}
           />
           <PassportField
             label="Nationality"
-            value={pd.nationality}
+            value={displayNation}
           />
           <PassportField
             label="Passport Number"
-            value={pd.passportLast4 ? `••••••••${pd.passportLast4}` : null}
-            note="Partial — last 4 digits shown"
+            value={displayPassport}
+            note={!pd?.passportNumber && pd?.passportLast4 ? "Partial — last 4 digits shown" : undefined}
+          />
+          <PassportField
+            label="Date of Birth"
+            value={displayDOB}
           />
           <PassportField
             label="Expiry Date"
-            value={pd.expiryDate}
+            value={displayExpiry}
           />
         </div>
       ) : (
