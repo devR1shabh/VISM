@@ -25,10 +25,10 @@ function RequirementsChecklist() {
   const metCount = checks.filter((c) => c.met).length;
 
   return (
-    <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-base font-bold text-[#0A2E57]">Requirements Checklist</h2>
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#F7F8FA] border border-[#E6E8EB] text-[#6B7280]">
+        <h2 className="text-base font-bold text-[var(--c-text)]">Requirements Checklist</h2>
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[var(--c-bg)] border border-[var(--c-border)] text-[var(--c-text-muted)]">
           {metCount} / {checks.length} Complete
         </span>
       </div>
@@ -39,13 +39,13 @@ function RequirementsChecklist() {
             key={label}
             className={`flex items-center gap-3 p-3 rounded-lg border ${
               met
-                ? "border-[#BBF7D0] bg-[#DCFCE7]"
-                : "border-[#E6E8EB] bg-[#F7F8FA]"
+                ? "border-[var(--c-success-border)] bg-[var(--c-success-bg)]"
+                : "border-[var(--c-border)] bg-[var(--c-bg)]"
             }`}
           >
             <div
               className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                met ? "bg-[#16A34A]" : "bg-[#E6E8EB]"
+                met ? "bg-[#16A34A]" : "bg-[var(--c-border)]"
               }`}
             >
               {met ? (
@@ -80,7 +80,7 @@ function RequirementsChecklist() {
             </div>
             <span
               className={`text-sm font-medium ${
-                met ? "text-[#14532D]" : "text-[#374151]"
+                met ? "text-[var(--c-green)]" : "text-[var(--c-text-mid)]"
               }`}
             >
               {label}
@@ -109,9 +109,8 @@ function Journey() {
   const status = caseData?.status || "In Progress";
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
-      {/* Compact navy page header with stat pills */}
       <PageHeader
         eyebrow="Immigration Journey Tracker"
         title="Your Visa Journey"
@@ -140,13 +139,13 @@ function Journey() {
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
 
         {/* Journey timeline */}
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
           <VisaJourneyTimeline visaJourney={visaJourney} />
         </div>
 
         {/* Compliance + Checklist */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
             <ComplianceNotes notes={complianceNotes} />
           </div>
           <RequirementsChecklist />
@@ -157,7 +156,7 @@ function Journey() {
           <button
             type="button"
             onClick={handleProceed}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
           >
             Proceed To Dashboard
             <svg

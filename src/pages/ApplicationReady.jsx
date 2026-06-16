@@ -65,9 +65,8 @@ function ApplicationReady() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
-      {/* Compact navy success header */}
       <PageHeader
         eyebrow="Application Complete"
         title="Application Ready"
@@ -77,7 +76,7 @@ function ApplicationReady() {
       <div className="mx-auto max-w-4xl px-6 py-10 lg:px-8 space-y-8">
 
         {/* Success card */}
-        <div className="bg-white border border-[#E6E8EB] rounded-2xl shadow-sm p-10 text-center">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-2xl)] shadow-[var(--shadow-card)] p-10 text-center">
           <div className="mx-auto w-20 h-20 rounded-full bg-[#DCFCE7] border-4 border-[#BBF7D0] flex items-center justify-center mb-6">
             <svg
               className="w-10 h-10 text-[#16A34A]"
@@ -90,10 +89,10 @@ function ApplicationReady() {
             </svg>
           </div>
 
-          <h2 className="text-2xl font-bold text-[#0A2E57] mb-2">
+          <h2 className="text-2xl font-bold text-[var(--c-text)] mb-2">
             Application Package Complete
           </h2>
-          <p className="text-[#374151] mb-6 max-w-md mx-auto">
+          <p className="text-[var(--c-text-mid)] mb-6 max-w-md mx-auto">
             Your visa application package is complete. Download your summary PDF to review and submit.
           </p>
 
@@ -105,8 +104,8 @@ function ApplicationReady() {
             title={!canDownload ? "Complete all steps to enable PDF download" : ""}
             className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm transition shadow-sm ${
               canDownload
-                ? "bg-[#0A2E57] text-white hover:bg-[#0F3D6E] active:scale-[0.98]"
-                : "bg-[#E6E8EB] text-[#9CA3AF] cursor-not-allowed"
+                ? "bg-[var(--c-green)] text-white hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
+                : "bg-[var(--c-border)] text-[var(--c-text-muted)] cursor-not-allowed"
             }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -115,15 +114,15 @@ function ApplicationReady() {
             Download PDF
           </button>
 
-          <div className="mt-5 inline-flex items-center gap-2 bg-[#F7F8FA] border border-[#E6E8EB] px-4 py-1.5 rounded-full text-sm">
-            <strong className="text-[#111827]">Completed</strong>
-            <span className="text-[#6B7280]">{completionDate}</span>
+          <div className="mt-5 inline-flex items-center gap-2 bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-1.5 rounded-full text-sm">
+            <strong className="text-[var(--c-text)]">Completed</strong>
+            <span className="text-[var(--c-text-muted)]">{completionDate}</span>
           </div>
         </div>
 
         {/* Application Summary */}
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
-          <h2 className="text-base font-bold text-[#0A2E57] mb-5">Application Summary</h2>
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+          <h2 className="text-base font-bold text-[var(--c-text)] mb-5">Application Summary</h2>
 
           <div className="grid sm:grid-cols-2 gap-5">
             {[
@@ -133,17 +132,17 @@ function ApplicationReady() {
               { label: "Completion Date",     value: completionDate            },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280] mb-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)] mb-1">
                   {label}
                 </p>
-                <p className="text-base font-semibold text-[#111827]">{value}</p>
+                <p className="text-base font-semibold text-[var(--c-text)]">{value}</p>
               </div>
             ))}
           </div>
 
           {/* Verified documents — logic unchanged */}
-          <div className="mt-6 pt-5 border-t border-[#E6E8EB]">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280] mb-3">
+          <div className="mt-6 pt-5 border-t border-[var(--c-border)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)] mb-3">
               Verified Documents
             </p>
             <div className="flex flex-wrap gap-2">
@@ -157,7 +156,7 @@ function ApplicationReady() {
                     className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1 rounded-full border ${
                       verified
                         ? "bg-[#DCFCE7] text-[#14532D] border-[#BBF7D0]"
-                        : "bg-[#F7F8FA] text-[#6B7280] border-[#E6E8EB]"
+                        : "bg-[var(--c-bg)] text-[var(--c-text-muted)] border-[var(--c-border)]"
                     }`}
                   >
                     {verified ? (
@@ -180,14 +179,14 @@ function ApplicationReady() {
         {/* Future Enhancements */}
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px bg-[#E6E8EB]" />
-            <h2 className="text-lg font-bold text-[#0A2E57] whitespace-nowrap">
+            <div className="flex-1 h-px bg-[var(--c-border)]" />
+            <h2 className="text-lg font-bold text-[var(--c-text)] whitespace-nowrap">
               🚀 Future Enhancements
             </h2>
-            <div className="flex-1 h-px bg-[#E6E8EB]" />
+            <div className="flex-1 h-px bg-[var(--c-border)]" />
           </div>
 
-          <p className="text-center text-[#6B7280] text-sm mb-6 max-w-xl mx-auto">
+          <p className="text-center text-[var(--c-text-muted)] text-sm mb-6 max-w-xl mx-auto">
             The BlueprintAI roadmap — features being built to make visa applications faster, smarter, and more transparent.
           </p>
 
@@ -196,15 +195,15 @@ function ApplicationReady() {
             {FUTURE_ENHANCEMENTS.filter((f) => f.featured).map(({ icon, title, description }) => (
               <div
                 key={title}
-                className="bg-white border border-[#4DC7F7]/30 rounded-xl p-6 shadow-sm"
+                className="bg-white border border-[var(--c-green-light)] rounded-[var(--r-xl)] p-6 shadow-[var(--shadow-card)]"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex-none w-14 h-14 rounded-xl bg-[#E8F4FD] flex items-center justify-center text-2xl">
+                  <div className="flex-none w-14 h-14 rounded-xl bg-[var(--c-green-bg)] flex items-center justify-center text-2xl">
                     {icon}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-[#0A2E57]">{title}</h3>
-                    <p className="mt-1 text-sm text-[#374151] leading-relaxed">{description}</p>
+                    <h3 className="text-base font-bold text-[var(--c-text)]">{title}</h3>
+                    <p className="mt-1 text-sm text-[var(--c-text-mid)] leading-relaxed">{description}</p>
                   </div>
                 </div>
               </div>
@@ -216,15 +215,15 @@ function ApplicationReady() {
             {FUTURE_ENHANCEMENTS.filter((f) => !f.featured).map(({ icon, title, description }) => (
               <div
                 key={title}
-                className="bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+                className="bg-white border border-[var(--c-border)] rounded-xl p-5 shadow-sm transition hover:border-[var(--c-green)] hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex-none w-11 h-11 rounded-lg bg-[#E8F4FD] flex items-center justify-center text-xl">
+                  <div className="flex-none w-11 h-11 rounded-lg bg-[var(--c-green-bg)] flex items-center justify-center text-xl">
                     {icon}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-[#0A2E57]">{title}</h4>
-                    <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{description}</p>
+                    <h4 className="text-sm font-bold text-[var(--c-text)]">{title}</h4>
+                    <p className="text-xs text-[var(--c-text-muted)] mt-1 leading-relaxed">{description}</p>
                   </div>
                 </div>
               </div>
@@ -234,11 +233,11 @@ function ApplicationReady() {
 
         {/* Start New — onClick unchanged: clearCase → navigate("/") */}
         <div className="text-center pb-4">
-          <p className="text-[#6B7280] text-sm mb-3">Want to start a new application?</p>
+          <p className="text-[var(--c-text-muted)] text-sm mb-3">Want to start a new application?</p>
           <button
             type="button"
             onClick={handleStartNew}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#E6E8EB] bg-white px-6 py-3 text-sm font-semibold text-[#0A2E57] shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--c-border)] bg-white px-6 py-3 text-sm font-semibold text-[var(--c-text)] shadow-sm transition hover:border-[var(--c-green)] hover:shadow-md active:scale-[0.98]"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

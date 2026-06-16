@@ -27,9 +27,8 @@ function Documents() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
-      {/* Compact navy page header with stat pills */}
       <PageHeader
         eyebrow="Document Intelligence Center"
         title="Upload & Verify Documents"
@@ -41,7 +40,7 @@ function Documents() {
               key={label}
               className="flex items-center gap-2 rounded-lg bg-white/10 border border-white/15 px-4 py-2"
             >
-              <Icon size={14} className="text-[#4DC7F7]" />
+              <Icon size={14} className="text-white/70" />
               <span className="text-xs text-white/60 uppercase tracking-wide font-semibold">
                 {label}:
               </span>
@@ -57,7 +56,7 @@ function Documents() {
 
         <div className="space-y-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2AA6D8] mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--c-green-mid)] mb-3">
               Passport Upload
             </p>
             <PassportUploadSection />
@@ -65,7 +64,7 @@ function Documents() {
 
           {secondaryDoc && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2AA6D8] mb-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--c-green-mid)] mb-3">
                 {secondaryDoc}
               </p>
               <SecondaryDocSection documentName={secondaryDoc} />

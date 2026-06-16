@@ -29,7 +29,7 @@ function AppContent() {
   const showApplicantNav = !isProcessorRoute;
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA]">
+    <div className="min-h-screen bg-[var(--c-bg)]">
       <ScrollToTop />
 
       {showApplicantNav && <Navbar />}

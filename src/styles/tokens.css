@@ -1,91 +1,111 @@
 /* src/styles/tokens.css */
-/* VISM Design System — Vistolane-inspired premium immigration platform */
-/* Loaded via @import in index.css — after the Tailwind import */
+/* ═══════════════════════════════════════════════════════════════════════════
+   VISM Design System
+   Target aesthetic: premium editorial immigration platform
+   Colour philosophy: near-monochromatic — forest green as the ONE accent.
+   No cyan. No navy gradients. No glows. Just type, white, and green.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Google Fonts ─────────────────────────────────────────────────────────
-   Playfair Display: premium serif for display headings
-   Inter: clean sans-serif for all body and UI text
+/* ── Google Fonts ────────────────────────────────────────────────────────────
+   Playfair Display: editorial serif — used ONLY for display headings
+   Inter: clean neutral sans-serif — all body text, UI elements, labels
    The @import must be the very first declaration in this file.
-   ──────────────────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+   ─────────────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ── Design Tokens ────────────────────────────────────────────────────────
-   All values are CSS custom properties on :root.
-   Components reference these through Tailwind arbitrary value notation
-   e.g. bg-[var(--c-navy)] or text-[var(--c-text)]
-   ──────────────────────────────────────────────────────────────────────── */
+/* ── Design Tokens ───────────────────────────────────────────────────────────
+   All colour values live here. Every component uses these via Tailwind
+   arbitrary values e.g. bg-[var(--c-green)] or text-[var(--c-text-muted)]
+   Changing a token here updates every component that references it.
+   ─────────────────────────────────────────────────────────────────────────── */
 :root {
 
-  /* ── Colour Palette ───────────────────────────────────────────────────── */
+  /* ── Green — the single accent colour ────────────────────────────────────
+     Used for: CTA buttons, wordmark, page headers, active states,
+     checklist icons, step numbers, status dot, processor portal header.
+     This is the ONLY accent colour in the system. Use sparingly.
+     ──────────────────────────────────────────────────────────────────────── */
+  --c-green:       #1C4532;   /* primary — CTAs, wordmark, page headers         */
+  --c-green-mid:   #2D6A4F;   /* hover states, check icons, eyebrow step nums   */
+  --c-green-light: #D1FAE5;   /* light badge backgrounds, tag fills             */
+  --c-green-bg:    #F0FDF4;   /* tinted section backgrounds, status badge fills */
 
-  /* Navy — primary brand colour for navbar, heroes, CTAs */
-  --c-navy:        #0A2E57;
-  --c-navy-mid:    #0F3D6E;
-  --c-navy-dark:   #071E3D;
+  /* ── Backgrounds ─────────────────────────────────────────────────────────
+     Two background levels. Off-white for page, pure white for cards.
+     --c-bg is a warm off-white (not cool gray) — matches editorial print feel.
+     ──────────────────────────────────────────────────────────────────────── */
+  --c-bg:          #F7F7F5;   /* page background — warm off-white               */
+  --c-bg-alt:      #EFEFED;   /* alternate section bg — slightly darker off-white */
+  --c-card:        #FFFFFF;   /* all card surfaces                              */
 
-  /* Cyan — accent colour for icons, active states, highlights */
-  --c-cyan:        #4DC7F7;
-  --c-cyan-dim:    #2AA6D8;
-  --c-cyan-bg:     #E8F4FD;
+  /* ── Borders ─────────────────────────────────────────────────────────────
+     One border colour for everything: cards, inputs, dividers, table rows.
+     ──────────────────────────────────────────────────────────────────────── */
+  --c-border:      #E5E5E3;   /* warm neutral — not the cool #E6E8EB            */
 
-  /* Backgrounds */
-  --c-bg:          #F7F8FA;   /* page background — all content sections */
-  --c-card:        #FFFFFF;   /* card surfaces */
+  /* ── Text ────────────────────────────────────────────────────────────────
+     Three text levels. Primary for headings, mid for body, muted for labels.
+     ──────────────────────────────────────────────────────────────────────── */
+  --c-text:        #111111;   /* primary — headings, strong body                */
+  --c-text-mid:    #374151;   /* secondary — body text, descriptions            */
+  --c-text-muted:  #6B7280;   /* tertiary — labels, captions, metadata          */
 
-  /* Borders */
-  --c-border:      #E6E8EB;   /* all card and input borders */
-
-  /* Text */
-  --c-text:        #111827;   /* primary text — headings */
-  --c-text-mid:    #374151;   /* body text, descriptions */
-  --c-text-muted:  #6B7280;   /* labels, captions, metadata */
-
-  /* Semantic — status colours */
-  --c-success:     #16A34A;
-  --c-success-bg:  #DCFCE7;
+  /* ── Semantic — status colours ───────────────────────────────────────────
+     Used only for status badges and state indicators.
+     These are the same as before — no change needed.
+     ──────────────────────────────────────────────────────────────────────── */
+  --c-success:        #16A34A;
+  --c-success-bg:     #DCFCE7;
   --c-success-border: #BBF7D0;
 
-  --c-warning:     #D97706;
-  --c-warning-bg:  #FEF3C7;
+  --c-warning:        #D97706;
+  --c-warning-bg:     #FEF3C7;
   --c-warning-border: #FDE68A;
 
-  --c-error:       #DC2626;
-  --c-error-bg:    #FEE2E2;
-  --c-error-border: #FECACA;
+  --c-error:          #DC2626;
+  --c-error-bg:       #FEE2E2;
+  --c-error-border:   #FECACA;
 
-  --c-info:        #2563EB;
-  --c-info-bg:     #DBEAFE;
-  --c-info-border: #BFDBFE;
+  --c-info:           #2563EB;
+  --c-info-bg:        #DBEAFE;
+  --c-info-border:    #BFDBFE;
 
-  /* ── Typography ───────────────────────────────────────────────────────── */
+  /* ── Typography ──────────────────────────────────────────────────────────
+     Two fonts. Display font for hero headings ONLY.
+     Body font for everything else — nav, buttons, labels, cards, forms.
+     ──────────────────────────────────────────────────────────────────────── */
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
                   Roboto, Helvetica, Arial, sans-serif;
 
-  /* ── Border Radius Scale ──────────────────────────────────────────────── */
-  --r-sm:   6px;    /* badges, pills, small tags */
-  --r-md:   8px;    /* buttons, inputs */
-  --r-lg:   12px;   /* inner cards, secondary containers */
-  --r-xl:   16px;   /* primary page/section cards */
-  --r-2xl:  24px;   /* hero sections, upload areas, large modals */
+  /* ── Border Radius ───────────────────────────────────────────────────────
+     Conservative, editorial radius scale.
+     No large radius on cards — this is institutional, not playful.
+     ──────────────────────────────────────────────────────────────────────── */
+  --r-sm:    4px;    /* tags, tiny badges                                       */
+  --r-md:    6px;    /* buttons, small badges, pills                            */
+  --r-lg:    8px;    /* inputs, compact cards                                   */
+  --r-xl:   10px;    /* primary content cards                                   */
+  --r-2xl:  12px;    /* hero sections, upload zones, larger panels              */
 
-  /* ── Shadows ──────────────────────────────────────────────────────────── */
-  --shadow-card:   0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.10), 0 8px 24px rgba(0, 0, 0, 0.06);
-  --shadow-modal:  0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-nav:    0 2px 8px rgba(10, 46, 87, 0.20);
+  /* ── Shadows ─────────────────────────────────────────────────────────────
+     Extremely subtle. Editorial design doesn't use dramatic shadows.
+     ──────────────────────────────────────────────────────────────────────── */
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.05);
+  --shadow-modal:      0 8px 32px rgba(0, 0, 0, 0.10);
+  --shadow-nav:        0 1px 0 var(--c-border);   /* just a bottom border, no blur  */
 
-  /* ── Spacing ──────────────────────────────────────────────────────────── */
-  --max-w:        1280px;
-  --section-py:   96px;
-  --card-p:       24px;
+  /* ── Layout ──────────────────────────────────────────────────────────────*/
+  --max-w:       1280px;
+  --section-py:  96px;
+  --card-p:      24px;
 
 }
 
-/* ── Global Base ──────────────────────────────────────────────────────────
-   Applied to every page. Sets the font and background.
-   These are low-specificity — any component className overrides them.
-   ──────────────────────────────────────────────────────────────────────── */
+/* ── Global Base ─────────────────────────────────────────────────────────────
+   Low-specificity global resets. Any component className overrides these.
+   ─────────────────────────────────────────────────────────────────────────── */
 body {
   font-family: var(--font-body);
   background-color: var(--c-bg);
@@ -94,16 +114,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Utility Classes ──────────────────────────────────────────────────────
-   These extend Tailwind — used via className="font-display" etc.
-   ──────────────────────────────────────────────────────────────────────── */
-
-/* Display font — Playfair Display for hero headings */
+/* ── Typography Utility Classes ──────────────────────────────────────────────
+   Applied via className="font-display" on hero headings only.
+   ─────────────────────────────────────────────────────────────────────────── */
 .font-display {
   font-family: var(--font-display);
 }
 
-/* Premium white card base */
+/* ── Card Utility Class ───────────────────────────────────────────────────────
+   Optional shorthand. Components can also use inline Tailwind classes.
+   ─────────────────────────────────────────────────────────────────────────── */
 .card {
   background-color: var(--c-card);
   border: 1px solid var(--c-border);
@@ -111,31 +131,11 @@ body {
   box-shadow: var(--shadow-card);
 }
 
-/* ── Animations ───────────────────────────────────────────────────────────
-   Used in Phase 10 (polish). Defined here so they're available
-   immediately but not applied until explicitly added to className.
-   ──────────────────────────────────────────────────────────────────────── */
-
-/* Fade-in-up entrance animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeInUp 0.3s ease both;
-}
-
-/* ── Skeleton Loader ──────────────────────────────────────────────────────
-   Used in Phase 10 on Analysis page loading state.
-   Applied via className="skeleton h-N rounded-xl"
-   ──────────────────────────────────────────────────────────────────────── */
+/* ── Skeleton Loader ─────────────────────────────────────────────────────────
+   Used on Analysis page while AI analysis is generating.
+   Apply via: className="skeleton h-N rounded-xl"
+   The shimmer colours are warm — matches the off-white palette.
+   ─────────────────────────────────────────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -144,11 +144,30 @@ body {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #E6E8EB 25%,
-    #F0F2F5 50%,
-    #E6E8EB 75%
+    #E5E5E3 25%,
+    #EFEFED 50%,
+    #E5E5E3 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: var(--r-sm);
+}
+
+/* ── Fade-in Animation ───────────────────────────────────────────────────────
+   Used in later phases for page transitions and card entrances.
+   Apply via: className="animate-fade-in"
+   ─────────────────────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.25s ease both;
 }

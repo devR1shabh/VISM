@@ -29,9 +29,8 @@ function Dashboard() {
   const caseId = caseData.caseId || caseData.id || "—";
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
-      {/* Compact navy page header */}
       <PageHeader
         eyebrow="Application Dashboard"
         title="Case Overview"
@@ -68,66 +67,66 @@ function Dashboard() {
           ].map(({ label, value, sub }) => (
             <div
               key={label}
-              className="bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm"
+              className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-[var(--shadow-card)]"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--c-text-muted)]">
                 {label}
               </p>
-              <p className="mt-2 text-3xl font-bold text-[#0A2E57]">{value}</p>
-              <p className="mt-1 text-xs text-[#6B7280]">{sub}</p>
+              <p className="mt-2 font-display text-3xl font-bold text-[var(--c-green)]">{value}</p>
+              <p className="mt-1 text-xs text-[var(--c-text-muted)]">{sub}</p>
             </div>
           ))}
         </div>
 
         {/* Current Status + Application Summary */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
-            <h2 className="text-base font-bold text-[#0A2E57] mb-4">Current Status</h2>
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-4">Current Status</h2>
             <div className="space-y-3 text-sm">
               <p>
-                <strong className="text-[#111827]">Visa Type:</strong>{" "}
-                <span className="text-[#374151]">{caseData.visaType}</span>
+                <strong className="text-[var(--c-text)]">Visa Type:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{caseData.visaType}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Destination:</strong>{" "}
-                <span className="text-[#374151]">{caseData.country}</span>
+                <strong className="text-[var(--c-text)]">Destination:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{caseData.country}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Status:</strong>{" "}
-                <span className="font-semibold text-[#2AA6D8]">{readiness.label}</span>
+                <strong className="text-[var(--c-text)]">Status:</strong>{" "}
+                <span className="font-semibold text-[var(--c-green-mid)]">{readiness.label}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Documents:</strong>{" "}
-                <span className="text-[#374151]">{valid} / {requiredDocuments.length} verified</span>
+                <strong className="text-[var(--c-text)]">Documents:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{valid} / {requiredDocuments.length} verified</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
-            <h2 className="text-base font-bold text-[#0A2E57] mb-4">Application Summary</h2>
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-4">Application Summary</h2>
             <div className="space-y-3 text-sm">
               <p>
-                <strong className="text-[#111827]">Case ID:</strong>{" "}
-                <span className="text-[#374151]">{caseData.caseId || caseData.id}</span>
+                <strong className="text-[var(--c-text)]">Case ID:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{caseData.caseId || caseData.id}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Invalid Documents:</strong>{" "}
-                <span className="text-[#374151]">{invalid}</span>
+                <strong className="text-[var(--c-text)]">Invalid Documents:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{invalid}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Missing Documents:</strong>{" "}
-                <span className="text-[#374151]">{missing.length}</span>
+                <strong className="text-[var(--c-text)]">Missing Documents:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{missing.length}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Activity Events:</strong>{" "}
-                <span className="text-[#374151]">{activityFeed.length}</span>
+                <strong className="text-[var(--c-text)]">Activity Events:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{activityFeed.length}</span>
               </p>
             </div>
           </div>
         </div>
 
         {/* Activity Feed */}
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
           <ActivityFeed />
         </div>
 
@@ -135,26 +134,26 @@ function Dashboard() {
         <div className="grid md:grid-cols-3 gap-4">
           <Link
             to="/analysis"
-            className="block bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+            className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-[var(--shadow-card)] transition hover:border-[var(--c-green)] hover:shadow-md"
           >
-            <h2 className="text-sm font-bold text-[#0A2E57]">Analysis Report</h2>
-            <p className="mt-1 text-xs text-[#6B7280]">View complete visa assessment.</p>
+            <h2 className="text-sm font-bold text-[var(--c-text)]">Analysis Report</h2>
+            <p className="mt-1 text-xs text-[var(--c-text-muted)]">View complete visa assessment.</p>
           </Link>
 
           <Link
             to="/documents"
-            className="block bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+            className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-[var(--shadow-card)] transition hover:border-[var(--c-green)] hover:shadow-md"
           >
-            <h2 className="text-sm font-bold text-[#0A2E57]">Document Upload</h2>
-            <p className="mt-1 text-xs text-[#6B7280]">Upload or re-verify documents.</p>
+            <h2 className="text-sm font-bold text-[var(--c-text)]">Document Upload</h2>
+            <p className="mt-1 text-xs text-[var(--c-text-muted)]">Upload or re-verify documents.</p>
           </Link>
 
           <Link
             to="/journey"
-            className="block bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+            className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-[var(--shadow-card)] transition hover:border-[var(--c-green)] hover:shadow-md"
           >
-            <h2 className="text-sm font-bold text-[#0A2E57]">Processing Journey</h2>
-            <p className="mt-1 text-xs text-[#6B7280]">Review your visa journey timeline.</p>
+            <h2 className="text-sm font-bold text-[var(--c-text)]">Processing Journey</h2>
+            <p className="mt-1 text-xs text-[var(--c-text-muted)]">Review your visa journey timeline.</p>
           </Link>
         </div>
 
@@ -163,7 +162,7 @@ function Dashboard() {
           <button
             type="button"
             onClick={handleFinish}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
           >
             Finish Application
             <svg

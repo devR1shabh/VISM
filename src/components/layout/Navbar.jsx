@@ -3,7 +3,7 @@
 import { NavLink } from "react-router-dom";
 import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 
-// ── Data — completely unchanged ────────────────────────────────────────────
+// ── Workflow nav items — data completely unchanged ─────────────────────────
 const NAV_ITEMS = [
   { to: "/analysis",  label: "Analysis",  requiredStep: WORKFLOW_STEPS.CASE_CREATED   },
   { to: "/documents", label: "Documents", requiredStep: WORKFLOW_STEPS.ANALYSIS_DONE  },
@@ -18,11 +18,11 @@ const LOCK_TITLES = {
   "/dashboard": "Complete Journey to unlock Dashboard",
 };
 
-// ── LockIcon — SVG path unchanged, only className updated ──────────────────
+// ── LockIcon — SVG path unchanged ─────────────────────────────────────────
 function LockIcon() {
   return (
     <svg
-      className="w-3.5 h-3.5 text-white/40"
+      className="w-3 h-3 text-[#9CA3AF]"
       fill="currentColor"
       viewBox="0 0 20 20"
     >
@@ -36,40 +36,26 @@ function LockIcon() {
 }
 
 function Navbar() {
-  // ── Logic — completely unchanged ─────────────────────────────────────────
+  // ── Logic completely unchanged ────────────────────────────────────────────
   const { workflowStep } = useCase();
   const progressPercentage = Math.min(Math.round((workflowStep / 4) * 100), 100);
 
   return (
-    // Solid navy — no opacity hack needed on a solid background.
-    // Removed backdrop-blur-3xl (only useful on transparent backgrounds).
-    // Kept sticky, z-50, shadow.
-    <nav className="sticky top-0 z-50 bg-[#0A2E57] shadow-[0_2px_8px_rgba(10,46,87,0.25)]">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
+    <nav className="sticky top-0 z-50 bg-white border-b border-[var(--c-border)] shadow-[var(--shadow-nav)]">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-0 h-16">
 
-        {/* ── Brand ────────────────────────────────────────────────────── */}
-        {/* NavLink target, layout, and content unchanged.
-            Logo gradient updated to cyan palette.
-            "VISM" heading gets font-display (Playfair Display from tokens).
-            Subtitle colour updated to white/50 on navy. */}
-        <NavLink to="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4DC7F7] to-[#2AA6D8] shadow-[0_8px_24px_-8px_rgba(77,199,247,0.6)]">
-            <span className="text-lg font-black tracking-[0.2em] text-[#0A2E57]">V</span>
-          </div>
-          <div>
-            <h1 className="font-display text-lg font-bold tracking-tight text-white">
-              VISM
-            </h1>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/50">
-              Visa Immigration Services
-            </p>
-          </div>
+        {/* ── Brand — text-only wordmark, no icon box ────────────────────── */}
+        <NavLink
+          to="/"
+          className="flex items-center gap-3 shrink-0"
+        >
+          <span className="font-display text-[22px] font-bold text-[var(--c-green)] leading-none tracking-[-0.01em]">
+            VISM
+          </span>
         </NavLink>
 
-        {/* ── Navigation items ──────────────────────────────────────────── */}
-        {/* All logic (isUnlocked, LOCK_TITLES, NavLink targets) unchanged.
-            className strings updated to white-on-navy palette. */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* ── Nav links + CTA ───────────────────────────────────────────── */}
+        <div className="flex items-center gap-1">
 
           {NAV_ITEMS.map((item) => {
             const isUnlocked = workflowStep >= item.requiredStep;
@@ -79,7 +65,7 @@ function Navbar() {
                 <span
                   key={item.to}
                   title={LOCK_TITLES[item.to]}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-white/35 cursor-not-allowed select-none"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm text-[#D1D5DB] cursor-not-allowed select-none"
                 >
                   {item.label}
                   <LockIcon />
@@ -93,8 +79,8 @@ function Navbar() {
                 to={item.to}
                 className={({ isActive }) =>
                   isActive
-                    ? "rounded-lg border border-white/30 bg-white/15 px-4 py-2 text-sm font-semibold text-white transition"
-                    : "rounded-lg border border-transparent px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                    ? "px-4 py-2 text-sm font-semibold text-[var(--c-text)] rounded-md bg-[var(--c-bg)] transition"
+                    : "px-4 py-2 text-sm font-normal text-[var(--c-text-muted)] rounded-md transition hover:text-[var(--c-text)]"
                 }
               >
                 {item.label}
@@ -103,58 +89,56 @@ function Navbar() {
           })}
 
           {/* Divider */}
-          <div className="w-px h-5 bg-white/15 mx-1" />
+          <div className="w-px h-4 bg-[var(--c-border)] mx-2" />
 
-          {/* ── Processor Portal link ────────────────────────────────── */}
-          {/* href, title, SVG path all unchanged.
-              Colour updated to cyan-on-navy. */}
+          {/* Processor link — subtle text link, same visual weight as nav items */}
           <a
             href="/processor"
             title="Immigration Processor Dashboard"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#4DC7F7]/30 px-4 py-2 text-sm font-medium text-[#4DC7F7] transition hover:bg-[#4DC7F7]/10 hover:border-[#4DC7F7]/50"
+            className="px-4 py-2 text-sm font-normal text-[var(--c-text-muted)] rounded-md transition hover:text-[var(--c-text)]"
+          >
+            Processor
+          </a>
+
+          {/* Divider */}
+          <div className="w-px h-4 bg-[var(--c-border)] mx-2" />
+
+          {/* Start Assessment CTA — the only green element in the navbar */}
+          <a
+            href="#assessment"
+            className="inline-flex items-center gap-2 bg-[var(--c-green)] text-white text-sm font-semibold px-5 py-2.5 rounded-[var(--r-lg)] transition hover:bg-[var(--c-green-mid)] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:ring-offset-2"
           >
             <svg
               className="w-3.5 h-3.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2}
+              strokeWidth={2.5}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Processor
+            Start Assessment
           </a>
 
         </div>
 
-        {/* ── Progress bar ─────────────────────────────────────────────── */}
-        {/* Layout, progressPercentage calculation, and style={{ width }}
-            are all completely unchanged.
-            Wrapper updated to white/10 on navy.
-            Label colours updated to white palette.
-            Fill bar updated to solid cyan (#4DC7F7). */}
-        <div className="hidden lg:flex w-full max-w-[18rem] flex-col gap-2 rounded-xl border border-white/15 bg-white/8 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/50 font-medium">
-              Progress
-            </span>
-            <span className="text-xs font-semibold text-[#4DC7F7]">
-              {progressPercentage}%
-            </span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full bg-[#4DC7F7] transition-all duration-500 rounded-full"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-        </div>
-
       </div>
+
+      {/* ── Progress indicator — thin green strip under the nav ───────────────
+          Shown only after a case is created (workflowStep > 0).
+          The progressPercentage calculation and style={{ width }} are
+          completely unchanged from before — only presentation updated.
+          A 3px strip is subtler and more editorial than the old pill widget.
+      ──────────────────────────────────────────────────────────────────────── */}
+      {workflowStep > 0 && (
+        <div className="h-[3px] bg-[var(--c-border)] w-full">
+          <div
+            className="h-full bg-[var(--c-green)] transition-all duration-500"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+      )}
+
     </nav>
   );
 }

@@ -10,20 +10,17 @@ import visaTypes from "../../data/visaTypes";
 import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 import { createCase } from "../../services/api";
 
-// ── Light theme styles for react-select ──────────────────────────────────
-// Replaces darkSelectStyles. The CaseForm now sits on a white card
-// inside the navy assessment section. All Select logic (onChange, options,
-// isSearchable) is completely unchanged — only visual styles updated.
-const lightSelectStyles = {
+// ── react-select styles — green token system ──────────────────────────────
+// All Select logic (onChange, options, isSearchable) is completely unchanged.
+// Only the visual style object is updated to match the new green design system.
+const selectStyles = {
   control: (base, state) => ({
     ...base,
     backgroundColor: "#FFFFFF",
-    borderColor: state.isFocused ? "#4DC7F7" : "#E6E8EB",
+    borderColor: state.isFocused ? "#1C4532" : "#E5E5E3",
     borderWidth: "1px",
-    boxShadow: state.isFocused ? "0 0 0 2px rgba(77,199,247,0.2)" : "none",
-    "&:hover": {
-      borderColor: "#4DC7F7",
-    },
+    boxShadow: state.isFocused ? "0 0 0 2px rgba(28,69,50,0.12)" : "none",
+    "&:hover": { borderColor: "#1C4532" },
     cursor: "pointer",
     minHeight: "44px",
     borderRadius: "8px",
@@ -35,19 +32,19 @@ const lightSelectStyles = {
   }),
   input: (base) => ({
     ...base,
-    color: "#111827",
+    color: "#111111",
     fontSize: "14px",
   }),
   singleValue: (base) => ({
     ...base,
-    color: "#111827",
+    color: "#111111",
     fontSize: "14px",
   }),
   menu: (base) => ({
     ...base,
     backgroundColor: "#FFFFFF",
-    border: "1px solid #E6E8EB",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
+    border: "1px solid #E5E5E3",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
     borderRadius: "8px",
     overflow: "hidden",
   }),
@@ -59,17 +56,17 @@ const lightSelectStyles = {
   option: (base, state) => ({
     ...base,
     backgroundColor: state.isSelected
-      ? "#0A2E57"
+      ? "#1C4532"
       : state.isFocused
-      ? "#F7F8FA"
+      ? "#F7F7F5"
       : "#FFFFFF",
-    color: state.isSelected ? "#FFFFFF" : "#111827",
+    color: state.isSelected ? "#FFFFFF" : "#111111",
     cursor: "pointer",
     padding: "10px 14px",
     fontSize: "14px",
     "&:active": {
-      backgroundColor: "#E8F4FD",
-      color: "#0A2E57",
+      backgroundColor: "#F0FDF4",
+      color: "#1C4532",
     },
   }),
   loadingMessage: (base) => ({
@@ -85,12 +82,12 @@ const lightSelectStyles = {
 };
 
 function CaseForm() {
-  // ── All logic unchanged ───────────────────────────────────────────────────
+  // ── All logic completely unchanged ────────────────────────────────────────
   const navigate = useNavigate();
   const { setCaseData, clearCase } = useCase();
 
-  const [visaType, setVisaType] = useState("");
-  const [country, setCountry] = useState("");
+  const [visaType, setVisaType]       = useState("");
+  const [country, setCountry]         = useState("");
   const [description, setDescription] = useState("");
 
   const visaOptions = visaTypes.map((visa) => ({
@@ -133,12 +130,11 @@ function CaseForm() {
     }
   };
 
-  // ── JSX — classNames updated, all props/handlers/values unchanged ─────────
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
+    <div className="bg-white border border-[var(--c-border)] rounded-[var(--r-2xl)] p-8 shadow-[var(--shadow-card)] space-y-5">
 
       <div>
-        <label className="block mb-2 text-sm font-semibold text-[#374151]">
+        <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Visa Type
         </label>
         <Select
@@ -146,13 +142,13 @@ function CaseForm() {
           placeholder="Search or Select Visa Type"
           onChange={(selected) => setVisaType(selected?.value || "")}
           isSearchable
-          styles={lightSelectStyles}
+          styles={selectStyles}
           classNamePrefix="vism-select"
         />
       </div>
 
       <div>
-        <label className="block mb-2 text-sm font-semibold text-[#374151]">
+        <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Destination Country
         </label>
         <Select
@@ -160,20 +156,20 @@ function CaseForm() {
           placeholder="Search or Select Country"
           onChange={(selected) => setCountry(selected?.value || "")}
           isSearchable
-          styles={lightSelectStyles}
+          styles={selectStyles}
           classNamePrefix="vism-select"
         />
       </div>
 
       <div>
-        <label className="block mb-2 text-sm font-semibold text-[#374151]">
+        <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Case Description
         </label>
         <textarea
           rows="5"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full bg-white border border-[#E6E8EB] text-[#111827] p-3.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4DC7F7] focus:border-[#4DC7F7] placeholder-[#9CA3AF] transition resize-none"
+          className="w-full bg-white border border-[var(--c-border)] text-[var(--c-text)] p-3.5 rounded-[var(--r-lg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[#9CA3AF] transition resize-none"
           placeholder="Describe the immigration or visa case in detail..."
         />
       </div>
@@ -181,9 +177,9 @@ function CaseForm() {
       <button
         onClick={handleAnalyze}
         disabled={!visaType || !country}
-        className="w-full bg-[#0A2E57] text-white py-3.5 rounded-lg font-semibold text-sm hover:bg-[#0F3D6E] active:scale-[0.99] transition duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+        className="w-full bg-[var(--c-green)] text-white py-3.5 rounded-[var(--r-lg)] font-semibold text-sm hover:bg-[var(--c-green-mid)] active:scale-[0.99] transition duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
       >
-        Analyze Case
+        Analyse Case
       </button>
 
     </div>
