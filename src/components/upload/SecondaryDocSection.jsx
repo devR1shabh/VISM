@@ -5,10 +5,22 @@ import { useCase } from "../../context/CaseContext";
 import { verifyDocument, addVerifiedDocument } from "../../services/api";
 import { getDocumentByType } from "../../utils/documentUtils";
 
+// Icons for all 14 non-passport document types
 const DOC_ICONS = {
-  Resume: "📋",
-  "Academic Transcript": "🎓",
-  "Bank Statement": "🏦",
+  "Passport Size Photograph":     "📸",
+  "National ID Card":             "🪪",
+  "Birth Certificate":            "📜",
+  "Address Proof":                "🏠",
+  "Resume / CV":                  "📋",
+  "Academic Transcript":          "🎓",
+  "Degree Certificate":           "🎓",
+  "Employment Letter":            "💼",
+  "Bank Statement":               "🏦",
+  "Proof of Funds":               "💰",
+  "Travel History Document":      "✈️",
+  "Statement of Purpose":         "📝",
+  "Police Clearance Certificate": "🛡️",
+  "Medical Certificate":          "🏥",
 };
 
 function SecondaryDocSection({ documentName }) {
@@ -19,32 +31,50 @@ function SecondaryDocSection({ documentName }) {
     addActivity,
   } = useCase();
 
-  const [preview, setPreview]                 = useState(null);
-  const [verificationDone, setVerificationDone] = useState(false);
-  const [isVerifying, setIsVerifying]         = useState(false);
-  const [error, setError]                     = useState(null);
+  // preview holds the newly-selected file (src, file, timestamp).
+  // Cleared / reset whenever a new file is selected.
+  const [preview, setPreview] = useState(null);
 
+  // verificationDone tracks whether we ran verification for the current preview.
+  // Reset to false whenever a new file is selected.
+  const [verificationDone, setVerificationDone] = useState(false);
+
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Single hidden file input — always mounted, ref never ambiguous.
   const fileInputRef = useRef(null);
 
   const existingDoc = getDocumentByType(uploadedDocuments, documentName);
-  const icon        = DOC_ICONS[documentName] || "📄";
+  const icon = DOC_ICONS[documentName] || "📄";
 
+  // ── File selection ────────────────────────────────────────────────────────
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Reset so the same filename can be selected again
     if (fileInputRef.current) fileInputRef.current.value = "";
+
     setError(null);
     setVerificationDone(false);
+
     const reader = new FileReader();
     reader.onload = (ev) =>
-      setPreview({ src: ev.target.result, file, timestamp: new Date().toISOString() });
+      setPreview({
+        src: ev.target.result,
+        file,
+        timestamp: new Date().toISOString(),
+      });
     reader.readAsDataURL(file);
   };
 
+  // ── Trigger file picker ───────────────────────────────────────────────────
   const openFilePicker = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
+  // ── Verify ────────────────────────────────────────────────────────────────
   const handleVerify = async () => {
     if (!preview?.file) return;
     setIsVerifying(true);
@@ -92,14 +122,18 @@ function SecondaryDocSection({ documentName }) {
     }
   };
 
+  // ── Derived display state ─────────────────────────────────────────────────
   const hasNewPreview     = Boolean(preview && !verificationDone);
   const hasEverUploaded   = Boolean(existingDoc);
   const uploadButtonLabel = hasEverUploaded ? "Upload Again" : "Upload";
-  const showVerifiedCard  = Boolean(existingDoc?.valid && !hasNewPreview);
-  const showFailedCard    = Boolean(existingDoc && !existingDoc.valid && !hasNewPreview);
+
+  // Show the verification result card only when no new unverified preview is pending
+  const showVerifiedCard = Boolean(existingDoc?.valid && !hasNewPreview);
+  const showFailedCard   = Boolean(existingDoc && !existingDoc.valid && !hasNewPreview);
 
   return (
     <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-2xl)] shadow-[var(--shadow-card)] p-6">
+      {/* ── Hidden file input — single, always mounted ─────────────────── */}
       <input
         ref={fileInputRef}
         type="file"
@@ -108,6 +142,7 @@ function SecondaryDocSection({ documentName }) {
         onChange={handleFileSelect}
       />
 
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-9 h-9 rounded-[var(--r-lg)] bg-[var(--c-green-bg)] flex items-center justify-center shrink-0">
           <span className="text-xl">{icon}</span>
@@ -134,7 +169,7 @@ function SecondaryDocSection({ documentName }) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">
-        {/* Left: upload / preview */}
+        {/* ── Left column: upload / preview ──────────────────────────── */}
         <div>
           {!hasNewPreview && !existingDoc ? (
             <button
@@ -146,7 +181,8 @@ function SecondaryDocSection({ documentName }) {
                 className="w-9 h-9 text-[var(--c-text-muted)] group-hover:text-[var(--c-green)] mb-2 transition"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               <span className="text-sm font-medium text-[var(--c-text-mid)] group-hover:text-[var(--c-green)]">
                 Click to upload
@@ -168,7 +204,8 @@ function SecondaryDocSection({ documentName }) {
               {(preview?.timestamp || existingDoc?.uploadedAt) && (
                 <p className="text-xs text-[var(--c-text-muted)] flex items-center gap-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {new Date(preview?.timestamp || existingDoc?.uploadedAt).toLocaleString()}
                 </p>
@@ -190,7 +227,8 @@ function SecondaryDocSection({ documentName }) {
                     ) : (
                       <>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Verify Document
                       </>
@@ -205,7 +243,8 @@ function SecondaryDocSection({ documentName }) {
                   className="flex items-center justify-center gap-1.5 border border-[var(--c-border)] text-[var(--c-text-mid)] px-4 py-2.5 rounded-[var(--r-lg)] hover:bg-[var(--c-bg)] text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
                   {uploadButtonLabel}
                 </button>
@@ -220,7 +259,7 @@ function SecondaryDocSection({ documentName }) {
           )}
         </div>
 
-        {/* Right: verification result */}
+        {/* ── Right column: verification result ──────────────────────── */}
         <div>
           {showVerifiedCard ? (
             <div className="h-full bg-[var(--c-success-bg)] border border-[var(--c-success-border)] rounded-[var(--r-xl)] p-5 flex flex-col justify-center">
@@ -259,13 +298,15 @@ function SecondaryDocSection({ documentName }) {
                 </div>
               </div>
               <p className="text-xs text-[var(--c-text-muted)] mt-2">
-                This document does not appear to be a valid {documentName}. Please upload the correct document.
+                This document does not appear to be a valid {documentName}. Please
+                upload the correct document.
               </p>
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center rounded-[var(--r-xl)] border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg)] p-6 text-center">
               <svg className="w-9 h-9 text-[var(--c-border)] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm text-[var(--c-text-muted)] font-medium">
                 Verification result will appear here

@@ -1,16 +1,28 @@
-// src/pages/Home.jsx
-
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import airportPassport    from "../assets/hero/airport-passport.jpg";
-import immigrationOfficer from "../assets/hero/immigration-officer.jpg";
 import heroVideo from "../assets/hero/hero-video.mp4";
+import immigrationOfficer from "../assets/hero/immigration-officer.jpg";
+import airportPassport from "../assets/hero/airport-passport.jpg";
+import {
+  Search,
+  ShieldCheck,
+  Route,
+  GraduationCap,
+  Briefcase,
+  Plane,
+  Bot,
+  Sparkles,
+  Building2,
+  Users,
+  TrendingUp,
+  Home as HomeIcon,
+} from "lucide-react";
+
 import CaseForm from "../components/input/CaseForm";
 
 function Home() {
-  // ── Logic completely unchanged ────────────────────────────────────────────
   const location = useLocation();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const redirectMessage = location.state?.message;
 
   useEffect(() => {
@@ -22,446 +34,365 @@ function Home() {
   }, [redirectMessage, navigate, location.pathname]);
 
   return (
-    <main className="bg-white text-[var(--c-text)]">
+    <main className="bg-white text-[#111827]">
 
-      {/* ── HERO — full-bleed editorial photograph ─────────────────────────
-          No dark overlay container. Image fills edge to edge.
-          A small overline label sits top-left over the image.
-          The image is the hero — not a background.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <div className="relative">
-        <video
-  autoPlay
-  muted
-  loop
-  playsInline
-  className="w-full object-cover object-center"
-  style={{
-    height: "68vh",
-    minHeight: "420px",
-    maxHeight: "680px",
-  }}
->
-  <source src={heroVideo} type="video/mp4" />
-</video>
-        {/* Subtle gradient at bottom so stat band reads cleanly below */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent" />
-        {/* Overline label — editorial style */}
-        <div className="absolute top-8 left-8 lg:left-12">
-          <span className="inline-block bg-white/90 backdrop-blur-sm text-[var(--c-green)] text-[10px] font-bold tracking-[0.22em] uppercase px-3 py-1.5 rounded-[var(--r-sm)]">
-            VISM Intelligence Platform
-          </span>
-        </div>
-      </div>
+      {/* HERO */}
+      <section className="relative overflow-hidden bg-[#071E3D]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(77,199,247,0.12),transparent_50%)]" />
+        <div className="relative mx-auto grid min-h-[calc(100vh-68px)] max-w-7xl items-center gap-16 px-6 py-20 lg:grid-cols-2 lg:px-8">
 
-      {/* ── STAT BAND — borderless editorial stat tiles ────────────────────
-          Three columns separated by hairline rules. No cards, no shadows.
-          Numbers in Playfair Display — pure editorial typography.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <div className="border-b border-[var(--c-border)]">
-        <div className="mx-auto max-w-7xl grid grid-cols-3">
-          {[
-            { label: "Visa Categories",   value: "3+"         },
-            { label: "Verification Rate", value: "99.8%"      },
-            { label: "Active Tracking",   value: "Real-time"  },
-          ].map(({ label, value }, i) => (
-            <div
-              key={label}
-              className={`px-8 py-10 lg:px-12 ${i < 2 ? "border-r border-[var(--c-border)]" : ""}`}
-            >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--c-text-muted)] mb-3">
-                {label}
-              </p>
-              <p
-                className="font-display font-bold text-[var(--c-text)] leading-none"
-                style={{ fontSize: "clamp(36px, 4vw, 52px)" }}
+          {/* LEFT */}
+          <div className="max-w-2xl">
+            <p className="mb-6 inline-flex rounded-full border border-[#4DC7F7]/30 bg-[#4DC7F7]/10 px-4 py-1.5 text-sm font-semibold text-[#4DC7F7]">
+              AI-Powered Immigration Platform
+            </p>
+
+            <h1 className="font-display text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.1]">
+              Visa Applications Made Intelligent
+            </h1>
+
+            <p className="mt-7 max-w-xl text-lg leading-8 text-white/65 sm:text-xl">
+              BlueprintAI helps applicants assess eligibility, verify documents,
+              generate AI-powered insights, and track their immigration journey
+              from one unified platform.
+            </p>
+
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <a
+                href="#assessment"
+                className="inline-flex items-center justify-center rounded-lg bg-[#4DC7F7] px-8 py-3 text-sm font-bold text-[#0A2E57] shadow-lg shadow-[#4DC7F7]/25 transition hover:bg-[#2AA6D8] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#4DC7F7] focus:ring-offset-2 focus:ring-offset-[#071E3D]"
               >
-                {value}
+                Start Assessment
+              </a>
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("how-it-works")
+                    .scrollIntoView({ behavior: "smooth" })
+                }
+                className="inline-flex items-center justify-center rounded-lg border border-white/25 px-8 py-3 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/30"
+              >
+                Learn More
+              </button>
+            </div>
+
+            <div className="mt-14 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/8">
+                <p className="text-xs font-semibold text-white/50 uppercase tracking-wide">Visa Types</p>
+                <p className="mt-2.5 text-xl font-bold text-[#4DC7F7]">7+</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/8">
+                <p className="text-xs font-semibold text-white/50 uppercase tracking-wide">Verification</p>
+                <p className="mt-2.5 text-xl font-bold text-[#4DC7F7]">AI Powered</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/8">
+                <p className="text-xs font-semibold text-white/50 uppercase tracking-wide">Tracking</p>
+                <p className="mt-2.5 text-xl font-bold text-[#4DC7F7]">End-to-End</p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT - VIDEO */}
+          <div className="relative h-[500px] lg:h-full lg:min-h-[580px]">
+            <div className="absolute inset-0 rounded-2xl border border-white/10 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="h-full w-full object-cover"
+              >
+                <source src={heroVideo} type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#071E3D]/80 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                <h3 className="text-xl font-bold text-white">
+                  AI-Powered Immigration Intelligence
+                </h3>
+                <p className="mt-1.5 text-sm text-white/65">
+                  Analyze eligibility, verify documents and track your visa journey.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how-it-works" className="bg-white border-b border-[#E6E8EB] px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold text-[#2AA6D8] uppercase tracking-[0.18em] mb-3">
+              How It Works
+            </p>
+            <h2 className="font-display text-4xl font-bold text-[#0A2E57] sm:text-5xl">
+              Three Simple Steps to Success
+            </h2>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-3">
+            <div className="group rounded-xl border border-[#E6E8EB] bg-white p-8 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#E8F4FD] text-[#2AA6D8] group-hover:bg-[#4DC7F7]/15 transition">
+                  <Search size={28} />
+                </div>
+                <span className="text-3xl font-black text-[#E6E8EB] group-hover:text-[#4DC7F7]/20 transition font-display">
+                  01
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-[#111827] mb-2">Assess Eligibility</h3>
+              <p className="text-[#6B7280] leading-relaxed text-sm">
+                Input your visa details and let our AI analyze your application fit.
               </p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* ── THREE PHASES ───────────────────────────────────────────────────
-          Off-white section. Left-aligned heading.
-          Ghost step numbers in muted green. Zero decoration — no icons,
-          no cards, no borders. Pure typographic hierarchy.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        className="bg-[var(--c-bg)] border-b border-[var(--c-border)] px-8 py-20 lg:px-12"
-      >
-        <div className="mx-auto max-w-7xl">
-          <h2 className="font-display text-4xl font-bold text-[var(--c-text)] mb-14 lg:text-[42px]">
-            Three phases of verification
-          </h2>
-          <div className="grid gap-12 sm:grid-cols-3">
-            {[
-              {
-                num:   "01",
-                title: "Initial Scan",
-                body:  "Compute your eligibility across multiple jurisdictions using our AI engine and active visa databases.",
-              },
-              {
-                num:   "02",
-                title: "Document Audit",
-                body:  "Every file is cross-referenced against embassy requirements to ensure absolute compliance before formal submission.",
-              },
-              {
-                num:   "03",
-                title: "Journey Tracking",
-                body:  "Monitor your application lifecycle with direct links to government processing times and biometric scheduling.",
-              },
-            ].map(({ num, title, body }) => (
-              <div key={num}>
-                <span className="block text-sm font-semibold text-[var(--c-green-mid)] tracking-[0.12em] mb-5">
-                  {num}
+            <div className="group rounded-xl border border-[#E6E8EB] bg-white p-8 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#E8F4FD] text-[#2AA6D8] group-hover:bg-[#4DC7F7]/15 transition">
+                  <ShieldCheck size={28} />
+                </div>
+                <span className="text-3xl font-black text-[#E6E8EB] group-hover:text-[#4DC7F7]/20 transition font-display">
+                  02
                 </span>
-                <h3 className="text-[17px] font-bold text-[var(--c-text)] mb-3">
-                  {title}
-                </h3>
-                <p className="text-sm text-[var(--c-text-muted)] leading-[1.75]">
-                  {body}
-                </p>
+              </div>
+              <h3 className="text-lg font-bold text-[#111827] mb-2">Verify Documents</h3>
+              <p className="text-[#6B7280] leading-relaxed text-sm">
+                Upload documents and receive instant verification and extraction.
+              </p>
+            </div>
+
+            <div className="group rounded-xl border border-[#E6E8EB] bg-white p-8 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#E8F4FD] text-[#2AA6D8] group-hover:bg-[#4DC7F7]/15 transition">
+                  <Route size={28} />
+                </div>
+                <span className="text-3xl font-black text-[#E6E8EB] group-hover:text-[#4DC7F7]/20 transition font-display">
+                  03
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-[#111827] mb-2">Track Journey</h3>
+              <p className="text-[#6B7280] leading-relaxed text-sm">
+                Monitor your entire immigration process with real-time insights.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SUPPORTED VISA TYPES */}
+      <section className="bg-[#F7F8FA] border-b border-[#E6E8EB] px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold text-[#2AA6D8] uppercase tracking-[0.18em] mb-3">
+              Visa Support
+            </p>
+            <h2 className="font-display text-4xl font-bold text-[#0A2E57] sm:text-5xl">
+              Supported Visa Categories
+            </h2>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            {[
+              { Icon: GraduationCap, name: "Student Visa",             desc: "Comprehensive assessment for educational pursuits worldwide." },
+              { Icon: Briefcase,     name: "Work Visa",                 desc: "Employment visa evaluation and document verification." },
+              { Icon: Plane,         name: "Tourist Visa",              desc: "Travel visa processing and eligibility analysis." },
+              { Icon: HomeIcon,      name: "Permanent Residency Visa",  desc: "Pathway to permanent residence assessment and guidance." },
+              { Icon: Building2,     name: "Business Visa",             desc: "Business travel and commercial activity visa evaluation." },
+              { Icon: Users,         name: "Family Sponsorship Visa",   desc: "Family reunification and sponsorship eligibility review." },
+              { Icon: TrendingUp,    name: "Investor Visa",             desc: "Investment-based immigration and entrepreneur visa support." },
+            ].map(({ Icon, name, desc }) => (
+              <div key={name} className="group rounded-xl border border-[#E6E8EB] bg-white p-6 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#E8F4FD] text-[#2AA6D8] mb-4 group-hover:bg-[#4DC7F7]/15 transition">
+                  <Icon size={28} />
+                </div>
+                <h3 className="text-base font-bold text-[#111827] mb-1.5">{name}</h3>
+                <p className="text-[#6B7280] text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── SUPPORTED CATEGORIES — full-bleed photo cards ─────────────────
-          Images fill each card entirely. Small uppercase label overlaid
-          top-left. Title + description at the bottom over dark gradient.
-          Cards flush to page edges, separated by 2px gap.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <section className="bg-[var(--c-bg)] border-b border-[var(--c-border)]">
-        <div className="mx-auto max-w-7xl px-8 lg:px-12">
-          <div className="flex items-baseline justify-between py-10">
-            <h2 className="font-display text-4xl font-bold text-[var(--c-text)] lg:text-[42px]">
-              Supported Categories
-            </h2>
-            <a
-              href="#assessment"
-              className="text-sm text-[var(--c-green-mid)] font-medium hover:underline underline-offset-4 shrink-0 ml-8"
-            >
-              View all pathways →
-            </a>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: "2px" }}>
-          {[
-            {
-              src:   immigrationOfficer,
-              label: "Work Residency",
-              title: "Professional Talent",
-              sub:   "Specialised skills and H1-B equivalents.",
-              pos:   "center",
-            },
-            {
-              src:   airportPassport,
-              label: "Student Visas",
-              title: "Academic Pathways",
-              sub:   "Higher education and research fellowships.",
-              pos:   "center 60%",
-            },
-            {
-              src:   immigrationOfficer,
-              label: "Tourist & Business",
-              title: "Short-stay Mobility",
-              sub:   "Business meetings and cultural visits.",
-              pos:   "right center",
-            },
-          ].map(({ src, label, title, sub, pos }) => (
-            <div
-              key={label}
-              className="relative overflow-hidden cursor-pointer group"
-              style={{ height: "360px" }}
-            >
+      {/* AI IMMIGRATION INSIGHTS */}
+      <section className="bg-white border-b border-[#E6E8EB] px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 items-center lg:grid-cols-2">
+            <div className="relative rounded-2xl overflow-hidden h-[400px] shadow-sm border border-[#E6E8EB]">
               <img
-                src={src}
-                alt={title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                style={{ objectPosition: pos }}
+                src={immigrationOfficer}
+                alt="AI Immigration Intelligence"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute top-5 left-5">
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/85 bg-black/25 px-2.5 py-1 rounded-[var(--r-sm)]">
-                  {label}
-                </span>
-              </div>
-              <div className="absolute bottom-6 left-6 right-6">
-                <p className="font-display text-xl font-bold text-white mb-1">
-                  {title}
-                </p>
-                <p className="text-sm text-white/70">{sub}</p>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
             </div>
-          ))}
+
+            <div>
+              <p className="text-xs font-semibold text-[#2AA6D8] uppercase tracking-[0.18em] mb-3">
+                Advanced Analytics
+              </p>
+              <h2 className="font-display text-3xl font-bold text-[#0A2E57] mb-5 lg:text-4xl">
+                AI-Powered Immigration Intelligence
+              </h2>
+              <p className="text-[#374151] leading-relaxed mb-6">
+                Advanced assessment models help identify risks, improve application
+                readiness and provide actionable recommendations tailored to your
+                specific situation.
+              </p>
+              <ul className="space-y-3">
+                {["Risk identification", "Readiness improvement", "Actionable insights"].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-[#4DC7F7] shrink-0" />
+                    <span className="text-[#374151] text-sm">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── AI INTELLIGENCE — two-column feature section ───────────────────
-          White background. Left: text with check list.
-          Right: dark app mockup panel showing live data.
-          Eyebrow: tiny all-caps gray (NOT green).
-      ──────────────────────────────────────────────────────────────────────── */}
-      <section className="bg-white border-b border-[var(--c-border)] px-8 py-20 lg:px-12">
-        <div className="mx-auto max-w-7xl grid gap-16 items-center lg:grid-cols-2">
-          <div>
-            <span className="block text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text-muted)] mb-4">
-              Bureaucratic Intelligence
-            </span>
-            <h2 className="font-display text-3xl font-bold text-[var(--c-text)] mb-5 lg:text-4xl leading-[1.15]">
-              AI-driven verification that mirrors consular standards
-            </h2>
-            <p className="text-[15px] text-[var(--c-text-mid)] leading-[1.8] mb-7">
-              Our neural models are trained on over ten thousand successful visa
-              applications across 40 jurisdictions. We identify potential rejection
-              risks before they reach a human reviewer.
-            </p>
-            <ul className="space-y-3.5">
-              {[
-                "Legislative updates processed every 15 minutes",
-                "Automatic translation of over 60 identity documents",
-                "Risk identification across consular precedent",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <svg
-                    className="w-4 h-4 text-[var(--c-green-mid)] shrink-0 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span className="text-sm text-[var(--c-text-mid)]">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* App mockup — dark panel with live-style data */}
-          <div className="rounded-[var(--r-2xl)] bg-[#0a1628] overflow-hidden h-[340px] flex items-center justify-center p-8">
-            <div className="w-full rounded-[var(--r-lg)] bg-[#0f2040] border border-[#1a3050] p-5">
-              <div className="flex gap-1.5 mb-4">
-                {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
-                  <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+      {/* SMART DOCUMENT VERIFICATION */}
+      <section className="bg-[#F7F8FA] border-b border-[#E6E8EB] px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 items-center lg:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold text-[#2AA6D8] uppercase tracking-[0.18em] mb-3">
+                Smart Verification
+              </p>
+              <h2 className="font-display text-3xl font-bold text-[#0A2E57] mb-5 lg:text-4xl">
+                Smart Document Verification
+              </h2>
+              <p className="text-[#374151] leading-relaxed mb-6">
+                Upload passports and supporting documents to extract information
+                and verify readiness automatically. Our AI ensures compliance
+                and completeness.
+              </p>
+              <ul className="space-y-3">
+                {["Instant extraction", "Compliance check", "Automatic verification"].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-[#4DC7F7] shrink-0" />
+                    <span className="text-[#374151] text-sm">{item}</span>
+                  </li>
                 ))}
-              </div>
-              <p className="font-display text-center text-4xl font-bold text-[#4ade80] mb-1">
-                81 / 100
-              </p>
-              <p className="text-center text-[10px] tracking-[0.12em] uppercase text-white/40 mb-4">
-                Eligibility Score
-              </p>
-              <div className="border-t border-[#1a3050] pt-3 space-y-2.5">
-                {[
-                  ["CASE-1748779821", "Approved",   "#4ade80"],
-                  ["Passport Extracted", "✓ Verified", "#4ade80"],
-                  ["Risk Analysis",    "2 flags",    "#fbbf24"],
-                  ["Documents",        "2 / 2",      "#4ade80"],
-                ].map(([l, v, c]) => (
-                  <div key={l} className="flex justify-between items-center text-[11px]">
-                    <span className="text-white/55">{l}</span>
-                    <span style={{ color: c }} className="font-semibold">{v}</span>
+              </ul>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden h-[400px] shadow-sm border border-[#E6E8EB]">
+              <img
+                src={airportPassport}
+                alt="Smart Document Verification"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-l from-[#F7F8FA]/20 to-transparent" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MEET NAVI */}
+      <section className="bg-[#071E3D] border-b border-white/8 px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="rounded-2xl border border-white/10 bg-white/4 p-10 lg:p-14 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#4DC7F7]/8 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="grid gap-12 items-center lg:grid-cols-2 relative">
+              <div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-[#4DC7F7]/15 text-[#4DC7F7]">
+                    <Bot size={22} />
                   </div>
-                ))}
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#4DC7F7]/10 text-[#4DC7F7]">
+                    <Sparkles size={18} />
+                  </div>
+                </div>
+
+                <p className="text-xs font-semibold text-[#4DC7F7] uppercase tracking-[0.18em] mb-3">
+                  Intelligent Assistant
+                </p>
+                <h2 className="font-display text-4xl font-bold text-white mb-5">
+                  Meet Navi
+                </h2>
+                <p className="text-white/65 leading-relaxed mb-8">
+                  Your AI immigration assistant that helps guide applicants
+                  throughout the entire process. Navi provides real-time support,
+                  answers questions, and ensures you never miss a step.
+                </p>
+                <a
+                  href="#assessment"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#4DC7F7] px-8 py-3 text-sm font-bold text-[#0A2E57] shadow-lg shadow-[#4DC7F7]/20 transition hover:bg-[#2AA6D8] active:scale-[0.98]"
+                >
+                  Chat with Navi
+                </a>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-white/5 p-8">
+                <div className="w-full h-56 bg-gradient-to-br from-[#4DC7F7]/15 to-[#0A2E57]/40 rounded-xl flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(77,199,247,0.08),transparent_70%)]" />
+                  <div className="text-center relative z-10">
+                    <div className="flex items-center justify-center w-20 h-20 rounded-full bg-[#4DC7F7]/15 mx-auto mb-4">
+                      <Bot size={38} className="text-[#4DC7F7]" />
+                    </div>
+                    <p className="text-sm font-semibold text-[#4DC7F7]">
+                      Navi AI Assistant
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── SMART DOCUMENT VERIFICATION — reversed two-column ─────────────
-          Off-white background. Text left, image right.
-          img src/alt preserved exactly.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <section className="bg-[var(--c-bg)] border-b border-[var(--c-border)] px-8 py-20 lg:px-12">
-        <div className="mx-auto max-w-7xl grid gap-16 items-center lg:grid-cols-2">
-          <div>
-            <span className="block text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text-muted)] mb-4">
-              Smart Verification
-            </span>
-            <h2 className="font-display text-3xl font-bold text-[var(--c-text)] mb-5 lg:text-4xl leading-[1.15]">
-              Smart Document Verification
-            </h2>
-            <p className="text-[15px] text-[var(--c-text-mid)] leading-[1.8] mb-7">
-              Upload passports and supporting documents to extract information
-              and verify readiness automatically. Our AI ensures compliance
-              and completeness.
-            </p>
-            <ul className="space-y-3.5">
-              {[
-                "Instant extraction",
-                "Compliance check",
-                "Automatic verification",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <svg
-                    className="w-4 h-4 text-[var(--c-green-mid)] shrink-0 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span className="text-sm text-[var(--c-text-mid)]">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div
-            className="rounded-[var(--r-2xl)] overflow-hidden border border-[var(--c-border)]"
-            style={{ height: "380px" }}
-          >
-            <img
-              src={immigrationOfficer}
-              alt="Smart Document Verification"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA SECTION ────────────────────────────────────────────────────
-          White background. Centered editorial heading in Playfair Display.
-          Single dark green button. No dark navy section.
-          href="#assessment" unchanged.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <section className="bg-white border-b border-[var(--c-border)] px-8 py-24 lg:px-12 text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="font-display text-4xl font-bold text-[var(--c-text)] mb-4 lg:text-5xl leading-[1.1]">
-            Begin your assessment in under two minutes.
+      {/* FINAL CTA */}
+      <section className="bg-[#0A2E57] px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="font-display text-4xl font-bold text-white sm:text-5xl mb-5">
+            Start Your Immigration Journey Today
           </h2>
-          <p className="text-[15px] text-[var(--c-text-muted)] mb-10">
-            No account required. Receive a confidential eligibility report instantly.
+          <p className="text-lg text-white/65 mb-10 max-w-2xl mx-auto">
+            Join thousands of applicants using BlueprintAI to navigate their
+            visa process with confidence.
           </p>
+          
           <a
             href="#assessment"
-            className="inline-flex items-center gap-2 bg-[var(--c-green)] text-white font-semibold text-sm px-8 py-3.5 rounded-[var(--r-lg)] transition hover:bg-[var(--c-green-mid)] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:ring-offset-2"
+            className="inline-flex items-center justify-center rounded-lg bg-[#4DC7F7] px-10 py-4 text-base font-bold text-[#0A2E57] shadow-lg shadow-[#4DC7F7]/25 transition hover:bg-[#2AA6D8] active:scale-[0.98]"
           >
             Start Assessment
           </a>
         </div>
       </section>
 
-      {/* ── ASSESSMENT FORM SECTION ────────────────────────────────────────
-          Off-white background. Two-column: left = editorial copy, right = form.
-          id="assessment" unchanged. role="alert" unchanged. <CaseForm /> unchanged.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <section id="assessment" className="bg-[var(--c-bg)] border-b border-[var(--c-border)] px-8 py-20 lg:px-12">
-        <div className="mx-auto max-w-7xl grid gap-16 items-start lg:grid-cols-2">
+      {/* ASSESSMENT */}
+      <section id="assessment" className="bg-[#0A2E57] px-6 pb-24 pt-0 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="border-t border-white/10 mb-16" />
 
-          {/* Editorial context copy */}
-          <div className="lg:pt-6">
-            <span className="block text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text-muted)] mb-4">
+          {redirectMessage && (
+            <div
+              role="alert"
+              className="mb-8 rounded-lg border border-[#4DC7F7]/30 bg-[#4DC7F7]/10 px-6 py-4 text-[#4DC7F7]"
+            >
+              {redirectMessage}
+            </div>
+          )}
+
+          <div className="mb-10 text-center">
+            <p className="text-xs font-semibold text-[#4DC7F7] uppercase tracking-[0.18em] mb-3">
               Assessment Form
-            </span>
-            <h2 className="font-display text-3xl font-bold text-[var(--c-text)] mb-4 lg:text-4xl leading-[1.15]">
-              Tell VISM about your case
+            </p>
+            <h2 className="font-display text-3xl font-bold text-white mb-3 lg:text-4xl">
+              Tell BlueprintAI about your application
             </h2>
-            <p className="text-[15px] text-[var(--c-text-mid)] leading-[1.8]">
-              Select your visa type and destination country to generate a full
-              AI-powered eligibility analysis, risk assessment, and personalised
-              document checklist.
+            <p className="max-w-xl mx-auto text-white/60 text-sm">
+              Select your visa type and destination to generate an application analysis.
             </p>
           </div>
 
-          {/* Form */}
-          <div>
-            {redirectMessage && (
-              <div
-                role="alert"
-                className="mb-5 rounded-[var(--r-lg)] border border-[var(--c-green-light)] bg-[var(--c-green-bg)] px-5 py-3.5 text-sm text-[var(--c-green)]"
-              >
-                {redirectMessage}
-              </div>
-            )}
-            <CaseForm />
-          </div>
-
+          <CaseForm />
         </div>
       </section>
-
-      {/* ── FOOTER ─────────────────────────────────────────────────────────
-          White background. Three-column grid.
-          Left: VISM wordmark + tagline.
-          Centre: PLATFORM links.
-          Right: INSTITUTIONAL links including Processor Portal.
-          Bottom strip: copyright + systems status.
-      ──────────────────────────────────────────────────────────────────────── */}
-      <footer className="bg-white border-t border-[var(--c-border)] px-8 pt-16 pb-8 lg:px-12">
-        <div className="mx-auto max-w-7xl">
-
-          <div className="grid gap-12 lg:grid-cols-[2fr_1fr_1fr] mb-14">
-
-            {/* Brand */}
-            <div>
-              <span className="font-display text-[20px] font-bold text-[var(--c-green)] block mb-3">
-                VISM
-              </span>
-              <p className="text-sm text-[var(--c-text-muted)] leading-[1.75] max-w-[260px]">
-                The international benchmark for algorithmic residency processing.
-                Providing certainty in a world of complex borders.
-              </p>
-            </div>
-
-            {/* Platform */}
-            <div>
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[var(--c-text-muted)] mb-4">
-                Platform
-              </p>
-              {["Protocols", "Security", "Jurisdictions"].map((link) => (
-                <a
-                  key={link}
-                  href="#"
-                  className="block text-sm text-[var(--c-text-mid)] mb-2.5 hover:text-[var(--c-text)] transition"
-                >
-                  {link}
-                </a>
-              ))}
-            </div>
-
-            {/* Institutional — includes Processor Portal per approved architecture */}
-            <div>
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[var(--c-text-muted)] mb-4">
-                Institutional
-              </p>
-              {["Legal Notice", "Privacy Policy", "Registry Access"].map((link) => (
-                <a
-                  key={link}
-                  href="#"
-                  className="block text-sm text-[var(--c-text-mid)] mb-2.5 hover:text-[var(--c-text)] transition"
-                >
-                  {link}
-                </a>
-              ))}
-              <a
-                href="/processor"
-                className="block text-sm text-[var(--c-text-muted)] mb-2.5 hover:text-[var(--c-text)] transition"
-              >
-                Processor Portal
-              </a>
-            </div>
-
-          </div>
-
-          {/* Bottom strip */}
-          <div className="border-t border-[var(--c-border)] pt-6 flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-[0.06em] text-[var(--c-text-muted)]">
-              © 2026 VISM Global Registry. All Rights Reserved.
-            </span>
-            <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.06em] text-[var(--c-text-muted)]">
-              <span className="w-[7px] h-[7px] rounded-full bg-[#22c55e] inline-block" />
-              Systems Operational
-            </span>
-          </div>
-
-        </div>
-      </footer>
 
     </main>
   );

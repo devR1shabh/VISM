@@ -5,7 +5,6 @@ import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 import { deriveDocumentSummary } from "../../engines/readinessEngine";
 
 function DocumentProgress() {
-  // ── Logic completely unchanged ─────────────────────────────────────────────
   const navigate = useNavigate();
   const { caseData, uploadedDocuments, setWorkflowStep } = useCase();
 
@@ -14,9 +13,9 @@ function DocumentProgress() {
   const { valid: verifiedCount, required: totalCount, missing } =
     deriveDocumentSummary(requiredDocuments, uploadedDocuments);
 
-  const allVerified = verifiedCount === totalCount && totalCount > 0;
-  const progress    = totalCount === 0 ? 0 : Math.round((verifiedCount / totalCount) * 100);
+  const progress = totalCount === 0 ? 0 : Math.round((verifiedCount / totalCount) * 100);
 
+  // Documents are advisory — user can always proceed regardless of upload count.
   const handleProceed = () => {
     setWorkflowStep(WORKFLOW_STEPS.DOCUMENTS_DONE);
     navigate("/journey");
@@ -32,12 +31,10 @@ function DocumentProgress() {
             Document Progress
           </p>
           <h2 className="text-xl font-bold text-[var(--c-text)]">Application Document Status</h2>
-          <p className={`mt-1.5 text-sm font-medium ${
-            allVerified ? "text-[var(--c-success)]" : "text-[var(--c-text-muted)]"
-          }`}>
-            {allVerified
-              ? "✓ Ready For Next Step"
-              : `${missing.length} document${missing.length !== 1 ? "s" : ""} remaining`}
+          <p className="mt-1.5 text-sm font-medium text-[var(--c-text-muted)]">
+            {verifiedCount === totalCount && totalCount > 0
+              ? "✓ All documents verified"
+              : `${verifiedCount} of ${totalCount} documents verified — you can continue at any time`}
           </p>
         </div>
 
@@ -59,9 +56,9 @@ function DocumentProgress() {
           />
         </div>
         <div className="flex items-center justify-between text-xs text-[var(--c-text-muted)]">
-          <span>{progress}% complete</span>
+          <span>{progress}% complete ({verifiedCount}/{totalCount})</span>
           <span>
-            {totalCount === 0 ? "No documents required" : `${verifiedCount} of ${totalCount}`}
+            {totalCount === 0 ? "No documents required" : `${missing.length} remaining`}
           </span>
         </div>
       </div>
@@ -88,7 +85,7 @@ function DocumentProgress() {
                     : "bg-[var(--c-border)] text-[var(--c-text-muted)]"
                 }`}
               >
-                {uploaded ? "✓" : "!"}
+                {uploaded ? "✓" : "·"}
               </span>
               {doc}
             </div>
@@ -96,18 +93,12 @@ function DocumentProgress() {
         })}
       </div>
 
-      {/* Proceed button */}
+      {/* Proceed button — always enabled */}
       <div className="flex justify-end">
         <button
           type="button"
           onClick={handleProceed}
-          disabled={!allVerified}
-          title={!allVerified ? "Please verify all documents to continue" : ""}
-          className={`inline-flex items-center gap-2 rounded-[var(--r-lg)] px-6 py-3 text-sm font-semibold transition shadow-sm ${
-            allVerified
-              ? "bg-[var(--c-green)] text-white hover:bg-[var(--c-green-mid)] cursor-pointer active:scale-[0.98]"
-              : "bg-[var(--c-border)] text-[var(--c-text-muted)] cursor-not-allowed"
-          }`}
+          className="inline-flex items-center gap-2 rounded-[var(--r-lg)] px-6 py-3 text-sm font-semibold transition shadow-sm bg-[var(--c-green)] text-white hover:bg-[var(--c-green-mid)] cursor-pointer active:scale-[0.98]"
         >
           Proceed To Journey
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

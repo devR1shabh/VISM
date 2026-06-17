@@ -1,10 +1,22 @@
 // src/components/processor/CaseDocumentsPanel.jsx
 
-const REQUIRED_DOCS_BY_VISA = {
-  "Student Visa": ["Passport", "Academic Transcript"],
-  "Work Visa":    ["Passport", "Resume"],
-  "Tourist Visa": ["Passport", "Bank Statement"],
-};
+const REQUIRED_DOCUMENTS = [
+  "Passport",
+  "Passport Size Photograph",
+  "National ID Card",
+  "Birth Certificate",
+  "Address Proof",
+  "Resume / CV",
+  "Academic Transcript",
+  "Degree Certificate",
+  "Employment Letter",
+  "Bank Statement",
+  "Proof of Funds",
+  "Travel History Document",
+  "Statement of Purpose",
+  "Police Clearance Certificate",
+  "Medical Certificate",
+];
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -84,12 +96,30 @@ function DocRow({ name, submitted, verified, uploadedAt }) {
 function CaseDocumentsPanel({ caseRecord }) {
   if (!caseRecord) return null;
 
-  const { visaType, uploadedDocuments = [] } = caseRecord;
-  const required = REQUIRED_DOCS_BY_VISA[visaType] || [];
+  const { uploadedDocuments = [] } = caseRecord;
+
+  const required = REQUIRED_DOCUMENTS;
+  const total    = required.length; // always 15
+
+  const uploadedCount = uploadedDocuments.filter((d) =>
+    required.includes(d.type || d.requiredDocument)
+  ).length;
+
   const verifiedCount = uploadedDocuments.filter((d) => d.verified).length;
+
+  const missingDocs = required.filter((docName) =>
+    !uploadedDocuments.some(
+      (d) => (d.type === docName || d.requiredDocument === docName)
+    )
+  );
+
+  const uploadedPct = Math.round((uploadedCount / total) * 100);
+  const verifiedPct = Math.round((verifiedCount / total) * 100);
 
   return (
     <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold mb-1">
@@ -98,32 +128,63 @@ function CaseDocumentsPanel({ caseRecord }) {
           <h3 className="text-base font-bold text-[var(--c-text)]">Submitted Documents</h3>
         </div>
         <span className="text-xs text-[var(--c-text-muted)] font-medium">
-          {verifiedCount} / {required.length} verified
+          {verifiedCount} / {total} verified
         </span>
       </div>
 
-      {required.length === 0 ? (
-        <div className="text-sm text-[var(--c-text-muted)] text-center py-6">
-          No document requirements found for this visa type.
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-3 py-3 text-center">
+          <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--c-text-muted)] mb-1">Uploaded</p>
+          <p className="text-xl font-bold text-[var(--c-text)]">{uploadedCount} / {total}</p>
+          <p className="text-xs text-[var(--c-text-muted)]">{uploadedPct}%</p>
         </div>
-      ) : (
-        <div className="space-y-2.5">
-          {required.map((docName) => {
-            const record = uploadedDocuments.find(
-              (d) => d.type === docName || d.requiredDocument === docName
-            );
-            return (
-              <DocRow
-                key={docName}
-                name={docName}
-                submitted={Boolean(record)}
-                verified={record?.verified ?? false}
-                uploadedAt={record?.uploadedAt}
-              />
-            );
-          })}
+        <div className="rounded-[var(--r-lg)] border border-[var(--c-success-border)] bg-[var(--c-success-bg)] px-3 py-3 text-center">
+          <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--c-success)] mb-1">Verified</p>
+          <p className="text-xl font-bold text-[var(--c-success)]">{verifiedCount} / {total}</p>
+          <p className="text-xs text-[var(--c-success)]">{verifiedPct}%</p>
+        </div>
+        <div className="rounded-[var(--r-lg)] border border-[var(--c-warning-border)] bg-[var(--c-warning-bg)] px-3 py-3 text-center">
+          <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--c-warning)] mb-1">Missing</p>
+          <p className="text-xl font-bold text-[var(--c-warning)]">{missingDocs.length}</p>
+          <p className="text-xs text-[var(--c-warning)]">of {total}</p>
+        </div>
+      </div>
+
+      {/* Missing document names */}
+      {missingDocs.length > 0 && (
+        <div className="mb-5 rounded-[var(--r-lg)] border border-[var(--c-warning-border)] bg-[var(--c-warning-bg)] px-4 py-3">
+          <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-warning)] font-semibold mb-2">
+            Missing Documents ({missingDocs.length})
+          </p>
+          <ul className="space-y-1">
+            {missingDocs.map((doc) => (
+              <li key={doc} className="text-xs text-[var(--c-text-mid)] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-warning)] shrink-0" />
+                {doc}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
+
+      {/* Full document list */}
+      <div className="space-y-2.5">
+        {required.map((docName) => {
+          const record = uploadedDocuments.find(
+            (d) => d.type === docName || d.requiredDocument === docName
+          );
+          return (
+            <DocRow
+              key={docName}
+              name={docName}
+              submitted={Boolean(record)}
+              verified={record?.verified ?? false}
+              uploadedAt={record?.uploadedAt}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

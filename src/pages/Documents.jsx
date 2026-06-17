@@ -1,24 +1,50 @@
 ﻿// src/pages/Documents.jsx
 
 import { Globe, Plane, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCase } from "../context/CaseContext";
-import DocumentGuidelines   from "../components/upload/DocumentGuidelines";
+import DocumentGuidelines    from "../components/upload/DocumentGuidelines";
 import PassportUploadSection from "../components/upload/PassportUploadSection";
 import SecondaryDocSection   from "../components/upload/SecondaryDocSection";
 import DocumentProgress      from "../components/upload/DocumentProgress";
 import { PageHeader }        from "../components/ui";
 
-const SECONDARY_DOCS = {
-  "Student Visa": "Academic Transcript",
-  "Work Visa":    "Resume",
-  "Tourist Visa": "Bank Statement",
-};
-
 function Documents() {
-  // ── Logic completely unchanged ────────────────────────────────────────────
+  const navigate = useNavigate();
   const { caseData } = useCase();
-  const secondaryDoc = SECONDARY_DOCS[caseData?.visaType] || null;
-  const status       = caseData?.status || "In Progress";
+  const status = caseData?.status || "In Progress";
+
+  // ── Empty state — no case ────────────────────────────────────────────────
+  if (!caseData) {
+    return (
+      <main className="min-h-screen bg-[#F7F8FA]">
+        <PageHeader
+          eyebrow="Document Intelligence Center"
+          title="Upload & Verify Documents"
+          description="Secure passport extraction, AI-powered document validation, and verified readiness status."
+        />
+        <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8 text-center">
+          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-12 max-w-md mx-auto">
+            <ShieldCheck size={40} className="text-[#9CA3AF] mx-auto mb-4" />
+            <h2 className="text-lg font-bold text-[#0A2E57] mb-2">No Case Yet</h2>
+            <p className="text-sm text-[#6B7280] mb-6">
+              Create a case on the home page first to begin uploading documents.
+            </p>
+            <button
+              onClick={() => navigate("/")}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0F3D6E] transition"
+            >
+              Go to Home
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const allRequiredDocs = caseData?.analysis?.documents || [];
+  const nonPassportDocs = allRequiredDocs.filter((doc) => doc !== "Passport");
+  const hasPassport     = allRequiredDocs.includes("Passport");
 
   const summaryCards = [
     { label: "Visa Type",   value: caseData?.visaType || "—", Icon: Plane       },
@@ -26,8 +52,36 @@ function Documents() {
     { label: "Case Status", value: status,                     Icon: ShieldCheck },
   ];
 
+  // ── Analysis pending state ────────────────────────────────────────────────
+  if (allRequiredDocs.length === 0) {
+    return (
+      <main className="min-h-screen bg-[#F7F8FA]">
+        <PageHeader
+          eyebrow="Document Intelligence Center"
+          title="Upload & Verify Documents"
+          description="Secure passport extraction, AI-powered document validation, and verified readiness status."
+        />
+        <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8 text-center">
+          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-12 max-w-md mx-auto">
+            <ShieldCheck size={40} className="text-[#9CA3AF] mx-auto mb-4" />
+            <h2 className="text-lg font-bold text-[#0A2E57] mb-2">Analysis Pending</h2>
+            <p className="text-sm text-[#6B7280] mb-6">
+              Complete the AI analysis first to see the required document list.
+            </p>
+            <button
+              onClick={() => navigate("/analysis")}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0F3D6E] transition"
+            >
+              Go to Analysis
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-[var(--c-bg)]">
+    <main className="min-h-screen bg-[#F7F8FA]">
 
       <PageHeader
         eyebrow="Document Intelligence Center"
@@ -40,7 +94,7 @@ function Documents() {
               key={label}
               className="flex items-center gap-2 rounded-lg bg-white/10 border border-white/15 px-4 py-2"
             >
-              <Icon size={14} className="text-white/70" />
+              <Icon size={14} className="text-[#4DC7F7]" />
               <span className="text-xs text-white/60 uppercase tracking-wide font-semibold">
                 {label}:
               </span>
@@ -55,23 +109,28 @@ function Documents() {
         <DocumentGuidelines />
 
         <div className="space-y-6">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--c-green-mid)] mb-3">
-              Passport Upload
-            </p>
-            <PassportUploadSection />
-          </div>
 
-          {secondaryDoc && (
+          {hasPassport && (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--c-green-mid)] mb-3">
-                {secondaryDoc}
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2AA6D8] mb-3">
+                Passport
               </p>
-              <SecondaryDocSection documentName={secondaryDoc} />
+              <PassportUploadSection />
             </div>
           )}
 
+          {nonPassportDocs.map((docName) => (
+            <div key={docName}>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2AA6D8] mb-3">
+                {docName}
+              </p>
+              <SecondaryDocSection documentName={docName} />
+            </div>
+          ))}
+
+          {/* Progress bar + Proceed button (always enabled) */}
           <DocumentProgress />
+
         </div>
 
       </div>
