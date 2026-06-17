@@ -1,4 +1,5 @@
 ﻿// src/pages/Analysis.jsx
+// Phase 2: Added ExportPDFButton alongside existing Proceed button. Logic unchanged.
 
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -7,7 +8,6 @@ import {
   Briefcase,
   Plane,
   Globe,
-  ShieldCheck,
   Sparkles,
   FileText,
   ArrowRight,
@@ -18,6 +18,7 @@ import AIApplicationOverview from "../components/output/AIApplicationOverview";
 import AIRiskPanel           from "../components/output/AIRiskPanel";
 import AIRecommendations     from "../components/output/AIRecommendations";
 import CaseSummary           from "../components/output/CaseSummary";
+import ExportPDFButton       from "../components/output/ExportPDFButton";
 import { PageHeader }        from "../components/ui";
 
 import { generateAnalysis, updateCase } from "../services/api";
@@ -29,7 +30,6 @@ const visaIconMap = {
 };
 
 function Analysis() {
-  // ── Logic completely unchanged ────────────────────────────────────────────
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -78,7 +78,6 @@ function Analysis() {
     runAnalysis();
   }, [caseData, analysis, setCaseData, setWorkflowStep]);
 
-  // ── Loading state — skeleton cards on light background ────────────────────
   if (isLoading || !analysis) {
     return (
       <div className="min-h-screen bg-[var(--c-bg)]">
@@ -111,7 +110,6 @@ function Analysis() {
 
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
 
-        {/* Redirect message */}
         {redirectMessage && (
           <div className="rounded-lg border border-[var(--c-green-light)] bg-[var(--c-green-bg)] px-5 py-3 text-sm text-[var(--c-green)]">
             {redirectMessage}
@@ -181,7 +179,7 @@ function Analysis() {
           )}
         </div>
 
-        {/* AI output components — each in a white card */}
+        {/* AI output components */}
         <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
           <AIApplicationOverview aiOverview={analysis.aiOverview} />
         </div>
@@ -198,8 +196,10 @@ function Analysis() {
           <AIRecommendations aiRecommendations={analysis.aiRecommendations || []} />
         </div>
 
-        {/* Proceed button */}
-        <div className="flex justify-end pb-4">
+        {/* Action bar — Export PDF + Proceed */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
+          <ExportPDFButton />
+
           <button
             type="button"
             onClick={() => navigate("/documents")}

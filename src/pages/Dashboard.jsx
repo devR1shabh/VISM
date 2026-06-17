@@ -1,13 +1,14 @@
 // src/pages/Dashboard.jsx
+// Phase 2: Added ExportPDFButton. All existing logic unchanged.
 
 import { Link, useNavigate } from "react-router-dom";
 import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
 import ActivityFeed from "../components/output/ActivityFeed";
+import ExportPDFButton from "../components/output/ExportPDFButton";
 import { calculateReadiness, deriveDocumentSummary } from "../engines/readinessEngine";
 import { PageHeader } from "../components/ui";
 
 function Dashboard() {
-  // ── Logic completely unchanged ────────────────────────────────────────────
   const navigate = useNavigate();
 
   const { caseData, uploadedDocuments, activityFeed, setWorkflowStep } = useCase();
@@ -130,7 +131,7 @@ function Dashboard() {
           <ActivityFeed />
         </div>
 
-        {/* Quick Access — Link to= values unchanged */}
+        {/* Quick Access */}
         <div className="grid md:grid-cols-3 gap-4">
           <Link
             to="/analysis"
@@ -157,8 +158,10 @@ function Dashboard() {
           </Link>
         </div>
 
-        {/* Finish Application — onClick unchanged */}
-        <div className="flex justify-end pb-4">
+        {/* Action bar — Export PDF + Finish Application */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
+          <ExportPDFButton />
+
           <button
             type="button"
             onClick={handleFinish}
