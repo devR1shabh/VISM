@@ -73,8 +73,8 @@ function Navbar() {
           </a>
 
         </div>
-
-        {/* ── Progress bar ───────────────────────────────────────────────── */}
+{/* 
+        ── Progress bar ─────────────────────────────────────────────────
         {progressPercentage > 0 && (
           <div className="hidden lg:flex w-full max-w-[16rem] flex-col gap-1.5">
             <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ function Navbar() {
               />
             </div>
           </div>
-        )}
+        )} */}
 
       </div>
     </nav>
