@@ -2,42 +2,22 @@
 
 function KPICard({ label, count, color, icon }) {
   const colorMap = {
-    amber: {
-      border: "border-amber-400/30",
-      bg:     "bg-amber-500/10",
-      text:   "text-amber-300",
-      dot:    "bg-amber-400",
-    },
-    emerald: {
-      border: "border-emerald-400/30",
-      bg:     "bg-emerald-500/10",
-      text:   "text-emerald-300",
-      dot:    "bg-emerald-400",
-    },
-    red: {
-      border: "border-red-400/30",
-      bg:     "bg-red-500/10",
-      text:   "text-red-300",
-      dot:    "bg-red-400",
-    },
-    blue: {
-      border: "border-blue-400/30",
-      bg:     "bg-blue-500/10",
-      text:   "text-blue-300",
-      dot:    "bg-blue-400",
-    },
+    amber:   { border: "border-[var(--c-warning-border)]", bg: "bg-[var(--c-warning-bg)]",  text: "text-[var(--c-warning)]",  dot: "bg-[var(--c-warning)]"  },
+    emerald: { border: "border-[var(--c-success-border)]", bg: "bg-[var(--c-success-bg)]",  text: "text-[var(--c-success)]",  dot: "bg-[var(--c-success)]"  },
+    red:     { border: "border-[var(--c-error-border)]",   bg: "bg-[var(--c-error-bg)]",    text: "text-[var(--c-error)]",    dot: "bg-[var(--c-error)]"    },
+    blue:    { border: "border-[var(--c-info-border)]",    bg: "bg-[var(--c-info-bg)]",     text: "text-[var(--c-info)]",     dot: "bg-[var(--c-info)]"     },
   };
 
   const c = colorMap[color] || colorMap.amber;
 
   return (
-    <div className={`rounded-[24px] border ${c.border} ${c.bg} p-6 backdrop-blur`}>
-      <div className="flex items-center justify-between mb-4">
+    <div className={`bg-[var(--c-card)] border-l-4 ${c.border} rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-5`}>
+      <div className="flex items-center justify-between mb-3">
         <span className="text-2xl">{icon}</span>
-        <span className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
+        <span className={`w-2 h-2 rounded-full ${c.dot}`} />
       </div>
-      <p className="text-sm font-medium text-[#B8C5D1]">{label}</p>
-      <p className={`mt-2 text-4xl font-bold ${c.text}`}>{count}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--c-text-muted)]">{label}</p>
+      <p className={`mt-1.5 font-display text-4xl font-bold ${c.text}`}>{count}</p>
     </div>
   );
 }
@@ -49,11 +29,11 @@ function KPICards({ cases = [] }) {
   const needDocs = cases.filter((c) => c.processorStatus === "Need Documents").length;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-      <KPICard label="Pending Cases"   count={pending}  color="amber"   icon="🕐" />
-      <KPICard label="Approved Cases"  count={approved} color="emerald" icon="✅" />
-      <KPICard label="Rejected Cases"  count={rejected} color="red"     icon="❌" />
-      <KPICard label="Need Documents"  count={needDocs} color="blue"    icon="📎" />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <KPICard label="Pending Cases"  count={pending}  color="amber"   icon="🕐" />
+      <KPICard label="Approved Cases" count={approved} color="emerald" icon="✅" />
+      <KPICard label="Rejected Cases" count={rejected} color="red"     icon="❌" />
+      <KPICard label="Need Documents" count={needDocs} color="blue"    icon="📎" />
     </div>
   );
 }

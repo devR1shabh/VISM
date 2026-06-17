@@ -33,14 +33,14 @@ async function sendProcessorAction(caseId, action, note) {
 
 function StatusBadge({ status }) {
   const map = {
-    Pending:          "border-amber-400/40 bg-amber-500/10 text-amber-300",
-    Approved:         "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
-    Rejected:         "border-red-400/40 bg-red-500/10 text-red-300",
-    "Need Documents": "border-blue-400/40 bg-blue-500/10 text-blue-300",
+    Pending:          "bg-[var(--c-warning-bg)] text-[var(--c-warning)] border-[var(--c-warning-border)]",
+    Approved:         "bg-[var(--c-green-bg)] text-[var(--c-green)] border-[var(--c-green-light)]",
+    Rejected:         "bg-[var(--c-error-bg)] text-[var(--c-error)] border-[var(--c-error-border)]",
+    "Need Documents": "bg-[var(--c-info-bg)] text-[var(--c-info)] border-[var(--c-info-border)]",
   };
-  const cls = map[status] || "border-white/10 bg-white/5 text-[#B8C5D1]";
+  const cls = map[status] || "bg-[var(--c-bg)] text-[var(--c-text-muted)] border-[var(--c-border)]";
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${cls}`}>
+    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] ${cls}`}>
       {status || "Pending"}
     </span>
   );
@@ -62,14 +62,14 @@ function formatDate(iso) {
 }
 
 function ProcessorCaseDetail() {
-  const { id }       = useParams();
-  const navigate     = useNavigate();
-  const { auth }     = useProcessorAuth();
+  const { id }   = useParams();
+  const navigate = useNavigate();
+  const { auth } = useProcessorAuth();
 
-  const [caseRecord, setCaseRecord]     = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState("");
-  const [notesSaving, setNotesSaving]   = useState(false);
+  const [caseRecord, setCaseRecord]   = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState("");
+  const [notesSaving, setNotesSaving] = useState(false);
 
   const viewLoggedRef = useRef(false);
 
@@ -122,10 +122,10 @@ function ProcessorCaseDetail() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#061A28] flex items-center justify-center">
+      <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#22E7C5] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#B8C5D1]">Loading case...</p>
+          <div className="w-10 h-10 border-[3px] border-[var(--c-green)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-[var(--c-text-muted)]">Loading case...</p>
         </div>
       </main>
     );
@@ -133,15 +133,15 @@ function ProcessorCaseDetail() {
 
   if (error || !caseRecord) {
     return (
-      <main className="min-h-screen bg-[#061A28] flex items-center justify-center px-6">
+      <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center px-6">
         <div className="text-center max-w-md">
           <p className="text-4xl mb-4">⚠️</p>
-          <h2 className="text-xl font-semibold text-white mb-2">Case Not Found</h2>
-          <p className="text-[#B8C5D1] mb-6">{error || "This case does not exist."}</p>
+          <h2 className="text-xl font-bold text-[var(--c-text)] mb-2">Case Not Found</h2>
+          <p className="text-sm text-[var(--c-text-muted)] mb-6">{error || "This case does not exist."}</p>
           <button
             type="button"
             onClick={() => navigate("/processor")}
-            className="rounded-xl bg-[#22E7C5] text-[#061A28] px-5 py-2.5 text-sm font-semibold hover:bg-[#39F5D5] transition"
+            className="rounded-[var(--r-lg)] bg-[var(--c-green)] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[var(--c-green-mid)] transition"
           >
             ← Back to Dashboard
           </button>
@@ -153,56 +153,52 @@ function ProcessorCaseDetail() {
   const applicantName = caseRecord.passportData?.name || "—";
 
   return (
-    <main className="min-h-screen bg-[#061A28] text-white">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
-      {/* Processor Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-[#143045]/70 bg-[#061A28]/95 backdrop-blur-3xl shadow-[0_22px_60px_-35px_rgba(0,0,0,0.8)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 flex-wrap">
+      {/* ── Processor Navbar ──────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 bg-[var(--c-green)] shadow-[0_1px_0_rgba(255,255,255,0.1)]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3.5 flex-wrap">
 
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => navigate("/processor")}
-              className="flex items-center gap-1.5 text-sm text-[#B8C5D1] hover:text-white transition"
+              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition font-medium"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
               All Cases
             </button>
-            <div className="w-px h-5 bg-white/15" />
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#22E7C5] to-[#1AC9D6] shadow-lg">
-                <span className="text-sm font-black tracking-[0.2em] text-slate-950">V</span>
-              </div>
-              <p className="text-sm font-semibold text-white hidden sm:block">VISM Processor</p>
-            </div>
+            <div className="w-px h-4 bg-white/25" />
+            <span className="font-display text-lg font-bold text-white">VISM</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-white/55 font-semibold hidden sm:block">
+              Processor
+            </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#22E7C5]" />
-              <span className="text-xs text-[#B8C5D1]">{auth?.username}</span>
-            </div>
+          <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-white/20 bg-white/10 px-3 py-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#4ade80]" />
+            <span className="text-xs text-white font-medium">{auth?.username}</span>
           </div>
         </div>
       </nav>
 
-      {/* Page Body */}
-      <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
-
-        {/* Case Header */}
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.25)] backdrop-blur-xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      {/* ── Case Header ───────────────────────────────────────────────────── */}
+      <div className="bg-[var(--c-green)] border-b border-white/15 px-6 py-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Case Review</p>
-              <h1 className="text-3xl font-bold text-white">{applicantName}</h1>
-              <p className="mt-2 text-sm text-[#B8C5D1]">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-white/60 font-semibold mb-1">
+                Case Review
+              </p>
+              <h1 className="font-display text-3xl font-bold text-white">{applicantName}</h1>
+              <p className="mt-1.5 text-sm text-white/65">
                 {caseRecord.visaType} · {caseRecord.country}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: "Case ID",     value: caseRecord.caseId },
                 { label: "Visa Type",   value: caseRecord.visaType },
@@ -211,10 +207,10 @@ function ProcessorCaseDetail() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur"
+                  className="rounded-[var(--r-lg)] border border-white/15 bg-white/10 px-4 py-3"
                 >
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#B8C5D1]">{item.label}</p>
-                  <p className="mt-1.5 text-sm font-semibold text-white leading-tight">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/55">{item.label}</p>
+                  <p className="mt-1 text-sm font-semibold text-white leading-tight">
                     {item.value || "—"}
                   </p>
                 </div>
@@ -222,30 +218,30 @@ function ProcessorCaseDetail() {
             </div>
           </div>
 
-          <div className="mt-6 pt-5 border-t border-white/8 flex items-center justify-between flex-wrap gap-4">
+          <div className="mt-5 pt-5 border-t border-white/15 flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-sm text-[#B8C5D1]">Status:</span>
+              <span className="text-sm text-white/65">Status:</span>
               <StatusBadge status={caseRecord.processorStatus} />
             </div>
-            <p className="text-xs text-[#B8C5D1]/60">
+            <p className="text-xs text-white/50">
               {caseRecord.auditLog?.length || 0} audit events ·{" "}
               {caseRecord.processorNotes?.length || 0} notes
             </p>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-8 items-start">
+      {/* ── Page Body ─────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6 items-start">
 
-          {/* Left: Assessment, Passport, Documents */}
-          <div className="space-y-6 min-w-0">
+          <div className="space-y-5 min-w-0">
             <CaseAssessmentPanel caseRecord={caseRecord} />
             <CasePassportPanel   caseRecord={caseRecord} />
             <CaseDocumentsPanel  caseRecord={caseRecord} />
           </div>
 
-          {/* Right: Actions, Notes, Audit Timeline */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             <ProcessorActions
               caseId={caseRecord._id}
               currentStatus={caseRecord.processorStatus}

@@ -6,9 +6,9 @@ import AIRecommendations     from "../output/AIRecommendations";
 
 function InfoRow({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-      <p className="text-xs uppercase tracking-[0.28em] text-[#B8C5D1] mb-1">{label}</p>
-      <p className="text-sm font-semibold text-white">{value || "—"}</p>
+    <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-4 py-3">
+      <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-text-muted)] mb-1">{label}</p>
+      <p className="text-sm font-semibold text-[var(--c-text)]">{value || "—"}</p>
     </div>
   );
 }
@@ -20,26 +20,28 @@ function CaseAssessmentPanel({ caseRecord }) {
   const analysis = caseRecord.analysis || null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
 
-      <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 backdrop-blur-xl">
-        <p className="text-xs uppercase tracking-[0.32em] text-[#22E7C5] mb-1">Case Information</p>
-        <h3 className="text-lg font-semibold text-white mb-5">Assessment Details</h3>
+      <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold mb-1">
+          Case Information
+        </p>
+        <h3 className="text-base font-bold text-[var(--c-text)] mb-4">Assessment Details</h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <InfoRow label="Visa Type"           value={visaType} />
           <InfoRow label="Destination Country" value={country} />
         </div>
 
         {description ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-            <p className="text-xs uppercase tracking-[0.28em] text-[#B8C5D1] mb-2">
+          <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-text-muted)] mb-1.5">
               Case Description
             </p>
-            <p className="text-sm text-[#B8C5D1] leading-relaxed">{description}</p>
+            <p className="text-sm text-[var(--c-text-mid)] leading-relaxed">{description}</p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/6 bg-white/3 px-5 py-4 text-sm text-[#B8C5D1]/60">
+          <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-4 py-3 text-sm text-[var(--c-text-muted)]">
             No case description provided.
           </div>
         )}
@@ -48,20 +50,26 @@ function CaseAssessmentPanel({ caseRecord }) {
       {analysis ? (
         <>
           {analysis.aiOverview && (
-            <AIApplicationOverview aiOverview={analysis.aiOverview} />
+            <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+              <AIApplicationOverview aiOverview={analysis.aiOverview} />
+            </div>
           )}
           {analysis.aiRisks?.length > 0 && (
-            <AIRiskPanel aiRisks={analysis.aiRisks} />
+            <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+              <AIRiskPanel aiRisks={analysis.aiRisks} />
+            </div>
           )}
           {analysis.aiRecommendations?.length > 0 && (
-            <AIRecommendations aiRecommendations={analysis.aiRecommendations} />
+            <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+              <AIRecommendations aiRecommendations={analysis.aiRecommendations} />
+            </div>
           )}
         </>
       ) : (
-        <div className="rounded-[24px] border border-white/6 bg-white/3 p-6 text-sm text-center">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6 text-center">
           <p className="text-2xl mb-2">🤖</p>
-          <p className="font-medium text-[#B8C5D1]">AI Analysis Not Available</p>
-          <p className="text-xs mt-1 text-[#B8C5D1]/60">
+          <p className="text-sm font-medium text-[var(--c-text-mid)]">AI Analysis Not Available</p>
+          <p className="text-xs mt-1 text-[var(--c-text-muted)]">
             AI analysis is stored client-side and was not persisted to the server for this case.
           </p>
         </div>

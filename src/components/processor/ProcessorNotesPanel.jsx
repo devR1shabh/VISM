@@ -19,14 +19,14 @@ function formatDate(iso) {
 
 function NoteCard({ note }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-[#22E7C5] uppercase tracking-wide">
+    <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-4 py-3">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--c-green-mid)]">
           Processor Note
         </span>
-        <span className="text-xs text-[#B8C5D1]">{formatDate(note.addedAt)}</span>
+        <span className="text-xs text-[var(--c-text-muted)]">{formatDate(note.addedAt)}</span>
       </div>
-      <p className="text-sm text-[#B8C5D1] leading-relaxed">{note.text}</p>
+      <p className="text-sm text-[var(--c-text-mid)] leading-relaxed">{note.text}</p>
     </div>
   );
 }
@@ -53,31 +53,33 @@ function ProcessorNotesPanel({ notes = [], onAddNote, isSaving }) {
   );
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 backdrop-blur-xl">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-[#22E7C5]/15 flex items-center justify-center text-lg">
+        <div className="w-9 h-9 rounded-[var(--r-lg)] bg-[var(--c-green-bg)] flex items-center justify-center text-lg">
           📝
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.32em] text-[#22E7C5]">Internal</p>
-          <h3 className="text-lg font-semibold text-white">Processor Notes</h3>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold">
+            Internal
+          </p>
+          <h3 className="text-base font-bold text-[var(--c-text)]">Processor Notes</h3>
         </div>
       </div>
 
       {sortedNotes.length > 0 ? (
-        <div className="space-y-3 mb-5">
+        <div className="space-y-2.5 mb-5">
           {sortedNotes.map((note, i) => (
             <NoteCard key={note.noteId || i} note={note} />
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/6 bg-white/3 px-5 py-6 text-center mb-5">
-          <p className="text-sm text-[#B8C5D1]/60">No notes added yet.</p>
+        <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-4 py-5 text-center mb-5">
+          <p className="text-sm text-[var(--c-text-muted)]">No notes added yet.</p>
         </div>
       )}
 
       <div className="space-y-3">
-        <label className="block text-xs uppercase tracking-[0.28em] text-[#B8C5D1] font-semibold">
+        <label className="block text-[10px] uppercase tracking-[0.18em] text-[var(--c-text-muted)] font-semibold">
           Add Note
         </label>
         <textarea
@@ -86,13 +88,13 @@ function ProcessorNotesPanel({ notes = [], onAddNote, isSaving }) {
           onKeyDown={handleKeyDown}
           rows={3}
           placeholder="Add an internal processor note... (Ctrl+Enter to submit)"
-          className="w-full bg-[#061A28] border border-white/10 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#22E7C5] focus:border-[#22E7C5] placeholder-[#B8C5D1]/50 transition resize-none"
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] text-sm px-4 py-3 rounded-[var(--r-lg)] focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[var(--c-text-muted)] transition resize-none"
         />
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!noteText.trim() || isSaving}
-          className="inline-flex items-center gap-2 rounded-xl bg-white/8 border border-white/10 text-white text-sm font-semibold px-5 py-2.5 hover:bg-white/12 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-[var(--c-green)] text-white text-sm font-semibold px-5 py-2.5 hover:bg-[var(--c-green-mid)] disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           {isSaving ? (
             <>

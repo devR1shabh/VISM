@@ -24,31 +24,30 @@ function ProcessorLogin() {
   };
 
   return (
-    <main className="min-h-screen bg-[#061A28] text-white flex items-center justify-center px-4 py-12">
+    <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
-        <div className="flex items-center justify-center gap-3 mb-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#22E7C5] to-[#1AC9D6] shadow-[0_18px_40px_-28px_rgba(34,231,197,0.85)]">
-            <span className="text-xl font-black tracking-[0.2em] text-slate-950">V</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight text-white">VISM</h1>
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Processor Portal</p>
-          </div>
+        <div className="text-center mb-10">
+          <span className="font-display text-3xl font-bold text-[var(--c-green)]">VISM</span>
+          <p className="text-xs uppercase tracking-[0.22em] text-[var(--c-text-muted)] mt-1">
+            Processor Portal
+          </p>
         </div>
 
-        <div className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.25)] backdrop-blur-xl">
-          <div className="mb-8">
-            <p className="text-xs uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Secure Access</p>
-            <h2 className="text-2xl font-bold text-white">Processor Login</h2>
-            <p className="mt-2 text-sm text-[#B8C5D1]">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-2xl)] shadow-[var(--shadow-modal)] p-8">
+          <div className="mb-7">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold mb-2">
+              Secure Access
+            </p>
+            <h2 className="text-2xl font-bold text-[var(--c-text)]">Processor Login</h2>
+            <p className="mt-2 text-sm text-[var(--c-text-muted)] leading-relaxed">
               Enter your processor credentials to access the case management dashboard.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#B8C5D1] mb-2">
+              <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
                 Username
               </label>
               <input
@@ -58,12 +57,12 @@ function ProcessorLogin() {
                 required
                 autoComplete="username"
                 placeholder="processor"
-                className="w-full bg-[#061A28] border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#22E7C5] focus:border-[#22E7C5] placeholder-[#B8C5D1]/50 transition"
+                className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] px-4 py-3 rounded-[var(--r-lg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[var(--c-text-muted)] transition"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#B8C5D1] mb-2">
+              <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
                 Password
               </label>
               <input
@@ -73,12 +72,12 @@ function ProcessorLogin() {
                 required
                 autoComplete="current-password"
                 placeholder="••••••••"
-                className="w-full bg-[#061A28] border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#22E7C5] focus:border-[#22E7C5] placeholder-[#B8C5D1]/50 transition"
+                className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] px-4 py-3 rounded-[var(--r-lg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[var(--c-text-muted)] transition"
               />
             </div>
 
             {error && (
-              <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              <div className="rounded-[var(--r-lg)] border border-[var(--c-error-border)] bg-[var(--c-error-bg)] px-4 py-3 text-sm text-[var(--c-error)]">
                 {error}
               </div>
             )}
@@ -86,11 +85,11 @@ function ProcessorLogin() {
             <button
               type="submit"
               disabled={loading || !username || !password}
-              className="w-full bg-[#22E7C5] text-[#061A28] py-3 rounded-xl font-semibold hover:bg-[#39F5D5] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#22E7C5]/20"
+              className="w-full bg-[var(--c-green)] text-white py-3 rounded-[var(--r-lg)] text-sm font-semibold hover:bg-[var(--c-green-mid)] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-[#061A28]/40 border-t-[#061A28] rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                   Authenticating...
                 </span>
               ) : (
@@ -99,15 +98,17 @@ function ProcessorLogin() {
             </button>
           </form>
 
-          <div className="mt-6 rounded-xl bg-white/5 border border-white/8 px-4 py-3 text-xs text-[#B8C5D1]">
-            <p className="font-semibold text-white mb-1">Demo Credentials</p>
-            <p>Username: <span className="text-[#22E7C5] font-mono">processor</span></p>
-            <p>Password: <span className="text-[#22E7C5] font-mono">vism2024</span></p>
+          <div className="mt-5 rounded-[var(--r-lg)] bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3 text-xs text-[var(--c-text-mid)]">
+            <p className="font-semibold text-[var(--c-text)] mb-1">Demo Credentials</p>
+            <p>Username: <span className="text-[var(--c-green)] font-mono font-bold">processor</span></p>
+            <p>Password: <span className="text-[var(--c-green)] font-mono font-bold">vism2024</span></p>
           </div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-[#B8C5D1]">
-          <a href="/" className="text-[#22E7C5] hover:underline">← Back to Applicant Portal</a>
+        <p className="mt-6 text-center text-xs text-[var(--c-text-muted)]">
+          <a href="/" className="text-[var(--c-green-mid)] hover:underline underline-offset-2">
+            ← Back to Applicant Portal
+          </a>
         </p>
       </div>
     </main>

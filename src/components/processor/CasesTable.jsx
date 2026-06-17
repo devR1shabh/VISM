@@ -7,14 +7,14 @@ const FILTER_TABS = ["All", "Pending", "Approved", "Rejected", "Need Documents"]
 
 function StatusBadge({ status }) {
   const map = {
-    Pending:          "border-amber-400/40 bg-amber-500/10 text-amber-300",
-    Approved:         "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
-    Rejected:         "border-red-400/40 bg-red-500/10 text-red-300",
-    "Need Documents": "border-blue-400/40 bg-blue-500/10 text-blue-300",
+    Pending:          "bg-[var(--c-warning-bg)] text-[var(--c-warning)] border-[var(--c-warning-border)]",
+    Approved:         "bg-[var(--c-green-bg)] text-[var(--c-green)] border-[var(--c-green-light)]",
+    Rejected:         "bg-[var(--c-error-bg)] text-[var(--c-error)] border-[var(--c-error-border)]",
+    "Need Documents": "bg-[var(--c-info-bg)] text-[var(--c-info)] border-[var(--c-info-border)]",
   };
-  const cls = map[status] || "border-white/10 bg-white/5 text-[#B8C5D1]";
+  const cls = map[status] || "bg-[var(--c-bg)] text-[var(--c-text-muted)] border-[var(--c-border)]";
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${cls}`}>
       {status || "Pending"}
     </span>
   );
@@ -45,13 +45,11 @@ function CasesTable({ cases = [] }) {
 
   const filtered = useMemo(() => {
     let result = cases;
-
     if (activeFilter !== "All") {
       result = result.filter(
         (c) => (c.processorStatus || "Pending") === activeFilter
       );
     }
-
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter(
@@ -60,7 +58,6 @@ function CasesTable({ cases = [] }) {
           getApplicantName(c).toLowerCase().includes(q)
       );
     }
-
     return result;
   }, [cases, activeFilter, search]);
 
@@ -73,21 +70,21 @@ function CasesTable({ cases = [] }) {
   }, [cases]);
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 backdrop-blur-xl overflow-hidden">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] overflow-hidden">
 
       {/* Header */}
-      <div className="px-6 py-5 border-b border-white/8">
+      <div className="px-6 py-5 border-b border-[var(--c-border)]">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-white">Cases</h2>
-            <p className="text-sm text-[#B8C5D1] mt-0.5">
+            <h2 className="text-base font-bold text-[var(--c-text)]">Cases</h2>
+            <p className="text-xs text-[var(--c-text-muted)] mt-0.5">
               {filtered.length} of {cases.length} total
             </p>
           </div>
 
           <div className="relative w-full sm:w-72">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8C5D1]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--c-text-muted)]"
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
             >
               <path strokeLinecap="round" strokeLinejoin="round"
@@ -98,7 +95,7 @@ function CasesTable({ cases = [] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search Case ID or Name..."
-              className="w-full bg-[#061A28] border border-white/10 text-white text-sm pl-9 pr-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#22E7C5] focus:border-[#22E7C5] placeholder-[#B8C5D1]/60 transition"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] text-sm pl-9 pr-4 py-2.5 rounded-[var(--r-lg)] focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[var(--c-text-muted)] transition"
             />
           </div>
         </div>
@@ -110,8 +107,8 @@ function CasesTable({ cases = [] }) {
               onClick={() => setActiveFilter(tab)}
               className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition border ${
                 activeFilter === tab
-                  ? "bg-[#22E7C5] text-[#061A28] border-[#22E7C5]"
-                  : "bg-white/5 text-[#B8C5D1] border-white/10 hover:bg-white/10 hover:text-white"
+                  ? "bg-[var(--c-green)] text-white border-[var(--c-green)]"
+                  : "bg-[var(--c-bg)] text-[var(--c-text-muted)] border-[var(--c-border)] hover:border-[var(--c-green)] hover:text-[var(--c-green)]"
               }`}
             >
               {tab}
@@ -124,21 +121,21 @@ function CasesTable({ cases = [] }) {
       {/* Table */}
       <div className="overflow-x-auto">
         {filtered.length === 0 ? (
-          <div className="py-16 text-center text-[#B8C5D1]">
+          <div className="py-16 text-center">
             <p className="text-4xl mb-3">📭</p>
-            <p className="font-medium">No cases found</p>
-            <p className="text-sm mt-1 text-[#B8C5D1]/70">
+            <p className="font-medium text-[var(--c-text-mid)]">No cases found</p>
+            <p className="text-sm mt-1 text-[var(--c-text-muted)]">
               {search ? "Try a different search term." : "No cases match this filter."}
             </p>
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/8">
+              <tr className="border-b border-[var(--c-border)] bg-[var(--c-green)]">
                 {["Case ID", "Applicant Name", "Visa Type", "Destination", "Status", "Created"].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#B8C5D1]"
+                    className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white/80"
                   >
                     {h}
                   </th>
@@ -151,30 +148,30 @@ function CasesTable({ cases = [] }) {
                 <tr
                   key={c._id || c.caseId}
                   onClick={() => navigate(`/processor/case/${c._id}`)}
-                  className={`border-b border-white/5 cursor-pointer transition hover:bg-white/5 ${
-                    i % 2 === 0 ? "" : "bg-white/[0.02]"
+                  className={`border-b border-[var(--c-border)] cursor-pointer transition hover:bg-[var(--c-bg)] ${
+                    i % 2 === 0 ? "" : "bg-[var(--c-bg)]/40"
                   }`}
                 >
-                  <td className="px-6 py-4 font-mono text-xs text-[#22E7C5] font-semibold whitespace-nowrap">
+                  <td className="px-6 py-4 font-mono text-xs text-[var(--c-green)] font-semibold whitespace-nowrap">
                     {c.caseId || "—"}
                   </td>
-                  <td className="px-6 py-4 text-white font-medium whitespace-nowrap">
+                  <td className="px-6 py-4 text-[var(--c-text)] font-medium whitespace-nowrap">
                     {getApplicantName(c)}
                   </td>
-                  <td className="px-6 py-4 text-[#B8C5D1] whitespace-nowrap">
+                  <td className="px-6 py-4 text-[var(--c-text-muted)] whitespace-nowrap">
                     {c.visaType || "—"}
                   </td>
-                  <td className="px-6 py-4 text-[#B8C5D1] whitespace-nowrap">
+                  <td className="px-6 py-4 text-[var(--c-text-muted)] whitespace-nowrap">
                     {c.country || "—"}
                   </td>
                   <td className="px-6 py-4">
                     <StatusBadge status={c.processorStatus || "Pending"} />
                   </td>
-                  <td className="px-6 py-4 text-[#B8C5D1] whitespace-nowrap">
+                  <td className="px-6 py-4 text-[var(--c-text-muted)] whitespace-nowrap">
                     {formatDate(c.createdAt)}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[#22E7C5] text-xs font-semibold hover:underline">
+                    <span className="text-[var(--c-green)] text-xs font-semibold hover:underline underline-offset-2">
                       Review →
                     </span>
                   </td>

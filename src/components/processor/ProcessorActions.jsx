@@ -12,8 +12,8 @@ const ACTIONS = [
     description:  "Mark this case as approved.",
     confirmLabel: "Confirm Approval",
     resultStatus: "Approved",
-    baseClass:    "border-emerald-400/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20",
-    confirmClass: "bg-emerald-500 text-white hover:bg-emerald-600",
+    baseClass:    "border-[var(--c-success-border)] bg-[var(--c-success-bg)] text-[var(--c-success)] hover:bg-[var(--c-success-bg)]",
+    confirmClass: "bg-[var(--c-success)] text-white hover:bg-[var(--c-success)]",
   },
   {
     key:          "reject",
@@ -22,8 +22,8 @@ const ACTIONS = [
     description:  "Mark this case as rejected.",
     confirmLabel: "Confirm Rejection",
     resultStatus: "Rejected",
-    baseClass:    "border-red-400/40 bg-red-500/10 text-red-300 hover:bg-red-500/20",
-    confirmClass: "bg-red-500 text-white hover:bg-red-600",
+    baseClass:    "border-[var(--c-error-border)] bg-[var(--c-error-bg)] text-[var(--c-error)] hover:bg-[var(--c-error-bg)]",
+    confirmClass: "bg-[var(--c-error)] text-white hover:bg-[var(--c-error)]",
   },
   {
     key:          "request_documents",
@@ -32,8 +32,8 @@ const ACTIONS = [
     description:  "Request additional documents from the applicant.",
     confirmLabel: "Confirm Request",
     resultStatus: "Need Documents",
-    baseClass:    "border-blue-400/40 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20",
-    confirmClass: "bg-blue-500 text-white hover:bg-blue-600",
+    baseClass:    "border-[var(--c-info-border)] bg-[var(--c-info-bg)] text-[var(--c-info)] hover:bg-[var(--c-info-bg)]",
+    confirmClass: "bg-[var(--c-info)] text-white hover:bg-[var(--c-info)]",
   },
 ];
 
@@ -88,10 +88,10 @@ function ActionButton({ action, currentStatus, caseId, onActionSuccess }) {
 
   if (confirming) {
     return (
-      <div className={`rounded-2xl border p-5 space-y-4 ${action.baseClass}`}>
+      <div className={`rounded-[var(--r-lg)] border p-4 space-y-3 ${action.baseClass}`}>
         <div className="flex items-center gap-2">
           <span className="text-xl">{action.icon}</span>
-          <p className="text-sm font-semibold text-white">{action.confirmLabel}</p>
+          <p className="text-sm font-semibold text-[var(--c-text)]">{action.confirmLabel}</p>
         </div>
 
         <textarea
@@ -99,19 +99,17 @@ function ActionButton({ action, currentStatus, caseId, onActionSuccess }) {
           onChange={(e) => setNoteText(e.target.value)}
           rows={2}
           placeholder={`Optional: add a note for this ${action.label.toLowerCase()} action...`}
-          className="w-full bg-[#061A28] border border-white/10 text-white text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#22E7C5] placeholder-[#B8C5D1]/50 transition resize-none"
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] text-sm px-4 py-2.5 rounded-[var(--r-md)] focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] placeholder-[var(--c-text-muted)] transition resize-none"
         />
 
-        {error && (
-          <p className="text-xs text-red-300">{error}</p>
-        )}
+        {error && <p className="text-xs text-[var(--c-error)]">{error}</p>}
 
-        <div className="flex gap-3">
+        <div className="flex gap-2.5">
           <button
             type="button"
             onClick={handleConfirm}
             disabled={loading}
-            className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${action.confirmClass}`}
+            className={`flex-1 inline-flex items-center justify-center gap-2 rounded-[var(--r-lg)] px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${action.confirmClass}`}
           >
             {loading ? (
               <>
@@ -126,7 +124,7 @@ function ActionButton({ action, currentStatus, caseId, onActionSuccess }) {
             type="button"
             onClick={handleCancel}
             disabled={loading}
-            className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-[#B8C5D1] text-sm font-semibold hover:bg-white/10 transition disabled:opacity-50"
+            className="px-4 py-2.5 rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-card)] text-[var(--c-text-mid)] text-sm font-semibold hover:bg-[var(--c-bg)] transition disabled:opacity-50"
           >
             Cancel
           </button>
@@ -141,7 +139,7 @@ function ActionButton({ action, currentStatus, caseId, onActionSuccess }) {
       onClick={handleOpen}
       disabled={isCurrentStatus}
       title={isCurrentStatus ? `Case is already ${currentStatus}` : action.description}
-      className={`w-full inline-flex items-center justify-center gap-2.5 rounded-2xl border px-5 py-3.5 text-sm font-semibold transition ${action.baseClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+      className={`w-full inline-flex items-center justify-center gap-2.5 rounded-[var(--r-lg)] border px-5 py-3 text-sm font-semibold transition ${action.baseClass} disabled:opacity-40 disabled:cursor-not-allowed`}
     >
       <span>{action.icon}</span>
       {action.label}
@@ -156,23 +154,27 @@ function ProcessorActions({ caseId, currentStatus, onActionSuccess }) {
   if (!caseId) return null;
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#083D4A]/80 p-6 backdrop-blur-xl">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-[#22E7C5]/15 flex items-center justify-center text-lg">
+        <div className="w-9 h-9 rounded-[var(--r-lg)] bg-[var(--c-green-bg)] flex items-center justify-center text-lg">
           ⚡
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.32em] text-[#22E7C5]">Case Management</p>
-          <h3 className="text-lg font-semibold text-white">Processor Actions</h3>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold">
+            Case Management
+          </p>
+          <h3 className="text-base font-bold text-[var(--c-text)]">Processor Actions</h3>
         </div>
       </div>
 
-      <div className="mb-5 rounded-2xl border border-white/8 bg-white/3 px-4 py-3">
-        <p className="text-xs text-[#B8C5D1] uppercase tracking-wide mb-1">Current Status</p>
-        <p className="text-sm font-semibold text-white">{currentStatus || "Pending"}</p>
+      <div className="rounded-[var(--r-lg)] border border-[var(--c-border)] bg-[var(--c-bg)] px-4 py-3 mb-4">
+        <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-text-muted)] mb-1">
+          Current Status
+        </p>
+        <p className="text-sm font-semibold text-[var(--c-text)]">{currentStatus || "Pending"}</p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {ACTIONS.map((action) => (
           <ActionButton
             key={action.key}
@@ -184,7 +186,7 @@ function ProcessorActions({ caseId, currentStatus, onActionSuccess }) {
         ))}
       </div>
 
-      <p className="mt-4 text-xs text-[#B8C5D1]/50 text-center">
+      <p className="mt-4 text-xs text-[var(--c-text-muted)] text-center">
         Actions are logged in the audit timeline and cannot be undone.
       </p>
     </div>

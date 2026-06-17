@@ -15,6 +15,7 @@ async function fetchAllCases() {
 }
 
 function ProcessorDashboard() {
+  // ── Logic completely unchanged ─────────────────────────────────────────────
   const { auth, logout } = useProcessorAuth();
   const navigate = useNavigate();
 
@@ -37,9 +38,7 @@ function ProcessorDashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    loadCases();
-  }, [loadCases]);
+  useEffect(() => { loadCases(); }, [loadCases]);
 
   useEffect(() => {
     const interval = setInterval(loadCases, 30_000);
@@ -52,50 +51,48 @@ function ProcessorDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#061A28] text-white">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
-      {/* Processor Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-[#143045]/70 bg-[#061A28]/95 backdrop-blur-3xl shadow-[0_22px_60px_-35px_rgba(0,0,0,0.8)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 flex-wrap">
+      {/* ── Processor Navbar ──────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 bg-[var(--c-green)] shadow-[0_1px_0_rgba(255,255,255,0.1)]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3.5 flex-wrap">
 
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#22E7C5] to-[#1AC9D6] shadow-[0_18px_40px_-28px_rgba(34,231,197,0.85)]">
-              <span className="text-lg font-black tracking-[0.2em] text-slate-950">V</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight text-white">VISM</h1>
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Processor Portal</p>
-            </div>
+            <span className="font-display text-xl font-bold text-white tracking-[-0.01em]">
+              VISM
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-white/55 font-semibold">
+              Processor Portal
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
             {lastFetch && (
-              <span className="hidden sm:block text-xs text-[#B8C5D1]">
+              <span className="hidden sm:block text-xs text-white/60">
                 Updated {lastFetch.toLocaleTimeString()}
               </span>
             )}
             <button
               type="button"
               onClick={loadCases}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-[#B8C5D1] hover:bg-white/10 hover:text-white transition"
+              className="rounded-[var(--r-md)] border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 transition"
             >
               ↻ Refresh
             </button>
-            <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
-              <span className="w-2 h-2 rounded-full bg-[#22E7C5]" />
-              <span className="text-sm text-[#B8C5D1]">{auth?.username}</span>
+            <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-white/20 bg-white/10 px-3 py-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#4ade80]" />
+              <span className="text-xs text-white font-medium">{auth?.username}</span>
             </div>
-            
             <a
               href="/"
-              className="text-xs text-[#B8C5D1] hover:text-white transition"
+              className="text-xs text-white/65 hover:text-white transition font-medium"
             >
               Applicant Portal
             </a>
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-[#B8C5D1] hover:bg-red-500/10 hover:border-red-400/30 hover:text-red-300 transition"
+              className="rounded-[var(--r-md)] border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--c-error-bg)] hover:border-[var(--c-error-border)] hover:text-[var(--c-error)] transition"
             >
               Sign Out
             </button>
@@ -103,31 +100,33 @@ function ProcessorDashboard() {
         </div>
       </nav>
 
-      {/* Page Body */}
-      <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
-
-        {/* Hero */}
-        <section className="rounded-[32px] border border-white/10 bg-[#083D4A]/80 p-8 shadow-[0_40px_120px_-40px_rgba(34,231,197,0.25)] backdrop-blur-xl">
-          <p className="text-sm uppercase tracking-[0.32em] text-[#22E7C5] mb-2">Case Management</p>
-          <h2 className="text-4xl font-bold tracking-tight text-white">Processor Dashboard</h2>
-          <p className="mt-3 text-lg text-[#B8C5D1] max-w-2xl">
+      {/* ── Page Header ───────────────────────────────────────────────────── */}
+      <div className="bg-[var(--c-green)] border-b border-white/15 px-6 pb-6 pt-4 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-white/60 font-semibold mb-1">
+            Case Management
+          </p>
+          <h1 className="font-display text-3xl font-bold text-white">Processor Dashboard</h1>
+          <p className="mt-1.5 text-sm text-white/65">
             Review, assess, and action incoming visa applications. Cases are sorted newest first.
           </p>
-        </section>
+        </div>
+      </div>
 
-        {/* Error */}
+      {/* ── Page Body ─────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-7xl px-6 py-8 space-y-6 lg:px-8">
+
         {error && (
-          <div className="rounded-2xl border border-red-400/30 bg-red-500/10 px-5 py-4 text-sm text-red-300">
+          <div className="rounded-[var(--r-lg)] border border-[var(--c-error-border)] bg-[var(--c-error-bg)] px-5 py-4 text-sm text-[var(--c-error)]">
             {error}
           </div>
         )}
 
-        {/* Loading */}
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <div className="w-12 h-12 border-4 border-[#22E7C5] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-[#B8C5D1]">Loading cases...</p>
+              <div className="w-10 h-10 border-[3px] border-[var(--c-green)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm text-[var(--c-text-muted)]">Loading cases...</p>
             </div>
           </div>
         ) : (
