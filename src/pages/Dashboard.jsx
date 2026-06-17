@@ -6,7 +6,6 @@ import ActivityFeed from "../components/output/ActivityFeed";
 import { calculateReadiness, deriveDocumentSummary } from "../engines/readinessEngine";
 import { PageHeader } from "../components/ui";
 
-// Total required documents (constant — same for all visa types)
 const TOTAL_REQUIRED = 15;
 
 function Dashboard() {
@@ -17,24 +16,24 @@ function Dashboard() {
   // ── Empty state — no case ────────────────────────────────────────────────
   if (!caseData) {
     return (
-      <main className="min-h-screen bg-[#F7F8FA]">
+      <main className="min-h-screen bg-[var(--c-bg)]">
         <PageHeader
           eyebrow="Application Dashboard"
           title="Case Overview"
           description="Real-time visa case monitoring, document status, and activity feed."
         />
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 text-center">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-12 max-w-md mx-auto">
-            <svg className="w-10 h-10 text-[#9CA3AF] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-sm p-12 max-w-md mx-auto">
+            <svg className="w-10 h-10 text-[var(--c-text-muted)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h2 className="text-lg font-bold text-[#0A2E57] mb-2">No Case Yet</h2>
-            <p className="text-sm text-[#6B7280] mb-6">
+            <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No Case Yet</h2>
+            <p className="text-sm text-[var(--c-text-muted)] mb-6">
               Create a case on the home page to see your application dashboard.
             </p>
             <button
               onClick={() => navigate("/")}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0F3D6E] transition"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-green-mid)] transition"
             >
               Go to Home
             </button>
@@ -52,7 +51,6 @@ function Dashboard() {
     uploadedDocuments
   );
 
-  // Uploaded = all docs in uploadedDocuments that match a required doc (valid or not)
   const uploaded = uploadedDocuments.filter((d) =>
     requiredDocuments.includes(d.requiredDocument)
   ).length;
@@ -69,7 +67,7 @@ function Dashboard() {
   const caseId = caseData?.caseId || caseData?.id || "—";
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
       <PageHeader
         eyebrow="Application Dashboard"
@@ -100,53 +98,53 @@ function Dashboard() {
         {/* Metric cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Completion", value: `${verifiedPct}%`,            sub: readiness.label        },
-            { label: "Uploaded",   value: `${uploaded} / ${totalDocs}`, sub: `${uploadedPct}%`      },
-            { label: "Verified",   value: `${valid} / ${totalDocs}`,    sub: `${verifiedPct}%`      },
-            { label: "Missing",    value: String(missing.length),        sub: "Not yet uploaded"     },
+            { label: "Completion", value: `${verifiedPct}%`,            sub: readiness.label    },
+            { label: "Uploaded",   value: `${uploaded} / ${totalDocs}`, sub: `${uploadedPct}%`  },
+            { label: "Verified",   value: `${valid} / ${totalDocs}`,    sub: `${verifiedPct}%`  },
+            { label: "Missing",    value: String(missing.length),        sub: "Not yet uploaded" },
           ].map(({ label, value, sub }) => (
             <div
               key={label}
-              className="bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm"
+              className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-sm"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)]">
                 {label}
               </p>
-              <p className="mt-2 text-3xl font-bold text-[#0A2E57]">{value}</p>
-              <p className="mt-1 text-xs text-[#6B7280]">{sub}</p>
+              <p className="mt-2 text-3xl font-bold text-[var(--c-text)]">{value}</p>
+              <p className="mt-1 text-xs text-[var(--c-text-muted)]">{sub}</p>
             </div>
           ))}
         </div>
 
         {/* Document Status + Application Summary */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
-            <h2 className="text-base font-bold text-[#0A2E57] mb-4">Document Status</h2>
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-sm p-6">
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-4">Document Status</h2>
             <div className="space-y-3 text-sm">
               <p>
-                <strong className="text-[#111827]">Total Required:</strong>{" "}
-                <span className="text-[#374151]">{totalDocs}</span>
+                <strong className="text-[var(--c-text)]">Total Required:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{totalDocs}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Uploaded:</strong>{" "}
-                <span className="text-[#374151]">{uploaded} / {totalDocs} ({uploadedPct}%)</span>
+                <strong className="text-[var(--c-text)]">Uploaded:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{uploaded} / {totalDocs} ({uploadedPct}%)</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Verified:</strong>{" "}
-                <span className="text-[#374151]">{valid} / {totalDocs} ({verifiedPct}%)</span>
+                <strong className="text-[var(--c-text)]">Verified:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{valid} / {totalDocs} ({verifiedPct}%)</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Missing:</strong>{" "}
-                <span className="text-[#374151]">{missing.length}</span>
+                <strong className="text-[var(--c-text)]">Missing:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{missing.length}</span>
               </p>
               {missing.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-[#E6E8EB]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#6B7280] mb-2">
+                <div className="mt-3 pt-3 border-t border-[var(--c-border)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--c-text-muted)] mb-2">
                     Missing Documents
                   </p>
                   <ul className="space-y-1">
                     {missing.map((doc) => (
-                      <li key={doc} className="text-xs text-[#374151] flex items-center gap-2">
+                      <li key={doc} className="text-xs text-[var(--c-text-mid)] flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shrink-0" />
                         {doc}
                       </li>
@@ -157,31 +155,31 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
-            <h2 className="text-base font-bold text-[#0A2E57] mb-4">Application Summary</h2>
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-sm p-6">
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-4">Application Summary</h2>
             <div className="space-y-3 text-sm">
               <p>
-                <strong className="text-[#111827]">Case ID:</strong>{" "}
-                <span className="text-[#374151]">{caseId}</span>
+                <strong className="text-[var(--c-text)]">Case ID:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{caseId}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Visa Type:</strong>{" "}
-                <span className="text-[#374151]">{caseData?.visaType}</span>
+                <strong className="text-[var(--c-text)]">Visa Type:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{caseData?.visaType}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Destination:</strong>{" "}
-                <span className="text-[#374151]">{caseData?.country}</span>
+                <strong className="text-[var(--c-text)]">Destination:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{caseData?.country}</span>
               </p>
               <p>
-                <strong className="text-[#111827]">Activity Events:</strong>{" "}
-                <span className="text-[#374151]">{activityFeed.length}</span>
+                <strong className="text-[var(--c-text)]">Activity Events:</strong>{" "}
+                <span className="text-[var(--c-text-mid)]">{activityFeed.length}</span>
               </p>
             </div>
           </div>
         </div>
 
         {/* Activity Feed */}
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-sm p-6">
           <ActivityFeed />
         </div>
 
@@ -189,35 +187,35 @@ function Dashboard() {
         <div className="grid md:grid-cols-3 gap-4">
           <Link
             to="/analysis"
-            className="block bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+            className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-sm transition hover:border-[var(--c-green)] hover:shadow-md"
           >
-            <h2 className="text-sm font-bold text-[#0A2E57]">Analysis Report</h2>
-            <p className="mt-1 text-xs text-[#6B7280]">View complete visa assessment.</p>
+            <h2 className="text-sm font-bold text-[var(--c-text)]">Analysis Report</h2>
+            <p className="mt-1 text-xs text-[var(--c-text-muted)]">View complete visa assessment.</p>
           </Link>
 
           <Link
             to="/documents"
-            className="block bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+            className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-sm transition hover:border-[var(--c-green)] hover:shadow-md"
           >
-            <h2 className="text-sm font-bold text-[#0A2E57]">Document Upload</h2>
-            <p className="mt-1 text-xs text-[#6B7280]">Upload or re-verify documents.</p>
+            <h2 className="text-sm font-bold text-[var(--c-text)]">Document Upload</h2>
+            <p className="mt-1 text-xs text-[var(--c-text-muted)]">Upload or re-verify documents.</p>
           </Link>
 
           <Link
             to="/journey"
-            className="block bg-white border border-[#E6E8EB] rounded-xl p-5 shadow-sm transition hover:border-[#4DC7F7] hover:shadow-md"
+            className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-5 shadow-sm transition hover:border-[var(--c-green)] hover:shadow-md"
           >
-            <h2 className="text-sm font-bold text-[#0A2E57]">Processing Journey</h2>
-            <p className="mt-1 text-xs text-[#6B7280]">Review your visa journey timeline.</p>
+            <h2 className="text-sm font-bold text-[var(--c-text)]">Processing Journey</h2>
+            <p className="mt-1 text-xs text-[var(--c-text-muted)]">Review your visa journey timeline.</p>
           </Link>
         </div>
 
-        {/* Submit Application — always enabled */}
+        {/* Submit Application */}
         <div className="flex justify-end pb-4">
           <button
             type="button"
             onClick={handleFinish}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
           >
             Submit Application
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

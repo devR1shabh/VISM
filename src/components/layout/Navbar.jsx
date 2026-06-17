@@ -3,7 +3,6 @@
 import { NavLink } from "react-router-dom";
 import { useCase } from "../../context/CaseContext";
 
-// All nav items are always accessible — no lock step requirements.
 const NAV_ITEMS = [
   { to: "/analysis",  label: "Analysis"  },
   { to: "/documents", label: "Documents" },
@@ -13,30 +12,29 @@ const NAV_ITEMS = [
 
 function Navbar() {
   const { workflowStep } = useCase();
-  // Progress bar: steps 1–5 map to 0–100%.
   const progressPercentage = Math.min(Math.round((workflowStep / 5) * 100), 100);
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#0A2E57] shadow-[0_2px_8px_rgba(10,46,87,0.25)]">
+    <nav className="sticky top-0 z-50 bg-white shadow-[var(--shadow-nav)]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
 
         {/* ── Brand ──────────────────────────────────────────────────────── */}
         <NavLink to="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4DC7F7] to-[#2AA6D8] shadow-[0_8px_24px_-8px_rgba(77,199,247,0.6)]">
-            <span className="text-lg font-black tracking-[0.2em] text-[#0A2E57]">V</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-green)]">
+            <span className="text-base font-black tracking-[0.1em] text-white">V</span>
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold tracking-tight text-white">
+            <h1 className="font-display text-lg font-bold tracking-tight text-[var(--c-green)]">
               VISM
             </h1>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/50">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)]">
               Visa Immigration Services
             </p>
           </div>
         </NavLink>
 
-        {/* ── Navigation items — always clickable, no locks ──────────────── */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* ── Navigation items ───────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-1">
 
           {NAV_ITEMS.map((item) => (
             <NavLink
@@ -44,58 +42,57 @@ function Navbar() {
               to={item.to}
               className={({ isActive }) =>
                 isActive
-                  ? "rounded-lg border border-white/30 bg-white/15 px-4 py-2 text-sm font-semibold text-white transition"
-                  : "rounded-lg border border-transparent px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                  ? "rounded-[var(--r-md)] bg-[var(--c-green-bg)] px-4 py-2 text-sm font-semibold text-[var(--c-green)] transition"
+                  : "rounded-[var(--r-md)] px-4 py-2 text-sm font-medium text-[var(--c-text-muted)] transition hover:bg-[var(--c-bg)] hover:text-[var(--c-text)]"
               }
             >
               {item.label}
             </NavLink>
           ))}
 
-          {/* Divider */}
-          <div className="w-px h-5 bg-white/15 mx-1" />
+          <div className="w-px h-4 bg-[var(--c-border)] mx-2" />
 
-          {/* ── Processor Portal link ──────────────────────────────────── */}
+          {/* ── Processor Portal ─────────────────────────────────────────
           <a
             href="/processor"
             title="Immigration Processor Dashboard"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#4DC7F7]/30 px-4 py-2 text-sm font-medium text-[#4DC7F7] transition hover:bg-[#4DC7F7]/10 hover:border-[#4DC7F7]/50"
+            className="inline-flex items-center gap-1.5 rounded-[var(--r-md)] border border-[var(--c-border)] px-4 py-2 text-sm font-medium text-[var(--c-text-muted)] transition hover:border-[var(--c-green)] hover:text-[var(--c-green)]"
           >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-              />
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             Processor
+          </a> */}
+
+          {/* ── Start Assessment CTA ───────────────────────────────────── */}
+          <a
+            href="/#assessment"
+            className="ml-2 inline-flex items-center gap-1.5 rounded-[var(--r-md)] bg-[var(--c-green)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--c-green-mid)]"
+          >
+            Start Assessment
           </a>
 
         </div>
 
         {/* ── Progress bar ───────────────────────────────────────────────── */}
-        <div className="hidden lg:flex w-full max-w-[18rem] flex-col gap-2 rounded-xl border border-white/15 bg-white/8 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/50 font-medium">
-              Progress
-            </span>
-            <span className="text-xs font-semibold text-[#4DC7F7]">
-              {progressPercentage}%
-            </span>
+        {progressPercentage > 0 && (
+          <div className="hidden lg:flex w-full max-w-[16rem] flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--c-text-muted)] font-medium">
+                Progress
+              </span>
+              <span className="text-[10px] font-semibold text-[var(--c-green)]">
+                {progressPercentage}%
+              </span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--c-border)]">
+              <div
+                className="h-full bg-[var(--c-green)] transition-all duration-500 rounded-full"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full bg-[#4DC7F7] transition-all duration-500 rounded-full"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-        </div>
+        )}
 
       </div>
     </nav>

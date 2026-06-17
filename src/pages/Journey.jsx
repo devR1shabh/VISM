@@ -24,10 +24,10 @@ function RequirementsChecklist() {
   const metCount = checks.filter((c) => c.met).length;
 
   return (
-    <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-base font-bold text-[#0A2E57]">Requirements Checklist</h2>
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#F7F8FA] border border-[#E6E8EB] text-[#6B7280]">
+        <h2 className="text-base font-bold text-[var(--c-text)]">Requirements Checklist</h2>
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[var(--c-bg)] border border-[var(--c-border)] text-[var(--c-text-muted)]">
           {metCount} / {checks.length} Complete
         </span>
       </div>
@@ -39,7 +39,7 @@ function RequirementsChecklist() {
             className={`flex items-center gap-3 p-3 rounded-lg border ${
               met
                 ? "border-[#BBF7D0] bg-[#DCFCE7]"
-                : "border-[#E6E8EB] bg-[#F7F8FA]"
+                : "border-[var(--c-border)] bg-[var(--c-bg)]"
             }`}
           >
             <div
@@ -57,7 +57,7 @@ function RequirementsChecklist() {
                 </svg>
               )}
             </div>
-            <span className={`text-sm font-medium ${met ? "text-[#14532D]" : "text-[#374151]"}`}>
+            <span className={`text-sm font-medium ${met ? "text-[#14532D]" : "text-[var(--c-text-mid)]"}`}>
               {label}
             </span>
           </li>
@@ -74,24 +74,24 @@ function Journey() {
   // ── Empty state — no case ────────────────────────────────────────────────
   if (!caseData) {
     return (
-      <main className="min-h-screen bg-[#F7F8FA]">
+      <main className="min-h-screen bg-[var(--c-bg)]">
         <PageHeader
           eyebrow="Immigration Journey Tracker"
           title="Your Visa Journey"
           description="Track every milestone of your visa application from assessment to approval."
         />
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 text-center">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-12 max-w-md mx-auto">
-            <svg className="w-10 h-10 text-[#9CA3AF] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-12 max-w-md mx-auto">
+            <svg className="w-10 h-10 text-[var(--c-text-muted)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
-            <h2 className="text-lg font-bold text-[#0A2E57] mb-2">No Case Yet</h2>
-            <p className="text-sm text-[#6B7280] mb-6">
+            <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No Case Yet</h2>
+            <p className="text-sm text-[var(--c-text-muted)] mb-6">
               Create a case on the home page to view your visa journey timeline.
             </p>
             <button
               onClick={() => navigate("/")}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0F3D6E] transition"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-green-mid)] transition"
             >
               Go to Home
             </button>
@@ -113,7 +113,7 @@ function Journey() {
   const status = caseData?.status || "In Progress";
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
       <PageHeader
         eyebrow="Immigration Journey Tracker"
@@ -142,12 +142,12 @@ function Journey() {
 
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
 
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
           <VisaJourneyTimeline visaJourney={visaJourney} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
             <ComplianceNotes notes={complianceNotes} />
           </div>
           <RequirementsChecklist />
@@ -157,7 +157,7 @@ function Journey() {
           <button
             type="button"
             onClick={handleProceed}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
           >
             Proceed To Dashboard
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -88,22 +88,22 @@ function Analysis() {
   // ── Empty state — no case exists yet ─────────────────────────────────────
   if (!caseData) {
     return (
-      <main className="min-h-screen bg-[#F7F8FA]">
+      <main className="min-h-screen bg-[var(--c-bg)]">
         <PageHeader
           eyebrow="BlueprintAI Assessment Report"
           title="AI Analysis & Eligibility Report"
           description="Review your case status, eligibility view, and key recommendations."
         />
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 text-center">
-          <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-12 max-w-md mx-auto">
-            <Globe size={40} className="text-[#9CA3AF] mx-auto mb-4" />
-            <h2 className="text-lg font-bold text-[#0A2E57] mb-2">No Case Yet</h2>
-            <p className="text-sm text-[#6B7280] mb-6">
+          <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-12 max-w-md mx-auto">
+            <Globe size={40} className="text-[var(--c-text-muted)] mx-auto mb-4" />
+            <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No Case Yet</h2>
+            <p className="text-sm text-[var(--c-text-muted)] mb-6">
               Start by creating a case on the home page to generate your AI analysis.
             </p>
             <button
               onClick={() => navigate("/")}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0F3D6E] transition"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-green-mid)] transition"
             >
               Go to Home
             </button>
@@ -116,7 +116,7 @@ function Analysis() {
   // ── Generating state ──────────────────────────────────────────────────────
   if (isLoading || !analysis) {
     return (
-      <div className="min-h-screen bg-[#F7F8FA]">
+      <div className="min-h-screen bg-[var(--c-bg)]">
         <PageHeader
           eyebrow="BlueprintAI Assessment Report"
           title="Generating Your Analysis..."
@@ -136,7 +136,7 @@ function Analysis() {
   const VisaIcon = visaIconMap[caseData?.visaType] || Globe;
 
   return (
-    <main className="min-h-screen bg-[#F7F8FA]">
+    <main className="min-h-screen bg-[var(--c-bg)]">
 
       <PageHeader
         eyebrow="BlueprintAI Assessment Report"
@@ -147,7 +147,7 @@ function Analysis() {
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
 
         {redirectMessage && (
-          <div className="rounded-lg border border-[#4DC7F7]/30 bg-[#E8F4FD] px-5 py-3 text-sm text-[#2AA6D8]">
+          <div className="rounded-lg border border-[var(--c-green-light)] bg-[var(--c-green-bg)] px-5 py-3 text-sm text-[var(--c-green-mid)]">
             {redirectMessage}
           </div>
         )}
@@ -161,26 +161,26 @@ function Analysis() {
           ].map(({ label, value, Icon }) => (
             <div
               key={label}
-              className="bg-white border border-[#E6E8EB] rounded-xl p-4 shadow-sm"
+              className="bg-white border border-[var(--c-border)] rounded-xl p-4 shadow-sm"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E8F4FD] text-[#2AA6D8] mb-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--c-green-bg)] text-[var(--c-green-mid)] mb-3">
                 <Icon size={18} />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)]">
                 {label}
               </p>
-              <p className="mt-1 text-sm font-bold text-[#0A2E57] leading-tight">
+              <p className="mt-1 text-sm font-bold text-[var(--c-text)] leading-tight">
                 {value}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#2AA6D8] mb-1">
+        <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-green-mid)] mb-1">
             Case Information
           </p>
-          <h2 className="text-xl font-bold text-[#0A2E57] mb-5">
+          <h2 className="text-xl font-bold text-[var(--c-text)] mb-5">
             Visa Case Details
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
@@ -192,40 +192,40 @@ function Analysis() {
             ].map(({ label, value }) => (
               <div
                 key={label}
-                className="rounded-lg bg-[#F7F8FA] border border-[#E6E8EB] px-4 py-3"
+                className="rounded-lg bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280] mb-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)] mb-1">
                   {label}
                 </p>
-                <p className="text-base font-semibold text-[#111827]">{value}</p>
+                <p className="text-base font-semibold text-[var(--c-text)]">{value}</p>
               </div>
             ))}
           </div>
           {caseData.description && (
-            <div className="mt-4 rounded-lg bg-[#F7F8FA] border border-[#E6E8EB] px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280] mb-1">
+            <div className="mt-4 rounded-lg bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)] mb-1">
                 Case Description
               </p>
-              <p className="text-sm text-[#374151] leading-relaxed">
+              <p className="text-sm text-[var(--c-text-mid)] leading-relaxed">
                 {caseData.description}
               </p>
             </div>
           )}
         </div>
 
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
           <AIApplicationOverview aiOverview={analysis.aiOverview} />
         </div>
 
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
           <AIRiskPanel aiRisks={analysis.aiRisks || []} />
         </div>
 
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
           <CaseSummary documents={analysis.documents || []} />
         </div>
 
-        <div className="bg-white border border-[#E6E8EB] rounded-xl shadow-sm p-6">
+        <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
           <AIRecommendations aiRecommendations={analysis.aiRecommendations || []} />
         </div>
 
@@ -233,7 +233,7 @@ function Analysis() {
           <button
             type="button"
             onClick={() => navigate("/documents")}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0A2E57] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0F3D6E] active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
           >
             Proceed To Documents
             <ArrowRight size={16} />
