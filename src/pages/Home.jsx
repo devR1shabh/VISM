@@ -55,7 +55,7 @@ function Home() {
         {/* Top-left eyebrow label */}
         <div className="absolute top-8 left-8 lg:top-10 lg:left-12">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
-            VISM Intelligence Platform
+            Visa Application Intelligence Platform
           </span>
         </div>
 
@@ -69,8 +69,8 @@ function Home() {
               </h1>
 
               <p className="mt-5 text-base text-white/70 leading-relaxed max-w-lg sm:text-lg">
-                BlueprintAI helps applicants assess eligibility, verify documents,
-                and track their immigration journey — from one platform.
+                VISM helps applicants assess eligibility, verify documents,
+                and track their immigration journey from one platform.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -95,7 +95,7 @@ function Home() {
             {/* Stat band — sits inside hero above fold line */}
             <div className="mt-12 flex flex-wrap gap-px overflow-hidden rounded-[var(--r-lg)] border border-white/10">
               {[
-                { label: "Visa Categories",    value: "7+" },
+                { label: "Visa Categories",    value: "7" },
                 { label: "Verification Rate",  value: "AI-Driven" },
                 { label: "Active Tracking",    value: "Real-time" },
               ].map(({ label, value }) => (

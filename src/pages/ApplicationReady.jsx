@@ -176,60 +176,7 @@ function ApplicationReady() {
           </div>
         </div>
 
-        {/* Future Enhancements */}
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px bg-[var(--c-border)]" />
-            <h2 className="text-lg font-bold text-[var(--c-text)] whitespace-nowrap">
-              🚀 Future Enhancements
-            </h2>
-            <div className="flex-1 h-px bg-[var(--c-border)]" />
-          </div>
-
-          <p className="text-center text-[var(--c-text-muted)] text-sm mb-6 max-w-xl mx-auto">
-            The BlueprintAI roadmap — features being built to make visa applications faster, smarter, and more transparent.
-          </p>
-
-          {/* Featured item — filter logic unchanged */}
-          <div className="space-y-4 mb-4">
-            {FUTURE_ENHANCEMENTS.filter((f) => f.featured).map(({ icon, title, description }) => (
-              <div
-                key={title}
-                className="bg-white border border-[var(--c-green-light)] rounded-[var(--r-xl)] p-6 shadow-[var(--shadow-card)]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-none w-14 h-14 rounded-xl bg-[var(--c-green-bg)] flex items-center justify-center text-2xl">
-                    {icon}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[var(--c-text)]">{title}</h3>
-                    <p className="mt-1 text-sm text-[var(--c-text-mid)] leading-relaxed">{description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Grid items — filter logic unchanged */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {FUTURE_ENHANCEMENTS.filter((f) => !f.featured).map(({ icon, title, description }) => (
-              <div
-                key={title}
-                className="bg-white border border-[var(--c-border)] rounded-xl p-5 shadow-sm transition hover:border-[var(--c-green)] hover:shadow-md"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-none w-11 h-11 rounded-lg bg-[var(--c-green-bg)] flex items-center justify-center text-xl">
-                    {icon}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-[var(--c-text)]">{title}</h4>
-                    <p className="text-xs text-[var(--c-text-muted)] mt-1 leading-relaxed">{description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      
 
         {/* Start New — onClick unchanged: clearCase → navigate("/") */}
         <div className="text-center pb-4">
