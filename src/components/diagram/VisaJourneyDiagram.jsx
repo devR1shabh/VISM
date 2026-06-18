@@ -56,6 +56,54 @@ graph TD
 `;
             break;
 
+          case "Permanent Residency Visa":
+            graphDefinition = `
+graph TD
+    A[Identity Documents]
+    --> B[Residency Eligibility Review]
+    --> C[Background Check]
+    --> D[Visa Submission]
+    --> E[Processing]
+    --> F[Decision]
+`;
+            break;
+
+          case "Business Visa":
+            graphDefinition = `
+graph TD
+    A[Business Documents]
+    --> B[Financial Verification]
+    --> C[Employment Review]
+    --> D[Visa Submission]
+    --> E[Processing]
+    --> F[Decision]
+`;
+            break;
+
+          case "Family Sponsorship Visa":
+            graphDefinition = `
+graph TD
+    A[Sponsor Documents]
+    --> B[Relationship Verification]
+    --> C[Financial Proof Review]
+    --> D[Visa Submission]
+    --> E[Processing]
+    --> F[Decision]
+`;
+            break;
+
+          case "Investor Visa":
+            graphDefinition = `
+graph TD
+    A[Investment Documents]
+    --> B[Proof of Funds Review]
+    --> C[Business Plan Assessment]
+    --> D[Visa Submission]
+    --> E[Processing]
+    --> F[Decision]
+`;
+            break;
+
           default:
             graphDefinition = `
 graph TD

@@ -30,8 +30,8 @@ function DocumentUploadPanel({ documents = [] }) {
 
         if (result.valid && result.passportData?.passportNumber) {
           const existingPassport = getDocumentByType(uploadedDocuments, "Passport");
-          const existingNumber = existingPassport?.passportData?.passportNumber;
-          const incomingNumber = result.passportData.passportNumber;
+          const existingNumber   = existingPassport?.passportData?.passportNumber;
+          const incomingNumber   = result.passportData.passportNumber;
           if (existingNumber && existingNumber !== incomingNumber) {
             onPassportReplaced();
           }
@@ -39,11 +39,11 @@ function DocumentUploadPanel({ documents = [] }) {
 
         const documentRecord = {
           requiredDocument: "Passport",
-          fileName: file.name,
+          fileName:    file.name,
           detectedType: result.documentType,
-          valid: result.valid,
+          valid:        result.valid,
           passportData: result.passportData,
-          uploadedAt: new Date().toISOString(),
+          uploadedAt:   new Date().toISOString(),
         };
 
         addDocument(documentRecord);
@@ -54,11 +54,8 @@ function DocumentUploadPanel({ documents = [] }) {
 
         addActivity(
           "upload",
-          result.valid
-            ? "Passport verified successfully"
-            : "Passport verification failed"
+          result.valid ? "Passport verified successfully" : "Passport verification failed"
         );
-
         return;
       }
 
@@ -67,12 +64,12 @@ function DocumentUploadPanel({ documents = [] }) {
 
         const documentRecord = {
           requiredDocument: documentName,
-          fileName: file.name,
-          detectedType: result.documentType,
-          valid: result.valid,
-          confidence: result.confidence,
-          matchedKeywords: result.matchedKeywords,
-          uploadedAt: new Date().toISOString(),
+          fileName:         file.name,
+          detectedType:     result.documentType,
+          valid:            result.valid,
+          confidence:       result.confidence,
+          matchedKeywords:  result.matchedKeywords,
+          uploadedAt:       new Date().toISOString(),
         };
 
         addDocument(documentRecord);
@@ -87,16 +84,15 @@ function DocumentUploadPanel({ documents = [] }) {
             ? `${documentName} verified successfully`
             : `${documentName} verification failed`
         );
-
         return;
       }
 
       const documentRecord = {
         requiredDocument: documentName,
-        fileName: file.name,
+        fileName:    file.name,
         detectedType: documentName,
-        valid: true,
-        uploadedAt: new Date().toISOString(),
+        valid:        true,
+        uploadedAt:   new Date().toISOString(),
       };
 
       addDocument(documentRecord);
@@ -114,28 +110,27 @@ function DocumentUploadPanel({ documents = [] }) {
     uploadedDocuments
   );
 
-  const progress =
-    totalCount === 0 ? 0 : Math.round((uploadedCount / totalCount) * 100);
+  const progress = totalCount === 0 ? 0 : Math.round((uploadedCount / totalCount) * 100);
 
   const getDocumentStatus = (documentName) => {
     return getDocumentByType(uploadedDocuments, documentName);
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4">Document Upload</h2>
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+      <h2 className="text-lg font-bold text-[var(--c-text)] mb-4">Document Upload</h2>
 
-      <div className="mb-6">
-        <p className="font-medium">
+      <div className="mb-5">
+        <p className="text-sm font-medium text-[var(--c-text-mid)] mb-2">
           Uploaded: {uploadedCount} / {totalCount}
         </p>
-        <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+        <div className="w-full bg-[var(--c-border)] rounded-full h-2">
           <div
-            className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+            className="bg-[var(--c-green)] h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-sm text-gray-600 mt-2">{progress}% Complete</p>
+        <p className="text-xs text-[var(--c-text-muted)] mt-1.5">{progress}% Complete</p>
       </div>
 
       <div className="space-y-4">
@@ -143,87 +138,64 @@ function DocumentUploadPanel({ documents = [] }) {
           const uploadedDoc = getDocumentStatus(doc);
 
           return (
-            <div key={doc} className="border rounded-lg p-4">
-              <div className="flex justify-between items-center">
+            <div
+              key={doc}
+              className="border border-[var(--c-border)] rounded-[var(--r-lg)] p-4"
+            >
+              <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
-                  <h3 className="font-medium">{doc}</h3>
+                  <h3 className="text-sm font-semibold text-[var(--c-text)] mb-1">{doc}</h3>
 
                   {!uploadedDoc ? (
-                    <p className="text-red-500 text-sm mt-1">Not Uploaded</p>
+                    <p className="text-[var(--c-error)] text-xs">Not uploaded</p>
                   ) : uploadedDoc.valid ? (
                     <>
-                      <p className="text-green-600 text-sm mt-1">
-                        Uploaded: {uploadedDoc.fileName}
+                      <p className="text-[var(--c-success)] text-xs">
+                        ✓ Uploaded: {uploadedDoc.fileName}
                       </p>
 
                       {doc === "Passport" && uploadedDoc.passportData && (
-                        <div className="mt-3 text-sm bg-gray-50 p-3 rounded">
-                          <p>
-                            <strong>Name:</strong>{" "}
-                            {uploadedDoc.passportData.fullName}
-                          </p>
-                          <p>
-                            <strong>Passport No:</strong>{" "}
-                            {uploadedDoc.passportData.passportNumber}
-                          </p>
-                          <p>
-                            <strong>Nationality:</strong>{" "}
-                            {uploadedDoc.passportData.nationality}
-                          </p>
-                          <p>
-                            <strong>Date Of Birth:</strong>{" "}
-                            {uploadedDoc.passportData.dateOfBirth}
-                          </p>
-                          <p>
-                            <strong>Expiry:</strong>{" "}
-                            {uploadedDoc.passportData.expiryDate}
-                          </p>
+                        <div className="mt-3 text-xs bg-[var(--c-bg)] rounded-[var(--r-md)] border border-[var(--c-border)] p-3 space-y-1 text-[var(--c-text-mid)]">
+                          <p><strong className="text-[var(--c-text)]">Name:</strong> {uploadedDoc.passportData.fullName}</p>
+                          <p><strong className="text-[var(--c-text)]">Passport No:</strong> {uploadedDoc.passportData.passportNumber}</p>
+                          <p><strong className="text-[var(--c-text)]">Nationality:</strong> {uploadedDoc.passportData.nationality}</p>
+                          <p><strong className="text-[var(--c-text)]">Date of Birth:</strong> {uploadedDoc.passportData.dateOfBirth}</p>
+                          <p><strong className="text-[var(--c-text)]">Expiry:</strong> {uploadedDoc.passportData.expiryDate}</p>
                         </div>
                       )}
 
                       {VERIFIABLE_DOCUMENTS.includes(doc) && (
-                        <div className="mt-3 text-sm bg-green-50 p-3 rounded border border-green-100">
-                          <p className="text-green-700 font-semibold">
-                            ✓ Verified
-                          </p>
-                          <p className="text-green-600 mt-1">
-                            ✓ Document Accepted
-                          </p>
+                        <div className="mt-3 text-xs bg-[var(--c-success-bg)] rounded-[var(--r-md)] border border-[var(--c-success-border)] p-3">
+                          <p className="font-semibold text-[var(--c-success)]">✓ Verified</p>
+                          <p className="text-[var(--c-success)] mt-0.5">✓ Document Accepted</p>
                         </div>
                       )}
 
-                      <p className="text-xs text-gray-500 mt-1">
-                        Uploaded:{" "}
-                        {new Date(uploadedDoc.uploadedAt).toLocaleString()}
+                      <p className="text-[var(--c-text-muted)] text-xs mt-1.5">
+                        Uploaded: {new Date(uploadedDoc.uploadedAt).toLocaleString()}
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="text-red-600 text-sm mt-1">
-                        Invalid Upload
-                      </p>
+                      <p className="text-[var(--c-error)] text-xs">Invalid upload</p>
 
                       {VERIFIABLE_DOCUMENTS.includes(doc) && (
-                        <div className="mt-2 text-sm bg-red-50 p-3 rounded border border-red-100">
-                          <p className="text-red-700 font-semibold">
-                            Verification Failed
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Document does not appear to be a {doc}. Please
-                            upload the correct file.
+                        <div className="mt-2 text-xs bg-[var(--c-error-bg)] rounded-[var(--r-md)] border border-[var(--c-error-border)] p-3">
+                          <p className="font-semibold text-[var(--c-error)]">Verification Failed</p>
+                          <p className="text-[var(--c-text-muted)] mt-0.5">
+                            Document does not appear to be a {doc}. Please upload the correct file.
                           </p>
                         </div>
                       )}
 
-                      <p className="text-xs text-gray-500 mt-1">
-                        Uploaded:{" "}
-                        {new Date(uploadedDoc.uploadedAt).toLocaleString()}
+                      <p className="text-[var(--c-text-muted)] text-xs mt-1.5">
+                        Uploaded: {new Date(uploadedDoc.uploadedAt).toLocaleString()}
                       </p>
                     </>
                   )}
                 </div>
 
-                <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-4 shrink-0">
+                <label className="cursor-pointer bg-[var(--c-green)] text-white text-xs font-semibold px-4 py-2 rounded-[var(--r-md)] hover:bg-[var(--c-green-mid)] transition shrink-0">
                   Upload
                   <input
                     type="file"

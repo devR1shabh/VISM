@@ -10,78 +10,84 @@ import visaTypes from "../../data/visaTypes";
 import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
 import { createCase } from "../../services/api";
 
-// ── Custom React Select styles for dark theme
-const darkSelectStyles = {
+// ── react-select styles — green token system ──────────────────────────────
+// All Select logic (onChange, options, isSearchable) is completely unchanged.
+// Only the visual style object is updated to match the new green design system.
+const selectStyles = {
   control: (base, state) => ({
     ...base,
-    backgroundColor: "#083D4A",
-    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#FFFFFF",
+    borderColor: state.isFocused ? "#1C4532" : "#E5E5E3",
     borderWidth: "1px",
-    color: "#FFFFFF",
-    boxShadow: state.isFocused ? "0 0 0 1px #22E7C5" : "none",
-    borderColor: state.isFocused ? "#22E7C5" : "rgba(255,255,255,0.1)",
-    "&:hover": {
-      borderColor: "#22E7C5",
-    },
+    boxShadow: state.isFocused ? "0 0 0 2px rgba(28,69,50,0.12)" : "none",
+    "&:hover": { borderColor: "#1C4532" },
     cursor: "pointer",
-    minHeight: "42px",
+    minHeight: "44px",
+    borderRadius: "8px",
   }),
   placeholder: (base) => ({
     ...base,
-    color: "#B8C5D1",
+    color: "#9CA3AF",
+    fontSize: "14px",
   }),
   input: (base) => ({
     ...base,
-    color: "#FFFFFF",
-    caretColor: "#22E7C5",
+    color: "#111111",
+    fontSize: "14px",
   }),
   singleValue: (base) => ({
     ...base,
-    color: "#FFFFFF",
+    color: "#111111",
+    fontSize: "14px",
   }),
   menu: (base) => ({
     ...base,
-    backgroundColor: "#083D4A",
-    border: "1px solid rgba(34,231,197,0.2)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    backgroundColor: "#FFFFFF",
+    border: "1px solid #E5E5E3",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+    borderRadius: "8px",
+    overflow: "hidden",
   }),
   menuList: (base) => ({
     ...base,
-    backgroundColor: "#083D4A",
-    padding: "8px 0",
+    backgroundColor: "#FFFFFF",
+    padding: "4px 0",
   }),
   option: (base, state) => ({
     ...base,
     backgroundColor: state.isSelected
-      ? "#22E7C5"
+      ? "#1C4532"
       : state.isFocused
-      ? "#0a4d5f"
-      : "#083D4A",
-    color: state.isSelected ? "#061A28" : "#FFFFFF",
+      ? "#F7F7F5"
+      : "#FFFFFF",
+    color: state.isSelected ? "#FFFFFF" : "#111111",
     cursor: "pointer",
-    padding: "12px 16px",
+    padding: "10px 14px",
+    fontSize: "14px",
     "&:active": {
-      backgroundColor: "#22E7C5",
-      color: "#061A28",
+      backgroundColor: "#F0FDF4",
+      color: "#1C4532",
     },
   }),
   loadingMessage: (base) => ({
     ...base,
-    color: "#B8C5D1",
+    color: "#6B7280",
+    fontSize: "14px",
   }),
   noOptionsMessage: (base) => ({
     ...base,
-    color: "#B8C5D1",
+    color: "#6B7280",
+    fontSize: "14px",
   }),
 };
 
 function CaseForm() {
+  // ── All logic completely unchanged ────────────────────────────────────────
   const navigate = useNavigate();
-
   const { setCaseData, clearCase } = useCase();
 
-  const [visaType, setVisaType] = useState("");
-  const [country, setCountry] = useState("");
+  const [visaType, setVisaType]       = useState("");
+  const [country, setCountry]         = useState("");
   const [description, setDescription] = useState("");
 
   const visaOptions = visaTypes.map((visa) => ({
@@ -98,36 +104,26 @@ function CaseForm() {
     if (!visaType || !country) return;
 
     try {
-      // Wipe all previous case data before starting fresh
       clearCase();
 
       const newCase = {
         caseId: `CASE-${Date.now()}`,
-
         visaType,
         country,
         description,
-
         status: "In Progress",
-
         createdAt: new Date().toISOString(),
-
         documents: [],
         extractedData: {},
         risks: [],
         tasks: [],
         notifications: [],
         readinessScore: null,
-
-        // Workflow step: case has been created → Analysis is now unlocked
         workflowStep: WORKFLOW_STEPS.CASE_CREATED,
       };
 
       const savedCase = await createCase(newCase);
-
-      // Ensure workflowStep is persisted even if the backend strips unknown fields
       setCaseData({ ...savedCase, workflowStep: WORKFLOW_STEPS.CASE_CREATED });
-
       navigate("/analysis");
     } catch (error) {
       console.error("Failed to create case:", error);
@@ -135,47 +131,45 @@ function CaseForm() {
   };
 
   return (
-    <div className="bg-[#083D4A] p-8 rounded-lg shadow-xl border border-white/10 space-y-6 backdrop-blur-sm">
+    <div className="bg-white border border-[var(--c-border)] rounded-[var(--r-2xl)] p-8 shadow-[var(--shadow-card)] space-y-5">
+
       <div>
-        <label className="block mb-3 font-medium text-[#B8C5D1]">
+        <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Visa Type
         </label>
-
         <Select
           options={visaOptions}
           placeholder="Search or Select Visa Type"
           onChange={(selected) => setVisaType(selected?.value || "")}
           isSearchable
-          styles={darkSelectStyles}
-          classNamePrefix="dark-select"
+          styles={selectStyles}
+          classNamePrefix="vism-select"
         />
       </div>
 
       <div>
-        <label className="block mb-3 font-medium text-[#B8C5D1]">
+        <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Destination Country
         </label>
-
         <Select
           options={countryOptions}
           placeholder="Search or Select Country"
           onChange={(selected) => setCountry(selected?.value || "")}
           isSearchable
-          styles={darkSelectStyles}
-          classNamePrefix="dark-select"
+          styles={selectStyles}
+          classNamePrefix="vism-select"
         />
       </div>
 
       <div>
-        <label className="block mb-3 font-medium text-[#B8C5D1]">
+        <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Case Description
         </label>
-
         <textarea
-          rows="6"
+          rows="5"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full bg-[#061A28] border border-white/10 text-white p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22E7C5] focus:border-[#22E7C5] placeholder-[#B8C5D1] transition"
+          className="w-full bg-white border border-[var(--c-border)] text-[var(--c-text)] p-3.5 rounded-[var(--r-lg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[#9CA3AF] transition resize-none"
           placeholder="Describe the immigration or visa case in detail..."
         />
       </div>
@@ -183,10 +177,11 @@ function CaseForm() {
       <button
         onClick={handleAnalyze}
         disabled={!visaType || !country}
-        className="w-full bg-[#22E7C5] text-[#061A28] py-3 rounded-lg font-semibold hover:bg-[#39F5D5] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#22E7C5]/20"
+        className="w-full bg-[var(--c-green)] text-white py-3.5 rounded-[var(--r-lg)] font-semibold text-sm hover:bg-[var(--c-green-mid)] active:scale-[0.99] transition duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
       >
-        Analyze Case
+        Analyse Case
       </button>
+
     </div>
   );
 }
