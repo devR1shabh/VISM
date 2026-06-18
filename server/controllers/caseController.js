@@ -220,3 +220,40 @@ export async function processorAction(req, res) {
     res.status(500).json({ error: "Failed to process action" });
   }
 }
+// ── saveQuestionnaire ───────────────────────────────────────────────────────
+// Called after applicant submits the post-document questionnaire.
+// Persists all answers to MongoDB so the processor dashboard can display them.
+//
+// Body: { answers: { purpose, education, occupation, ... } }
+export async function saveQuestionnaire(req, res) {
+  try {
+    const { answers } = req.body;
+    const caseId = req.params.id;
+
+    if (!answers || typeof answers !== "object") {
+      return res.status(400).json({ error: "answers object is required" });
+    }
+
+    const updatedCase = await Case.findByIdAndUpdate(
+      caseId,
+      {
+        $set: {
+          questionnaire: {
+            ...answers,
+            submittedAt: new Date(),
+          },
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedCase) {
+      return res.status(404).json({ error: "Case not found" });
+    }
+
+    res.json(updatedCase);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save questionnaire" });
+  }
+}

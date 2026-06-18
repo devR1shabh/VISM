@@ -11,6 +11,7 @@ import {
   getAllCases,
   getCaseById,
   processorAction,
+  saveQuestionnaire,
 } from "../controllers/caseController.js";
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.put("/:id",                     updateCase);
 router.put("/:id/documents",           addVerifiedDocument);
 router.post("/:id/passport-data",      savePassportData);
 router.post("/:id/processor-action",   processorAction);
+router.post("/:id/questionnaire",      saveQuestionnaire);
 
 export default router;

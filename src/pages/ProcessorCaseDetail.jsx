@@ -9,6 +9,7 @@ import CaseDocumentsPanel       from "../components/processor/CaseDocumentsPanel
 import ProcessorNotesPanel      from "../components/processor/ProcessorNotesPanel";
 import ProcessorActions         from "../components/processor/ProcessorActions";
 import AuditTimeline            from "../components/processor/AuditTimeline";
+import QuestionnairePanel       from "../components/processor/QuestionnairePanel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -236,9 +237,10 @@ function ProcessorCaseDetail() {
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6 items-start">
 
           <div className="space-y-5 min-w-0">
-            <CaseAssessmentPanel caseRecord={caseRecord} />
-            <CasePassportPanel   caseRecord={caseRecord} />
-            <CaseDocumentsPanel  caseRecord={caseRecord} />
+            <CaseAssessmentPanel  caseRecord={caseRecord} />
+            <QuestionnairePanel   caseRecord={caseRecord} />
+            <CasePassportPanel    caseRecord={caseRecord} />
+            <CaseDocumentsPanel   caseRecord={caseRecord} />
           </div>
 
           <div className="space-y-5">

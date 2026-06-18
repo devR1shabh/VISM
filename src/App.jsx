@@ -10,6 +10,7 @@ import ProcessorProtectedRoute from "./components/processor/ProcessorProtectedRo
 import Home                from "./pages/Home";
 import Analysis            from "./pages/Analysis";
 import Documents           from "./pages/Documents";
+import Questionnaire       from "./pages/Questionnaire";
 import Journey             from "./pages/Journey";
 import Dashboard           from "./pages/Dashboard";
 import ApplicationReady    from "./pages/ApplicationReady";
@@ -18,7 +19,7 @@ import ProcessorCaseDetail from "./pages/ProcessorCaseDetail";
 
 import Navi from "./components/navi/Navi";
 
-const NAVI_ROUTES            = ["/analysis", "/documents", "/journey"];
+const NAVI_ROUTES            = ["/analysis", "/documents", "/questionnaire", "/journey"];
 const PROCESSOR_ROUTE_PREFIX = "/processor";
 
 function AppContent() {
@@ -52,6 +53,15 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Documents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/questionnaire"
+          element={
+            <ProtectedRoute>
+              <Questionnaire />
             </ProtectedRoute>
           }
         />

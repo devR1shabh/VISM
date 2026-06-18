@@ -21,6 +21,8 @@ const STORAGE_KEYS = {
   // Stores { fullName, passportNumber } of the last successfully-extracted passport.
   // Used to detect identity changes on re-upload.
   applicantIdentity: "vism_applicantIdentity",
+  // Stores the completed questionnaire answers object.
+  questionnaire:     "vism_questionnaire",
 };
 
 function loadFromStorage(key, fallback) {
@@ -42,37 +44,35 @@ function saveToStorage(key, value) {
 
 // ── Workflow step constants (exported for use in guards) ─────────────────────
 // 0 = no active case
-// 1 = case created  → unlocks /analysis
-// 2 = analysis done → unlocks /documents
-// 3 = documents done → unlocks /journey
-// 4 = journey done  → unlocks /dashboard
-// 5 = all done      → unlocks /application-ready + PDF download
+// 1 = case created       → unlocks /analysis
+// 2 = analysis done      → unlocks /documents
+// 3 = documents done     → unlocks /questionnaire
+// 4 = questionnaire done → unlocks /journey
+// 5 = journey done       → unlocks /dashboard
+// 6 = all done           → unlocks /application-ready + PDF download
 export const WORKFLOW_STEPS = {
-  NONE:           0,
-  CASE_CREATED:   1,
-  ANALYSIS_DONE:  2,
-  DOCUMENTS_DONE: 3,
-  JOURNEY_DONE:   4,
-  ALL_DONE:       5,
+  NONE:               0,
+  CASE_CREATED:       1,
+  ANALYSIS_DONE:      2,
+  DOCUMENTS_DONE:     3,
+  QUESTIONNAIRE_DONE: 4,
+  JOURNEY_DONE:       5,
+  ALL_DONE:           6,
 };
 
 export function CaseProvider({ children }) {
   // ── Initialize state from localStorage, but only if no "fresh session" flag is set
-  // This ensures that on app startup, old demo/test cases don't persist.
   const [caseData, setCaseDataRaw] = useState(() => {
-    // Check if this is a fresh session (first load after app refresh)
     const freshSession = sessionStorage.getItem("_vism_fresh_session");
     if (!freshSession) {
-      // Mark this as a fresh session to prevent repeated clears
       sessionStorage.setItem("_vism_fresh_session", "true");
-      // Clear all old case data on fresh app startup
       localStorage.removeItem(STORAGE_KEYS.caseData);
       localStorage.removeItem(STORAGE_KEYS.uploadedDocuments);
       localStorage.removeItem(STORAGE_KEYS.activityFeed);
       localStorage.removeItem(STORAGE_KEYS.naviMessages);
+      localStorage.removeItem(STORAGE_KEYS.questionnaire);
       return null;
     }
-    // Otherwise, restore from storage as normal
     return loadFromStorage(STORAGE_KEYS.caseData, null);
   });
 
@@ -90,12 +90,16 @@ export function CaseProvider({ children }) {
     loadFromStorage(STORAGE_KEYS.naviMessages, [])
   );
 
-  // { fullName: string | null, passportNumber: string | null }
   const [applicantIdentity, setApplicantIdentityRaw] = useState(() =>
     loadFromStorage(STORAGE_KEYS.applicantIdentity, {
       fullName: null,
       passportNumber: null,
     })
+  );
+
+  // Questionnaire answers object — null until submitted
+  const [questionnaire, setQuestionnaireRaw] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.questionnaire, null)
   );
 
   // ── setCaseData ────────────────────────────────────────────────────────────
@@ -108,12 +112,9 @@ export function CaseProvider({ children }) {
   };
 
   // ── setWorkflowStep ────────────────────────────────────────────────────────
-  // Advances (or sets) the workflowStep on the current caseData.
-  // Only advances forward — never regresses.
   const setWorkflowStep = (step) => {
     setCaseDataRaw((prev) => {
       if (!prev) return prev;
-      // Only advance, never regress
       if ((prev.workflowStep ?? 0) >= step) return prev;
       const next = { ...prev, workflowStep: step };
       saveToStorage(STORAGE_KEYS.caseData, next);
@@ -122,7 +123,6 @@ export function CaseProvider({ children }) {
   };
 
   // ── addDocument ────────────────────────────────────────────────────────────
-  // Always upserts (one record per requiredDocument type — no duplicates).
   const addDocument = (document) => {
     setUploadedDocumentsRaw((prev) => {
       const next = upsertUploadedDocument(prev, document);
@@ -173,27 +173,21 @@ export function CaseProvider({ children }) {
     saveToStorage(STORAGE_KEYS.naviMessages, []);
   };
 
-  // ── onPassportReplaced ─────────────────────────────────────────────────────
+  // ── saveQuestionnaire ──────────────────────────────────────────────────────
   /**
-   * Called by PassportUploadSection when a passport with a DIFFERENT identity
-   * (name OR passport number) is detected.
-   *
-   * Behaviour:
-   *  - Clears Navi conversation so a fresh personalised greeting is shown.
-   *  - Updates the stored applicant identity to the new passport.
-   *  - All other case data (case info, documents, activity) is preserved.
-   *
-   * When the SAME passport is re-uploaded (same name + number), this function
-   * is NOT called — the conversation is preserved.
-   *
-   * @param {{ fullName: string, passportNumber: string } | null} newIdentity
+   * Persists the completed questionnaire answers to localStorage.
+   * @param {object} answers — the full answers object
    */
+  const saveQuestionnaire = (answers) => {
+    setQuestionnaireRaw(answers);
+    saveToStorage(STORAGE_KEYS.questionnaire, answers);
+  };
+
+  // ── onPassportReplaced ─────────────────────────────────────────────────────
   const onPassportReplaced = (newIdentity = null) => {
-    // Wipe Navi conversation
     setNaviMessagesRaw([]);
     saveToStorage(STORAGE_KEYS.naviMessages, []);
 
-    // Update stored identity
     if (newIdentity) {
       const updated = {
         fullName:       newIdentity.fullName       ?? null,
@@ -205,13 +199,6 @@ export function CaseProvider({ children }) {
   };
 
   // ── updateApplicantIdentity ────────────────────────────────────────────────
-  /**
-   * Called by PassportUploadSection after successful extraction when the
-   * identity has NOT changed (same applicant re-uploading their passport).
-   * Keeps the stored identity fresh without touching Navi messages.
-   *
-   * @param {{ fullName: string, passportNumber: string }} identity
-   */
   const updateApplicantIdentity = (identity) => {
     const updated = {
       fullName:       identity.fullName       ?? null,
@@ -234,6 +221,9 @@ export function CaseProvider({ children }) {
 
     setNaviMessagesRaw([]);
     saveToStorage(STORAGE_KEYS.naviMessages, []);
+
+    setQuestionnaireRaw(null);
+    saveToStorage(STORAGE_KEYS.questionnaire, null);
 
     const emptyIdentity = { fullName: null, passportNumber: null };
     setApplicantIdentityRaw(emptyIdentity);
@@ -263,6 +253,9 @@ export function CaseProvider({ children }) {
         naviMessages,
         setNaviMessages,
         clearNaviMessages,
+
+        questionnaire,
+        saveQuestionnaire,
 
         applicantIdentity,
         onPassportReplaced,

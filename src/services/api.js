@@ -160,3 +160,20 @@ export async function sendNaviMessage(caseContext, message) {
 
   return response.json();
 }
+/* =========================
+   QUESTIONNAIRE
+========================= */
+
+export async function saveQuestionnaire(caseId, answers) {
+  const response = await fetch(`${API_URL}/cases/${caseId}/questionnaire`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ answers }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to save questionnaire");
+  }
+
+  return response.json();
+}

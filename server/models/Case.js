@@ -30,6 +30,27 @@ const auditEntrySchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Stores all 10 questionnaire answers as flat key-value pairs.
+// Keys match the question IDs defined in the front-end QUESTIONS array.
+const questionnaireSchema = new mongoose.Schema(
+  {
+    purpose:               { type: String, default: "" },
+    education:             { type: String, default: "" },
+    occupation:            { type: String, default: "" },
+    experience:            { type: String, default: "" },
+    travelHistory:         { type: String, default: "" },
+    previousRefusal:       { type: String, default: "" },
+    previousRefusalDetails:{ type: String, default: "" },
+    financialCapacity:     { type: String, default: "" },
+    hasSponsor:            { type: String, default: "" },
+    sponsorName:           { type: String, default: "" },
+    existingArrangements:  { type: String, default: "" },
+    additionalNotes:       { type: String, default: "" },
+    submittedAt:           { type: Date,   default: null },
+  },
+  { _id: false }
+);
+
 const caseSchema = new mongoose.Schema(
   {
     caseId: { type: String, required: true },
@@ -38,13 +59,11 @@ const caseSchema = new mongoose.Schema(
     description: { type: String, default: "" },
 
     // Populated after passport extraction completes.
-    // Stores the full extracted passport fields so the processor can see them.
     passportData: {
       name:           String,
       nationality:    String,
       passportLast4:  String,
       expiryDate:     String,
-      // Full fields — written when passport is extracted on the applicant side
       fullName:       String,
       passportNumber: String,
       dateOfBirth:    String,
@@ -53,13 +72,18 @@ const caseSchema = new mongoose.Schema(
     },
 
     // Populated after AI analysis completes on the applicant side.
-    // mongoose.Schema.Types.Mixed accepts the full nested analysis object.
     analysis: {
       type: mongoose.Schema.Types.Mixed,
       default: null,
     },
 
     uploadedDocuments: [uploadedDocumentSchema],
+
+    // Populated after questionnaire is submitted by the applicant.
+    questionnaire: {
+      type: questionnaireSchema,
+      default: null,
+    },
 
     processorStatus: {
       type: String,
