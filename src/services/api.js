@@ -123,9 +123,6 @@ export async function addVerifiedDocument(caseId, documentType) {
 
 /* =========================
    PASSPORT DATA PERSISTENCE
-   Saves the full extracted passport data to MongoDB so the
-   processor dashboard can display it. Called after OCR extraction
-   succeeds in PassportUploadSection.
 ========================= */
 
 export async function savePassportData(caseId, passportData) {
@@ -160,6 +157,7 @@ export async function sendNaviMessage(caseContext, message) {
 
   return response.json();
 }
+
 /* =========================
    QUESTIONNAIRE
 ========================= */
@@ -173,6 +171,36 @@ export async function saveQuestionnaire(caseId, answers) {
 
   if (!response.ok) {
     throw new Error("Failed to save questionnaire");
+  }
+
+  return response.json();
+}
+
+/* =========================
+   READINESS ASSESSMENT AGENT
+   Triggers the autonomous agent loop on the server.
+   Returns immediately with { running: true }.
+   The frontend polls GET /cases/:id until agentAssessment.running === false.
+========================= */
+
+export async function triggerAssessmentAgent(caseId) {
+  const response = await fetch(`${API_URL}/cases/${caseId}/run-assessment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to start assessment agent");
+  }
+
+  return response.json();
+}
+
+export async function pollCaseForAssessment(caseId) {
+  const response = await fetch(`${API_URL}/cases/${caseId}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch case");
   }
 
   return response.json();

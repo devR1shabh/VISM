@@ -10,6 +10,7 @@ import ProcessorNotesPanel      from "../components/processor/ProcessorNotesPane
 import ProcessorActions         from "../components/processor/ProcessorActions";
 import AuditTimeline            from "../components/processor/AuditTimeline";
 import QuestionnairePanel       from "../components/processor/QuestionnairePanel";
+import AgentAssessmentPanel     from "../components/processor/AgentAssessmentPanel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -74,6 +75,17 @@ function ProcessorCaseDetail() {
 
   const viewLoggedRef = useRef(false);
 
+  // If the agent is still running when processor opens the case,
+  // poll every 3s until it finishes.
+  const pollRef = useRef(null);
+
+  function stopPolling() {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }
+
   const loadCase = useCallback(async () => {
     try {
       const data = await fetchCase(id);
@@ -97,12 +109,33 @@ function ProcessorCaseDetail() {
           const updated = await sendProcessorAction(data._id, "view_case", "");
           setCaseRecord(updated);
         } catch {
-          // Non-critical — don't surface this error
+          // Non-critical
         }
+      }
+
+      // If agent is already running, start polling
+      if (data?.agentAssessment?.running) {
+        startAgentPolling(data._id);
       }
     }
     init();
+    return () => stopPolling();
   }, [loadCase]);
+
+  function startAgentPolling(caseId) {
+    stopPolling();
+    pollRef.current = setInterval(async () => {
+      try {
+        const record = await fetchCase(caseId);
+        if (!record.agentAssessment?.running) {
+          stopPolling();
+          setCaseRecord(record);
+        }
+      } catch {
+        // Silent — don't disrupt the processor view
+      }
+    }, 3000);
+  }
 
   const handleActionSuccess = useCallback((updatedCase) => {
     setCaseRecord(updatedCase);
@@ -238,6 +271,7 @@ function ProcessorCaseDetail() {
 
           <div className="space-y-5 min-w-0">
             <CaseAssessmentPanel  caseRecord={caseRecord} />
+            <AgentAssessmentPanel caseRecord={caseRecord} />
             <QuestionnairePanel   caseRecord={caseRecord} />
             <CasePassportPanel    caseRecord={caseRecord} />
             <CaseDocumentsPanel   caseRecord={caseRecord} />
