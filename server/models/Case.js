@@ -51,6 +51,33 @@ const questionnaireSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// ── Agent Assessment Schema ─────────────────────────────────────────────────
+// Written by the Readiness Assessment Agent after it completes its tool loop.
+// The agent decides overallRisk, readinessLabel, and actions autonomously.
+const agentAssessmentSchema = new mongoose.Schema(
+  {
+    // The agent's verdict
+    overallRisk:    { type: String, enum: ["LOW", "MEDIUM", "HIGH"], default: null },
+    readinessLabel: { type: String, default: "" },
+
+    // Prioritised action list the agent generated
+    actions: { type: [String], default: [] },
+
+    // The agent's reasoning — explains WHY it reached this verdict
+    reasoning: { type: String, default: "" },
+
+    // Full log of every tool call the agent made (for transparency)
+    toolCallLog: { type: mongoose.Schema.Types.Mixed, default: [] },
+
+    // When the agent last ran
+    runAt: { type: Date, default: null },
+
+    // Whether the agent is currently running (optimistic lock for UI)
+    running: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
 const caseSchema = new mongoose.Schema(
   {
     caseId: { type: String, required: true },
@@ -83,6 +110,14 @@ const caseSchema = new mongoose.Schema(
     questionnaire: {
       type: questionnaireSchema,
       default: null,
+    },
+
+    // Populated after the Readiness Assessment Agent runs.
+    // default is an empty object (never null) so dot-path $set writes
+    // like "agentAssessment.running" always have a parent object to write into.
+    agentAssessment: {
+      type: agentAssessmentSchema,
+      default: () => ({}),
     },
 
     processorStatus: {
