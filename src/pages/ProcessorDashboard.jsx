@@ -6,13 +6,7 @@ import { useProcessorAuth } from "../context/ProcessorAuthContext";
 import KPICards   from "../components/processor/KPICards";
 import CasesTable from "../components/processor/CasesTable";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-async function fetchAllCases() {
-  const res = await fetch(`${API_URL}/cases`);
-  if (!res.ok) throw new Error("Failed to fetch cases");
-  return res.json();
-}
+import { getAllCases } from "../services/api.js";
 
 function ProcessorDashboard() {
   // ── Logic completely unchanged ─────────────────────────────────────────────
@@ -26,7 +20,7 @@ function ProcessorDashboard() {
 
   const loadCases = useCallback(async () => {
     try {
-      const data = await fetchAllCases();
+      const data = await getAllCases();
       setCases(data);
       setLastFetch(new Date());
       setError("");

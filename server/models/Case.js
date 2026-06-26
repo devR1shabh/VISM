@@ -85,6 +85,39 @@ const caseSchema = new mongoose.Schema(
     country: { type: String, required: true },
     description: { type: String, default: "" },
 
+    // ── Ownership ─────────────────────────────────────────────────────────────
+    // Links this case to the authenticated applicant who created it.
+    // Indexed for fast per-applicant queries (GET /api/my-cases).
+    //
+    // applicantId   — MongoDB ObjectId ref to User collection.
+    //                 Used for all server-side ownership checks.
+    //
+    // applicantEmail — Snapshot of the applicant's email at case creation time.
+    //                  Stored here so email notifications can be triggered from
+    //                  caseController without an extra User lookup.
+    //                  (Phase 5 — Email Notifications)
+    //
+    // applicantName  — Snapshot of the applicant's name at case creation time.
+    //                  Used in email templates and the processor dashboard.
+    applicantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:  "User",
+      // Not required during Phase 2 transition so existing legacy cases
+      // (created before auth existed) are not broken. Will be required
+      // in a future migration once all cases have owners.
+      default: null,
+    },
+
+    applicantEmail: {
+      type:    String,
+      default: "",
+    },
+
+    applicantName: {
+      type:    String,
+      default: "",
+    },
+
     // Populated after passport extraction completes.
     passportData: {
       name:           String,
@@ -141,6 +174,20 @@ const caseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ── Indexes ───────────────────────────────────────────────────────────────────
+//
+// applicantId index — the single most important query in the applicant flow:
+//   Case.find({ applicantId: req.user.id })
+// Without this index that query does a full collection scan.
+//
+// Compound index on [applicantId, createdAt] means MongoDB can satisfy
+// the sort in the same index pass — no separate sort step needed.
+caseSchema.index({ applicantId: 1, createdAt: -1 });
+
+// processorStatus index — speeds up the processor dashboard filter queries
+// e.g. "show me all Pending cases".
+caseSchema.index({ processorStatus: 1, createdAt: -1 });
 
 const Case = mongoose.model("Case", caseSchema);
 

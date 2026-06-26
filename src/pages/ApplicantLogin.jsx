@@ -1,17 +1,22 @@
-// src/components/processor/ProcessorLogin.jsx
+// src/pages/ApplicantLogin.jsx
 //
-// PHASE 3 CHANGE:
-// - Field changed from "Username" to "Email" (processors now have email accounts)
-// - login() is now async — it calls POST /api/auth/login via ProcessorAuthContext
-// - Demo credentials box updated to show the seeded email
-// - Everything else (layout, styles, loading spinner, error display) unchanged
+// Login page for applicants.
+// Matches the existing VISM design system exactly (tokens, radius, shadows).
+// After a successful login, redirects to wherever the user was trying to go,
+// or to "/" (home) if they came here directly.
 
-import { useState } from "react";
-import { Link }     from "react-router-dom";
-import { useProcessorAuth } from "../../context/ProcessorAuthContext.jsx";
+import { useState }                       from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useApplicantAuth }               from "../context/ApplicantAuthContext.jsx";
 
-function ProcessorLogin() {
-  const { login } = useProcessorAuth();
+function ApplicantLogin() {
+  const { login }    = useApplicantAuth();
+  const navigate     = useNavigate();
+  const location     = useLocation();
+
+  // If the user was redirected here from a protected route, send them back
+  // after login. Otherwise send them to home.
+  const from = location.state?.from || "/";
 
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -25,10 +30,9 @@ function ProcessorLogin() {
 
     try {
       await login(email.trim(), password);
-      // ProcessorProtectedRoute re-renders automatically when isAuthenticated
-      // becomes true — no navigate() needed here.
+      navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || "Invalid credentials. Please try again.");
+      setError(err.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -38,27 +42,35 @@ function ProcessorLogin() {
     <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
+        {/* ── Brand ────────────────────────────────────────────────────── */}
         <div className="text-center mb-10">
-          <span className="font-display text-3xl font-bold text-[var(--c-green)]">VISM</span>
+          <Link to="/" className="inline-flex flex-col items-center gap-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--c-green)] shadow-sm">
+              <span className="text-lg font-black tracking-[0.1em] text-white">V</span>
+            </div>
+            <span className="font-display text-2xl font-bold text-[var(--c-green)] mt-2">VISM</span>
+          </Link>
           <p className="text-xs uppercase tracking-[0.22em] text-[var(--c-text-muted)] mt-1">
-            Processor Portal
+            Visa &amp; Immigration Services
           </p>
         </div>
 
+        {/* ── Card ─────────────────────────────────────────────────────── */}
         <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-2xl)] shadow-[var(--shadow-modal)] p-8">
+
           <div className="mb-7">
             <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold mb-2">
-              Secure Access
+              Applicant Portal
             </p>
-            <h2 className="text-2xl font-bold text-[var(--c-text)]">Processor Login</h2>
+            <h1 className="text-2xl font-bold text-[var(--c-text)]">Sign In</h1>
             <p className="mt-2 text-sm text-[var(--c-text-muted)] leading-relaxed">
-              Enter your processor credentials to access the case management dashboard.
+              Access your visa cases, documents, and application status.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Email — replaces old Username field */}
+            {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
                 Email Address
@@ -69,11 +81,12 @@ function ProcessorLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                placeholder="processor@vism.internal"
+                placeholder="you@example.com"
                 className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] px-4 py-3 rounded-[var(--r-lg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[var(--c-text-muted)] transition"
               />
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
                 Password
@@ -89,21 +102,23 @@ function ProcessorLogin() {
               />
             </div>
 
+            {/* Error */}
             {error && (
               <div className="rounded-[var(--r-lg)] border border-[var(--c-error-border)] bg-[var(--c-error-bg)] px-4 py-3 text-sm text-[var(--c-error)]">
                 {error}
               </div>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading || !email || !password}
-              className="w-full bg-[var(--c-green)] text-white py-3 rounded-[var(--r-lg)] text-sm font-semibold hover:bg-[var(--c-green-mid)] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="w-full bg-[var(--c-green)] text-white py-3 rounded-[var(--r-lg)] text-sm font-semibold hover:bg-[var(--c-green-mid)] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm mt-2"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Authenticating...
+                  Signing in...
                 </span>
               ) : (
                 "Sign In"
@@ -111,20 +126,26 @@ function ProcessorLogin() {
             </button>
           </form>
 
-          {/* Updated hint — points to the seeded account, not the old hardcoded creds */}
-          <div className="mt-5 rounded-[var(--r-lg)] bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3 text-xs text-[var(--c-text-mid)]">
-            <p className="font-semibold text-[var(--c-text)] mb-1">Default Credentials</p>
-            <p>Email: <span className="text-[var(--c-green)] font-mono font-bold">processor@vism.internal</span></p>
-            <p>Password: <span className="text-[var(--c-green)] font-mono font-bold">ChangeMe123!</span></p>
-            <p className="mt-1.5 text-[var(--c-text-muted)]">
-              Set via <span className="font-mono">PROCESSOR_EMAIL</span> / <span className="font-mono">PROCESSOR_PASS</span> in <span className="font-mono">.env</span>
-            </p>
-          </div>
+          {/* ── Footer links ─────────────────────────────────────────── */}
+          <p className="mt-6 text-center text-sm text-[var(--c-text-muted)]">
+            Don&apos;t have an account?{" "}
+            <Link
+              to="/register"
+              className="font-semibold text-[var(--c-green)] hover:text-[var(--c-green-mid)] hover:underline underline-offset-2"
+            >
+              Create one
+            </Link>
+          </p>
         </div>
 
+        {/* ── Processor link ────────────────────────────────────────── */}
         <p className="mt-6 text-center text-xs text-[var(--c-text-muted)]">
-          <Link to="/" className="text-[var(--c-green-mid)] hover:underline underline-offset-2">
-            ← Back to Applicant Portal
+          Are you a processor?{" "}
+          <Link
+            to="/processor"
+            className="text-[var(--c-green-mid)] hover:underline underline-offset-2"
+          >
+            Go to Processor Portal →
           </Link>
         </p>
 
@@ -133,4 +154,4 @@ function ProcessorLogin() {
   );
 }
 
-export default ProcessorLogin;
+export default ApplicantLogin;

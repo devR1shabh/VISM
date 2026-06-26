@@ -1,7 +1,8 @@
 // src/components/processor/CasesTable.jsx
 
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo }  from "react";
+import { useNavigate }        from "react-router-dom";
+import { formatDate }         from "../../utils/dateUtils.js";
 
 const FILTER_TABS = ["All", "Pending", "Approved", "Rejected", "Need Documents"];
 
@@ -22,19 +23,6 @@ function StatusBadge({ status }) {
 
 function getApplicantName(c) {
   return c.passportData?.name || c.applicantName || "—";
-}
-
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-GB", {
-      day:   "2-digit",
-      month: "short",
-      year:  "numeric",
-    });
-  } catch {
-    return "—";
-  }
 }
 
 function CasesTable({ cases = [] }) {

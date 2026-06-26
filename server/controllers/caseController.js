@@ -2,13 +2,46 @@
 
 import Case from "../models/Case.js";
 import { runReadinessAgent } from "../services/assessmentAgentService.js";
+import {
+  sendCaseSubmittedEmail,
+  sendCaseUpdateEmail,
+} from "../services/emailService.js";
+
+// ── createCase ────────────────────────────────────────────────────────────────
+// POST /api/cases
+// Protected: applicant JWT required.
+//
+// Stamps applicantId, applicantEmail, applicantName from req.user so every
+// case is permanently linked to the authenticated applicant who created it.
 
 export async function createCase(req, res) {
   try {
-    const newCase = await Case.create(req.body);
+    // Snapshot ownership fields from the authenticated user.
+    // req.user is set by protect middleware (Phase 1 auth.js).
+    // Defensively defaulted so legacy/dev requests without a token still work
+    // during the transition period — remove the nullish defaults once Phase 3
+    // (frontend auth) is fully wired and protect is enforced on this route.
+    const caseData = {
+      ...req.body,
+      applicantId:    req.user?._id    ?? null,
+      applicantEmail: req.user?.email  ?? "",
+      applicantName:  req.user?.name   ?? "",
+    };
+
+    const newCase = await Case.create(caseData);
+
+    // ── Send case-submitted email (Phase 5) ───────────────────────────────────
+    // Fire-and-forget — a failed email must never crash case creation.
+    // The .catch() is belt-and-suspenders; emailService never throws internally.
+    if (newCase.applicantEmail) {
+      sendCaseSubmittedEmail(newCase).catch((err) =>
+        console.error("[createCase] Email send failed:", err.message)
+      );
+    }
+
     res.status(201).json(newCase);
   } catch (error) {
-    console.error(error);
+    console.error("[caseController.createCase]", error);
     res.status(500).json({ error: "Failed to create case" });
   }
 }
@@ -127,6 +160,11 @@ export async function savePassportData(req, res) {
   }
 }
 
+// ── getAllCases ────────────────────────────────────────────────────────────────
+// GET /api/cases
+// Processor only — returns ALL cases across all applicants.
+// Protected by: protect + processorOnly middleware (set in caseRoutes.js).
+
 export async function getAllCases(req, res) {
   try {
     const cases = await Case.find({}).sort({ createdAt: -1 }).lean();
@@ -137,12 +175,61 @@ export async function getAllCases(req, res) {
   }
 }
 
+// ── getApplicantCases ─────────────────────────────────────────────────────────
+// GET /api/my-cases
+// Applicant only — returns ONLY the authenticated user's own cases.
+// Protected by: protect middleware (set in caseRoutes.js).
+//
+// This is the data source for the Applicant Dashboard (Phase 4).
+// The applicantId index on Case makes this query fast even at scale.
+
+export async function getApplicantCases(req, res) {
+  try {
+    const cases = await Case
+      .find({ applicantId: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(cases);
+  } catch (error) {
+    console.error("[caseController.getApplicantCases]", error);
+    res.status(500).json({ error: "Failed to fetch your cases" });
+  }
+}
+
+// ── getCaseById ───────────────────────────────────────────────────────────────
+// GET /api/cases/:id
+// Accessible by:
+//   - The applicant who owns the case (applicantId matches req.user._id)
+//   - Any processor (role === "processor")
+//
+// Ownership is enforced here so a logged-in applicant cannot read
+// another applicant's case by guessing MongoDB IDs.
+
 export async function getCaseById(req, res) {
   try {
     const foundCase = await Case.findById(req.params.id).lean();
+
     if (!foundCase) {
       return res.status(404).json({ error: "Case not found" });
     }
+
+    // ── Ownership check ────────────────────────────────────────────────────────
+    // Processors can see any case.
+    // Applicants can only see their own.
+    // req.user may be undefined if protect is not yet on this route —
+    // the conditional guard keeps legacy behaviour during transition.
+    if (req.user) {
+      const isProcessor = req.user.role === "processor";
+      const isOwner     = foundCase.applicantId &&
+                          String(foundCase.applicantId) === String(req.user._id);
+
+      if (!isProcessor && !isOwner) {
+        // Return 404 not 403 — don't confirm the case exists to unauthorized callers
+        return res.status(404).json({ error: "Case not found" });
+      }
+    }
+
     res.json(foundCase);
   } catch (error) {
     console.error(error);
@@ -203,6 +290,15 @@ export async function processorAction(req, res) {
 
     if (!updatedCase) {
       return res.status(404).json({ error: "Case not found" });
+    }
+
+    // ── Send email notification to applicant (Phase 5) ──────────────────────────
+    // Fire-and-forget — a failed email never crashes the processor's response.
+    // view_case is excluded: it only logs an audit entry, not a status change.
+    if (action !== "view_case" && updatedCase.applicantEmail) {
+      sendCaseUpdateEmail(updatedCase, action, note || "").catch((err) =>
+        console.error("[processorAction] Email send failed:", err.message)
+      );
     }
 
     res.json(updatedCase);
@@ -268,15 +364,7 @@ export async function runAssessment(req, res) {
       return res.status(404).json({ error: "Case not found" });
     }
 
-    // ── Mark as running ───────────────────────────────────────────────────────────────────────────
-    // We $set the whole agentAssessment object, NOT a dot-path like
-    // "agentAssessment.running". MongoDB cannot write dot-path fields into a
-    // null parent. Existing documents created before the agent feature was added
-    // store agentAssessment: null, so dot-path writes throw:
-    //   "Cannot create field 'running' in element { agentAssessment: null }"
-    // Replacing the whole object works whether the current value is null, {},
-    // or an already-populated sub-document. It also migrates legacy nulls in
-    // one atomic operation with no separate migration step required.
+    // ── Mark as running ───────────────────────────────────────────────────────
     await Case.findByIdAndUpdate(caseId, {
       $set: {
         agentAssessment: {
@@ -294,15 +382,9 @@ export async function runAssessment(req, res) {
     // Respond immediately — agent runs in background
     res.json({ running: true, message: "Assessment agent started." });
 
-    // ── Build the case snapshot the agent will reason over ────────────────────
-    // Normalize uploadedDocuments from MongoDB format to the shape the agent tools expect.
-    // The agent tools look for d.valid and d.requiredDocument — these come from the
-    // client-side CaseContext shape, which the server stores differently.
-    // We synthesize a compatible snapshot here.
-
     const uploadedDocs = (caseRecord.uploadedDocuments || []).map((d) => ({
-      requiredDocument: d.type,       // server uses "type"; agent tools use "requiredDocument"
-      valid:            d.verified,   // server uses "verified"; agent tools use "valid"
+      requiredDocument: d.type,
+      valid:            d.verified,
     }));
 
     const caseSnapshot = {
@@ -316,11 +398,9 @@ export async function runAssessment(req, res) {
       uploadedDocuments: uploadedDocs,
     };
 
-    // ── Run the agent (async — response already sent) ─────────────────────────
     try {
       const result = await runReadinessAgent(caseSnapshot);
 
-      // Write the assessment result to MongoDB
       await Case.findByIdAndUpdate(caseId, {
         $set: {
           agentAssessment: {
@@ -348,9 +428,6 @@ export async function runAssessment(req, res) {
     } catch (agentError) {
       console.error("[Agent Controller] Agent run failed:", agentError);
 
-      // Clear the running flag even on failure.
-      // Again, use a full object $set rather than dot-paths so this works
-      // safely even if agentAssessment is currently null in the document.
       await Case.findByIdAndUpdate(caseId, {
         $set: {
           agentAssessment: {
@@ -368,7 +445,6 @@ export async function runAssessment(req, res) {
 
   } catch (error) {
     console.error("[Agent Controller] Setup error:", error);
-    // Only send error if headers not yet sent
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to start assessment agent" });
     }

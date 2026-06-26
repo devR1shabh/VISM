@@ -12,26 +12,11 @@ import AuditTimeline            from "../components/processor/AuditTimeline";
 import QuestionnairePanel       from "../components/processor/QuestionnairePanel";
 import AgentAssessmentPanel     from "../components/processor/AgentAssessmentPanel";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-async function fetchCase(id) {
-  const res = await fetch(`${API_URL}/cases/${id}`);
-  if (!res.ok) throw new Error("Case not found");
-  return res.json();
-}
-
-async function sendProcessorAction(caseId, action, note) {
-  const res = await fetch(`${API_URL}/cases/${caseId}/processor-action`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({ action, note: note || "" }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Action failed");
-  }
-  return res.json();
-}
+import {
+  getCaseByIdProcessor,
+  sendProcessorAction,
+} from "../services/api.js";
+import { formatDate, formatDateTime } from "../utils/dateUtils.js";
 
 function StatusBadge({ status }) {
   const map = {
@@ -48,20 +33,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString("en-GB", {
-      day:    "2-digit",
-      month:  "short",
-      year:   "numeric",
-      hour:   "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "—";
-  }
-}
+// formatDate imported from src/utils/dateUtils.js
 
 function ProcessorCaseDetail() {
   const { id }   = useParams();
@@ -88,7 +60,7 @@ function ProcessorCaseDetail() {
 
   const loadCase = useCallback(async () => {
     try {
-      const data = await fetchCase(id);
+      const data = await getCaseByIdProcessor(id);
       setCaseRecord(data);
       setError("");
       return data;
@@ -126,7 +98,7 @@ function ProcessorCaseDetail() {
     stopPolling();
     pollRef.current = setInterval(async () => {
       try {
-        const record = await fetchCase(caseId);
+        const record = await getCaseByIdProcessor(caseId);
         if (!record.agentAssessment?.running) {
           stopPolling();
           setCaseRecord(record);
