@@ -7,12 +7,11 @@ import Select from "react-select";
 import countries from "../../data/countries";
 import visaTypes from "../../data/visaTypes";
 
-import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
-import { createCase } from "../../services/api";
+import { useCase, WORKFLOW_STEPS }  from "../../context/CaseContext";
+import { useApplicantAuth }         from "../../context/ApplicantAuthContext.jsx";
+import { createCase }               from "../../services/api";
 
 // ── react-select styles — green token system ──────────────────────────────
-// All Select logic (onChange, options, isSearchable) is completely unchanged.
-// Only the visual style object is updated to match the new green design system.
 const selectStyles = {
   control: (base, state) => ({
     ...base,
@@ -82,9 +81,9 @@ const selectStyles = {
 };
 
 function CaseForm() {
-  // ── All logic completely unchanged ────────────────────────────────────────
   const navigate = useNavigate();
-  const { setCaseData, clearCase } = useCase();
+  const { setCaseData, clearCase }  = useCase();
+  const { isAuthenticated }         = useApplicantAuth();
 
   const [visaType, setVisaType]       = useState("");
   const [country, setCountry]         = useState("");
@@ -103,23 +102,32 @@ function CaseForm() {
   const handleAnalyze = async () => {
     if (!visaType || !country) return;
 
+    // ── Auth guard ────────────────────────────────────────────────────────────
+    // The Home page is public, so CaseForm can render while logged out.
+    // If the applicant is not authenticated, send them to /login and preserve
+    // the home path so they can return after signing in.
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: "/" } });
+      return;
+    }
+
     try {
       clearCase();
 
       const newCase = {
-        caseId: `CASE-${Date.now()}`,
+        caseId:        `CASE-${Date.now()}`,
         visaType,
         country,
         description,
-        status: "In Progress",
-        createdAt: new Date().toISOString(),
-        documents: [],
+        status:        "In Progress",
+        createdAt:     new Date().toISOString(),
+        documents:     [],
         extractedData: {},
-        risks: [],
-        tasks: [],
+        risks:         [],
+        tasks:         [],
         notifications: [],
         readinessScore: null,
-        workflowStep: WORKFLOW_STEPS.CASE_CREATED,
+        workflowStep:  WORKFLOW_STEPS.CASE_CREATED,
       };
 
       const savedCase = await createCase(newCase);
@@ -179,7 +187,7 @@ function CaseForm() {
         disabled={!visaType || !country}
         className="w-full bg-[var(--c-green)] text-white py-3.5 rounded-[var(--r-lg)] font-semibold text-sm hover:bg-[var(--c-green-mid)] active:scale-[0.99] transition duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
       >
-        Analyse Case
+        {isAuthenticated ? "Analyse Case" : "Sign In to Analyse Case"}
       </button>
 
     </div>

@@ -1,20 +1,40 @@
 ﻿// src/pages/Documents.jsx
 
+import { useState, useEffect }   from "react";
 import { Globe, Plane, ShieldCheck } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useCase } from "../context/CaseContext";
-import DocumentGuidelines    from "../components/upload/DocumentGuidelines";
-import PassportUploadSection from "../components/upload/PassportUploadSection";
-import SecondaryDocSection   from "../components/upload/SecondaryDocSection";
-import DocumentProgress      from "../components/upload/DocumentProgress";
-import { PageHeader }        from "../components/ui";
+import { useNavigate }           from "react-router-dom";
+import { useCase }               from "../context/CaseContext";
+import DocumentGuidelines        from "../components/upload/DocumentGuidelines";
+import PassportUploadSection     from "../components/upload/PassportUploadSection";
+import SecondaryDocSection       from "../components/upload/SecondaryDocSection";
+import DocumentProgress          from "../components/upload/DocumentProgress";
+import { PageHeader }            from "../components/ui";
+import PIIDisclaimerModal        from "../components/upload/PIIDisclaimerModal";
 
 function Documents() {
   const navigate = useNavigate();
   const { caseData } = useCase();
   const status = caseData?.status || "In Progress";
 
-  // ── Empty state — no case ────────────────────────────────────────────────
+  const caseId     = caseData?.id;
+  const storageKey = caseId ? `vism_disclaimer_accepted_${caseId}` : null;
+
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+  useEffect(() => {
+    if (!storageKey) return;
+    const accepted = localStorage.getItem(storageKey) === "true";
+    setShowDisclaimer(!accepted);
+  }, [storageKey]);
+
+  function handleDisclaimerAccept() {
+    if (storageKey) {
+      localStorage.setItem(storageKey, "true");
+    }
+    setShowDisclaimer(false);
+  }
+
+  // ── Empty state — no case ─────────────────────────────────────────────────
   if (!caseData) {
     return (
       <main className="min-h-screen bg-[var(--c-bg)]">
@@ -82,6 +102,10 @@ function Documents() {
 
   return (
     <main className="min-h-screen bg-[var(--c-bg)]">
+
+      {showDisclaimer && (
+        <PIIDisclaimerModal onAccept={handleDisclaimerAccept} />
+      )}
 
       <PageHeader
         eyebrow="Document Intelligence Center"
