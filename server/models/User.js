@@ -3,8 +3,10 @@
 // Stores both applicants and processors.
 // Role is enforced server-side — the client never trusts itself on this.
 //
-// Passwords are NEVER stored in plain text.
-// bcryptjs hashes happen in authController before save.
+// FEATURE 3 CHANGE:
+//   Added `notificationPrefs` — controls whether the user receives
+//   email and in-app notifications. Both default to true.
+//   Used by Feature 13 (in-app notifications) and the existing email service.
 
 import mongoose from "mongoose";
 
@@ -12,9 +14,9 @@ const userSchema = new mongoose.Schema(
   {
     // ── Identity ─────────────────────────────────────────────────────────────
     name: {
-      type:     String,
-      required: [true, "Name is required"],
-      trim:     true,
+      type:      String,
+      required:  [true, "Name is required"],
+      trim:      true,
       maxlength: [100, "Name cannot exceed 100 characters"],
     },
 
@@ -33,7 +35,6 @@ const userSchema = new mongoose.Schema(
     // ── Auth ─────────────────────────────────────────────────────────────────
     // bcrypt hash — never the raw password.
     // select: false means this field is excluded from query results by default.
-    // You must explicitly do .select("+passwordHash") to read it.
     passwordHash: {
       type:     String,
       required: true,
@@ -54,21 +55,29 @@ const userSchema = new mongoose.Schema(
       type:    Boolean,
       default: true,
     },
+
+    // ── FEATURE 3: Notification preferences ──────────────────────────────────
+    // Controls which notification channels are active for this user.
+    // Used by:
+    //   Feature 13 — in-app notifications (checks inApp flag)
+    //   emailService — already checks applicantEmail, this adds a user-level toggle
+    notificationPrefs: {
+      email: { type: Boolean, default: true  },
+      inApp: { type: Boolean, default: true  },
+    },
   },
   {
-    // Adds createdAt and updatedAt automatically
     timestamps: true,
   }
 );
 
-// ── Index ─────────────────────────────────────────────────────────────────────
+// ── Indexes ───────────────────────────────────────────────────────────────────
 // email is already indexed by `unique: true` above.
-// This compound index speeds up processor queries (role + createdAt ordering).
+// Compound index speeds up processor queries (role + createdAt ordering).
 userSchema.index({ role: 1, createdAt: -1 });
 
 // ── Safe serialization ────────────────────────────────────────────────────────
 // Strips passwordHash from any JSON output automatically.
-// Runs when res.json() serializes the document.
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.passwordHash;

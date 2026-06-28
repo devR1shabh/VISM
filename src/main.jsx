@@ -10,22 +10,24 @@ import App from "./App.jsx";
 import { ApplicantAuthProvider } from "./context/ApplicantAuthContext.jsx";
 import { ProcessorAuthProvider } from "./context/ProcessorAuthContext.jsx";
 import { CaseProvider }          from "./context/CaseContext.jsx";
+import { ConfigProvider }        from "./context/ConfigContext.jsx";
 
-// Provider order matters:
-//   ApplicantAuthProvider — outermost, establishes who is logged in
+// Provider order:
+//   ConfigProvider        — outermost; fetches shared constants once on mount
+//   ApplicantAuthProvider — establishes who is logged in
 //   ProcessorAuthProvider — independent auth for processor portal
-//   CaseProvider          — depends on auth being available (Phase 4 will
-//                           use useApplicantAuth inside CaseProvider to
-//                           scope case fetching to the logged-in user)
+//   CaseProvider          — depends on auth being available
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ApplicantAuthProvider>
-      <ProcessorAuthProvider>
-        <CaseProvider>
-          <App />
-        </CaseProvider>
-      </ProcessorAuthProvider>
-    </ApplicantAuthProvider>
+    <ConfigProvider>
+      <ApplicantAuthProvider>
+        <ProcessorAuthProvider>
+          <CaseProvider>
+            <App />
+          </CaseProvider>
+        </ProcessorAuthProvider>
+      </ApplicantAuthProvider>
+    </ConfigProvider>
   </StrictMode>
 );

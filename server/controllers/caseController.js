@@ -1,6 +1,7 @@
 // server/controllers/caseController.js
 
 import Case from "../models/Case.js";
+import { DOCUMENT_CATEGORY_MAP } from "../config/constants.js";
 import { runReadinessAgent } from "../services/assessmentAgentService.js";
 import {
   sendCaseSubmittedEmail,
@@ -8,19 +9,8 @@ import {
 } from "../services/emailService.js";
 
 // ── createCase ────────────────────────────────────────────────────────────────
-// POST /api/cases
-// Protected: applicant JWT required.
-//
-// Stamps applicantId, applicantEmail, applicantName from req.user so every
-// case is permanently linked to the authenticated applicant who created it.
-
 export async function createCase(req, res) {
   try {
-    // Snapshot ownership fields from the authenticated user.
-    // req.user is set by protect middleware (Phase 1 auth.js).
-    // Defensively defaulted so legacy/dev requests without a token still work
-    // during the transition period — remove the nullish defaults once Phase 3
-    // (frontend auth) is fully wired and protect is enforced on this route.
     const caseData = {
       ...req.body,
       applicantId:    req.user?._id    ?? null,
@@ -30,9 +20,6 @@ export async function createCase(req, res) {
 
     const newCase = await Case.create(caseData);
 
-    // ── Send case-submitted email (Phase 5) ───────────────────────────────────
-    // Fire-and-forget — a failed email must never crash case creation.
-    // The .catch() is belt-and-suspenders; emailService never throws internally.
     if (newCase.applicantEmail) {
       sendCaseSubmittedEmail(newCase).catch((err) =>
         console.error("[createCase] Email send failed:", err.message)
@@ -73,12 +60,23 @@ export async function updateCase(req, res) {
   }
 }
 
+// ── addVerifiedDocument ───────────────────────────────────────────────────────
+// FEATURE 2 CHANGE:
+//   Now stamps `category` (mandatory | supporting) on every uploaded document
+//   by looking up the document type in DOCUMENT_CATEGORY_MAP from constants.js.
+//   Legacy documents (created before this feature) will have category: null.
+
 export async function addVerifiedDocument(req, res) {
   try {
     const { documentType } = req.body;
-    const caseId   = req.params.id;
+    const caseId    = req.params.id;
     const uploadedAt = new Date();
 
+    // Look up category from the single source of truth.
+    // Falls back to null for any document type not in the map.
+    const category = DOCUMENT_CATEGORY_MAP[documentType] ?? null;
+
+    // Try to update an existing entry first (re-upload scenario).
     let updatedCase = await Case.findOneAndUpdate(
       {
         _id: caseId,
@@ -86,22 +84,25 @@ export async function addVerifiedDocument(req, res) {
       },
       {
         $set: {
-          "uploadedDocuments.$.verified":  true,
+          "uploadedDocuments.$.verified":   true,
           "uploadedDocuments.$.uploadedAt": uploadedAt,
+          "uploadedDocuments.$.category":   category,
         },
       },
       { new: true }
     );
 
+    // No existing entry — push a new one.
     if (!updatedCase) {
       updatedCase = await Case.findByIdAndUpdate(
         caseId,
         {
           $push: {
             uploadedDocuments: {
-              type: documentType,
-              verified: true,
+              type:      documentType,
+              verified:  true,
               uploadedAt,
+              category,
             },
           },
         },
@@ -161,10 +162,6 @@ export async function savePassportData(req, res) {
 }
 
 // ── getAllCases ────────────────────────────────────────────────────────────────
-// GET /api/cases
-// Processor only — returns ALL cases across all applicants.
-// Protected by: protect + processorOnly middleware (set in caseRoutes.js).
-
 export async function getAllCases(req, res) {
   try {
     const cases = await Case.find({}).sort({ createdAt: -1 }).lean();
@@ -176,13 +173,6 @@ export async function getAllCases(req, res) {
 }
 
 // ── getApplicantCases ─────────────────────────────────────────────────────────
-// GET /api/my-cases
-// Applicant only — returns ONLY the authenticated user's own cases.
-// Protected by: protect middleware (set in caseRoutes.js).
-//
-// This is the data source for the Applicant Dashboard (Phase 4).
-// The applicantId index on Case makes this query fast even at scale.
-
 export async function getApplicantCases(req, res) {
   try {
     const cases = await Case
@@ -198,14 +188,6 @@ export async function getApplicantCases(req, res) {
 }
 
 // ── getCaseById ───────────────────────────────────────────────────────────────
-// GET /api/cases/:id
-// Accessible by:
-//   - The applicant who owns the case (applicantId matches req.user._id)
-//   - Any processor (role === "processor")
-//
-// Ownership is enforced here so a logged-in applicant cannot read
-// another applicant's case by guessing MongoDB IDs.
-
 export async function getCaseById(req, res) {
   try {
     const foundCase = await Case.findById(req.params.id).lean();
@@ -214,18 +196,12 @@ export async function getCaseById(req, res) {
       return res.status(404).json({ error: "Case not found" });
     }
 
-    // ── Ownership check ────────────────────────────────────────────────────────
-    // Processors can see any case.
-    // Applicants can only see their own.
-    // req.user may be undefined if protect is not yet on this route —
-    // the conditional guard keeps legacy behaviour during transition.
     if (req.user) {
       const isProcessor = req.user.role === "processor";
       const isOwner     = foundCase.applicantId &&
                           String(foundCase.applicantId) === String(req.user._id);
 
       if (!isProcessor && !isOwner) {
-        // Return 404 not 403 — don't confirm the case exists to unauthorized callers
         return res.status(404).json({ error: "Case not found" });
       }
     }
@@ -292,9 +268,6 @@ export async function processorAction(req, res) {
       return res.status(404).json({ error: "Case not found" });
     }
 
-    // ── Send email notification to applicant (Phase 5) ──────────────────────────
-    // Fire-and-forget — a failed email never crashes the processor's response.
-    // view_case is excluded: it only logs an audit entry, not a status change.
     if (action !== "view_case" && updatedCase.applicantEmail) {
       sendCaseUpdateEmail(updatedCase, action, note || "").catch((err) =>
         console.error("[processorAction] Email send failed:", err.message)
@@ -341,30 +314,16 @@ export async function saveQuestionnaire(req, res) {
   }
 }
 
-// ── runAssessment ────────────────────────────────────────────────────────────
-// Triggers the Readiness Assessment Agent for a given case.
-//
-// The agent reads the case from MongoDB, builds a snapshot, runs its
-// autonomous tool loop, and writes the result back to agentAssessment.
-//
-// The endpoint returns immediately with { running: true } after setting the
-// running flag, then the agent runs asynchronously. The frontend polls
-// GET /cases/:id to check when running becomes false and agentAssessment
-// is populated.
-//
-// This avoids HTTP timeout issues for long agent runs.
-
+// ── runAssessment ─────────────────────────────────────────────────────────────
 export async function runAssessment(req, res) {
   const caseId = req.params.id;
 
   try {
-    // Load the full case from DB
     const caseRecord = await Case.findById(caseId).lean();
     if (!caseRecord) {
       return res.status(404).json({ error: "Case not found" });
     }
 
-    // ── Mark as running ───────────────────────────────────────────────────────
     await Case.findByIdAndUpdate(caseId, {
       $set: {
         agentAssessment: {
@@ -379,7 +338,6 @@ export async function runAssessment(req, res) {
       },
     });
 
-    // Respond immediately — agent runs in background
     res.json({ running: true, message: "Assessment agent started." });
 
     const uploadedDocs = (caseRecord.uploadedDocuments || []).map((d) => ({

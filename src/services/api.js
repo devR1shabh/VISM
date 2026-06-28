@@ -2,27 +2,18 @@
 //
 // All backend fetch calls live here — no component ever calls fetch() directly.
 //
-// PHASE 3 CHANGE:
-// Every request that hits a protected endpoint now automatically includes
-// the applicant's JWT in the Authorization header via authHeaders().
-// No component needs to know about tokens — it just calls the function.
+// FEATURE 1 CHANGE:
+//   Added getConfig() — fetches shared constants from GET /api/config.
 
 import { getApplicantToken, getProcessorToken } from "./authService.js";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// ── Auth header builder ───────────────────────────────────────────────────────
-// Reads the applicant token from localStorage and returns the correct headers.
-// Returns an empty object if no token is present (unauthenticated requests).
 function authHeaders() {
   const token = getApplicantToken();
-  return token
-    ? { "Authorization": `Bearer ${token}` }
-    : {};
+  return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-// ── Error helper ──────────────────────────────────────────────────────────────
-// Extracts the server error message from a non-ok response.
 async function handleError(response, fallback) {
   try {
     const body = await response.json();
@@ -31,6 +22,16 @@ async function handleError(response, fallback) {
     if (e.message !== fallback) throw e;
     throw new Error(fallback);
   }
+}
+
+/* =============================================================================
+   CONFIG — Feature 1
+============================================================================= */
+
+export async function getConfig() {
+  const response = await fetch(`${API_URL}/config`);
+  if (!response.ok) throw new Error("Failed to fetch config");
+  return response.json();
 }
 
 /* =============================================================================
@@ -43,7 +44,6 @@ export async function generateAnalysis(visaType, country, description) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify({ visaType, country, description }),
   });
-
   if (!response.ok) throw new Error("Failed to generate analysis");
   return response.json();
 }
@@ -55,13 +55,11 @@ export async function generateAnalysis(visaType, country, description) {
 export async function uploadPassport(file) {
   const formData = new FormData();
   formData.append("file", file);
-
   const response = await fetch(`${API_URL}/documents/passport`, {
     method:  "POST",
-    headers: { ...authHeaders() },  // No Content-Type — let browser set multipart boundary
+    headers: { ...authHeaders() },
     body:    formData,
   });
-
   if (!response.ok) throw new Error("Passport extraction failed");
   return response.json();
 }
@@ -74,13 +72,11 @@ export async function verifyDocument(file, documentType) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("documentType", documentType);
-
   const response = await fetch(`${API_URL}/documents/verify`, {
     method:  "POST",
     headers: { ...authHeaders() },
     body:    formData,
   });
-
   if (!response.ok) throw new Error("Document verification failed");
   return response.json();
 }
@@ -95,7 +91,6 @@ export async function createCase(caseData) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify(caseData),
   });
-
   if (!response.ok) await handleError(response, "Failed to create case");
   return response.json();
 }
@@ -104,7 +99,6 @@ export async function getCase(caseId) {
   const response = await fetch(`${API_URL}/cases/${caseId}`, {
     headers: { ...authHeaders() },
   });
-
   if (!response.ok) throw new Error("Failed to fetch case");
   return response.json();
 }
@@ -115,20 +109,14 @@ export async function updateCase(caseId, caseData) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify(caseData),
   });
-
   if (!response.ok) throw new Error("Failed to update case");
   return response.json();
 }
 
-// ── getApplicantCases ─────────────────────────────────────────────────────────
-// Fetches all cases belonging to the currently authenticated applicant.
-// This is the data source for the Applicant Dashboard (Phase 4).
-// Returns an array sorted by createdAt descending (newest first).
 export async function getApplicantCases() {
   const response = await fetch(`${API_URL}/cases/my-cases`, {
     headers: { ...authHeaders() },
   });
-
   if (!response.ok) await handleError(response, "Failed to fetch your cases");
   return response.json();
 }
@@ -143,7 +131,6 @@ export async function addVerifiedDocument(caseId, documentType) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify({ documentType }),
   });
-
   if (!response.ok) throw new Error("Failed to save document");
   return response.json();
 }
@@ -158,7 +145,6 @@ export async function savePassportData(caseId, passportData) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify({ passportData }),
   });
-
   if (!response.ok) throw new Error("Failed to save passport data");
   return response.json();
 }
@@ -173,12 +159,10 @@ export async function sendNaviMessage(caseContext, message) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify({ caseContext, message }),
   });
-
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || "Navi request failed");
   }
-
   return response.json();
 }
 
@@ -192,7 +176,6 @@ export async function saveQuestionnaire(caseId, answers) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body:    JSON.stringify({ answers }),
   });
-
   if (!response.ok) throw new Error("Failed to save questionnaire");
   return response.json();
 }
@@ -206,7 +189,6 @@ export async function triggerAssessmentAgent(caseId) {
     method:  "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
   });
-
   if (!response.ok) throw new Error("Failed to start assessment agent");
   return response.json();
 }
@@ -215,29 +197,19 @@ export async function pollCaseForAssessment(caseId) {
   const response = await fetch(`${API_URL}/cases/${caseId}`, {
     headers: { ...authHeaders() },
   });
-
   if (!response.ok) throw new Error("Failed to fetch case");
   return response.json();
 }
 
 /* =============================================================================
-   PROCESSOR API FUNCTIONS
-   Phase 6: Consolidated from inline fetch calls in ProcessorDashboard.jsx,
-   ProcessorCaseDetail.jsx, and ProcessorActions.jsx.
-   All processor calls use getProcessorToken() for auth.
+   PROCESSOR
 ============================================================================= */
 
-
-// ── Processor auth header builder ─────────────────────────────────────────────
 function processorAuthHeaders() {
   const token = getProcessorToken();
-  return token
-    ? { "Authorization": `Bearer ${token}` }
-    : {};
+  return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-// ── getAllCases ────────────────────────────────────────────────────────────────
-// GET /api/cases — processor only. Returns all cases across all applicants.
 export async function getAllCases() {
   const response = await fetch(`${API_URL}/cases`, {
     headers: { ...processorAuthHeaders() },
@@ -246,8 +218,6 @@ export async function getAllCases() {
   return response.json();
 }
 
-// ── getCaseByIdProcessor ──────────────────────────────────────────────────────
-// GET /api/cases/:id — fetches a single case with processor auth.
 export async function getCaseByIdProcessor(caseId) {
   const response = await fetch(`${API_URL}/cases/${caseId}`, {
     headers: { ...processorAuthHeaders() },
@@ -256,11 +226,6 @@ export async function getCaseByIdProcessor(caseId) {
   return response.json();
 }
 
-// ── sendProcessorAction ───────────────────────────────────────────────────────
-// POST /api/cases/:id/processor-action
-// Single source of truth — replaces the duplicate function that existed in
-// both ProcessorActions.jsx (as sendAction) and ProcessorCaseDetail.jsx
-// (as sendProcessorAction).
 export async function sendProcessorAction(caseId, action, note) {
   const response = await fetch(`${API_URL}/cases/${caseId}/processor-action`, {
     method:  "POST",

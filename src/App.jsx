@@ -12,6 +12,7 @@ import Home                from "./pages/Home.jsx";
 import ApplicantLogin      from "./pages/ApplicantLogin.jsx";
 import ApplicantRegister   from "./pages/ApplicantRegister.jsx";
 import ApplicantDashboard  from "./pages/ApplicantDashboard.jsx";
+import Packages            from "./pages/Packages.jsx";
 import Analysis            from "./pages/Analysis.jsx";
 import Documents           from "./pages/Documents.jsx";
 import Questionnaire       from "./pages/Questionnaire.jsx";
@@ -25,7 +26,9 @@ import Navi from "./components/navi/Navi.jsx";
 
 const NAVI_ROUTES            = ["/analysis", "/documents", "/questionnaire", "/journey"];
 const PROCESSOR_ROUTE_PREFIX = "/processor";
-const PUBLIC_ROUTES          = ["/", "/login", "/register"];
+
+// Public routes — no applicant navbar shown on these pages
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/packages"];
 
 function AppContent() {
   const location = useLocation();
@@ -33,7 +36,6 @@ function AppContent() {
   const isProcessorRoute = location.pathname.startsWith(PROCESSOR_ROUTE_PREFIX);
   const isPublicRoute    = PUBLIC_ROUTES.includes(location.pathname);
   const showNavi         = !isProcessorRoute && NAVI_ROUTES.includes(location.pathname);
-  // Show the applicant navbar everywhere except processor routes and pure public pages
   const showApplicantNav = !isProcessorRoute && !isPublicRoute;
 
   return (
@@ -44,13 +46,15 @@ function AppContent() {
 
       <Routes>
 
-        {/* ── Public routes ─────────────────────────────────────────── */}
-        <Route path="/"         element={<Home />} />
-        <Route path="/login"    element={<ApplicantLogin />} />
+        {/* ── Public routes ──────────────────────────────────────────── */}
+        <Route path="/"         element={<Home />}              />
+        <Route path="/login"    element={<ApplicantLogin />}    />
         <Route path="/register" element={<ApplicantRegister />} />
 
-        {/* ── Applicant: multi-case dashboard ───────────────────────── */}
-        {/* Phase 4: new route — shows ALL the user's cases */}
+        {/* ── Package comparison — public, no auth required ──────────── */}
+        <Route path="/packages" element={<Packages />} />
+
+        {/* ── Applicant: multi-case dashboard ────────────────────────── */}
         <Route
           path="/my-cases"
           element={
@@ -60,7 +64,7 @@ function AppContent() {
           }
         />
 
-        {/* ── Applicant: active-case workflow routes ─────────────────── */}
+        {/* ── Applicant: active-case workflow routes ──────────────────── */}
         <Route
           path="/analysis"
           element={
@@ -127,7 +131,7 @@ function AppContent() {
           }
         />
 
-        {/* ── Processor routes ───────────────────────────────────────── */}
+        {/* ── Processor routes ────────────────────────────────────────── */}
         <Route
           path="/processor"
           element={

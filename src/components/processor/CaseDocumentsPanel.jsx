@@ -1,22 +1,10 @@
 // src/components/processor/CaseDocumentsPanel.jsx
+//
+// FEATURE 2 CHANGE:
+//   Each document row now shows a MANDATORY / SUPPORTING badge.
+//   Missing documents section is split — mandatory missing shown first, more urgently.
 
-const REQUIRED_DOCUMENTS = [
-  "Passport",
-  "Passport Size Photograph",
-  "National ID Card",
-  "Birth Certificate",
-  "Address Proof",
-  "Resume / CV",
-  "Academic Transcript",
-  "Degree Certificate",
-  "Employment Letter",
-  "Bank Statement",
-  "Proof of Funds",
-  "Travel History Document",
-  "Statement of Purpose",
-  "Police Clearance Certificate",
-  "Medical Certificate",
-];
+import { useConfig } from "../../context/ConfigContext.jsx";
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -33,7 +21,21 @@ function formatDate(iso) {
   }
 }
 
-function DocRow({ name, submitted, verified, uploadedAt }) {
+function CategoryBadge({ category }) {
+  if (!category) return null;
+  const isMandatory = category === "mandatory";
+  return (
+    <span className={`text-[9px] font-bold uppercase tracking-[0.1em] px-1.5 py-0.5 rounded border ${
+      isMandatory
+        ? "border-[var(--c-error-border)] bg-[var(--c-error-bg)] text-[var(--c-error)]"
+        : "border-[var(--c-info-border)] bg-[var(--c-info-bg)] text-[var(--c-info)]"
+    }`}>
+      {isMandatory ? "Mandatory" : "Supporting"}
+    </span>
+  );
+}
+
+function DocRow({ name, category, submitted, verified, uploadedAt }) {
   return (
     <div
       className={`flex items-center justify-between rounded-[var(--r-lg)] border px-4 py-3 ${
@@ -64,11 +66,14 @@ function DocRow({ name, submitted, verified, uploadedAt }) {
         </div>
 
         <div>
-          <p className={`text-sm font-semibold ${
-            verified || submitted ? "text-[var(--c-text)]" : "text-[var(--c-text-muted)]"
-          }`}>
-            {name}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className={`text-sm font-semibold ${
+              verified || submitted ? "text-[var(--c-text)]" : "text-[var(--c-text-muted)]"
+            }`}>
+              {name}
+            </p>
+            <CategoryBadge category={category} />
+          </div>
           {uploadedAt && formatDate(uploadedAt) && (
             <p className="text-xs text-[var(--c-text-muted)] mt-0.5">
               Uploaded {formatDate(uploadedAt)}
@@ -94,12 +99,13 @@ function DocRow({ name, submitted, verified, uploadedAt }) {
 }
 
 function CaseDocumentsPanel({ caseRecord }) {
+  const { documents } = useConfig();
+
   if (!caseRecord) return null;
 
   const { uploadedDocuments = [] } = caseRecord;
-
-  const required = REQUIRED_DOCUMENTS;
-  const total    = required.length; // always 15
+  const required    = documents.all;
+  const total       = required.length;
 
   const uploadedCount = uploadedDocuments.filter((d) =>
     required.includes(d.type || d.requiredDocument)
@@ -112,6 +118,10 @@ function CaseDocumentsPanel({ caseRecord }) {
       (d) => (d.type === docName || d.requiredDocument === docName)
     )
   );
+
+  // Split missing into mandatory and supporting for prioritised display
+  const missingMandatory  = missingDocs.filter((d) => documents.categoryMap[d] === "mandatory");
+  const missingSupporting = missingDocs.filter((d) => documents.categoryMap[d] === "supporting");
 
   const uploadedPct = Math.round((uploadedCount / total) * 100);
   const verifiedPct = Math.round((verifiedCount / total) * 100);
@@ -151,16 +161,32 @@ function CaseDocumentsPanel({ caseRecord }) {
         </div>
       </div>
 
-      {/* Missing document names */}
-      {missingDocs.length > 0 && (
-        <div className="mb-5 rounded-[var(--r-lg)] border border-[var(--c-warning-border)] bg-[var(--c-warning-bg)] px-4 py-3">
-          <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-warning)] font-semibold mb-2">
-            Missing Documents ({missingDocs.length})
+      {/* Missing — mandatory first, then supporting */}
+      {missingMandatory.length > 0 && (
+        <div className="mb-4 rounded-[var(--r-lg)] border border-[var(--c-error-border)] bg-[var(--c-error-bg)] px-4 py-3">
+          <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-error)] font-semibold mb-2">
+            Missing Mandatory ({missingMandatory.length})
           </p>
           <ul className="space-y-1">
-            {missingDocs.map((doc) => (
+            {missingMandatory.map((doc) => (
               <li key={doc} className="text-xs text-[var(--c-text-mid)] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-warning)] shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-error)] shrink-0" />
+                {doc}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {missingSupporting.length > 0 && (
+        <div className="mb-5 rounded-[var(--r-lg)] border border-[var(--c-info-border)] bg-[var(--c-info-bg)] px-4 py-3">
+          <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--c-info)] font-semibold mb-2">
+            Missing Supporting ({missingSupporting.length})
+          </p>
+          <ul className="space-y-1">
+            {missingSupporting.map((doc) => (
+              <li key={doc} className="text-xs text-[var(--c-text-mid)] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-info)] shrink-0" />
                 {doc}
               </li>
             ))}
@@ -171,13 +197,15 @@ function CaseDocumentsPanel({ caseRecord }) {
       {/* Full document list */}
       <div className="space-y-2.5">
         {required.map((docName) => {
-          const record = uploadedDocuments.find(
+          const record   = uploadedDocuments.find(
             (d) => d.type === docName || d.requiredDocument === docName
           );
+          const category = documents.categoryMap[docName] ?? null;
           return (
             <DocRow
               key={docName}
               name={docName}
+              category={category}
               submitted={Boolean(record)}
               verified={record?.verified ?? false}
               uploadedAt={record?.uploadedAt}

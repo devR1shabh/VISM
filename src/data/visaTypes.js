@@ -1,6 +1,8 @@
 // src/data/visaTypes.js
-// Single source of truth for all supported visa types.
-// Add new visa types here; all dropdowns and selectors read from this list.
+//
+// DEPRECATED — do not import this in new code.
+// Use: const { visaTypes } = useConfig();
+// Source of truth: server/config/constants.js
 
 const visaTypes = [
   "Student Visa",

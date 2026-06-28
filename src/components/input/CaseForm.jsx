@@ -1,17 +1,20 @@
 // src/components/input/CaseForm.jsx
+//
+// FEATURE 1 CHANGE:
+//   Removed `import visaTypes from "../../data/visaTypes"`.
+//   Now reads visa types from useConfig().
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 
 import countries from "../../data/countries";
-import visaTypes from "../../data/visaTypes";
 
 import { useCase, WORKFLOW_STEPS }  from "../../context/CaseContext";
 import { useApplicantAuth }         from "../../context/ApplicantAuthContext.jsx";
+import { useConfig }                from "../../context/ConfigContext.jsx";
 import { createCase }               from "../../services/api";
 
-// ── react-select styles — green token system ──────────────────────────────
 const selectStyles = {
   control: (base, state) => ({
     ...base,
@@ -24,21 +27,9 @@ const selectStyles = {
     minHeight: "44px",
     borderRadius: "8px",
   }),
-  placeholder: (base) => ({
-    ...base,
-    color: "#9CA3AF",
-    fontSize: "14px",
-  }),
-  input: (base) => ({
-    ...base,
-    color: "#111111",
-    fontSize: "14px",
-  }),
-  singleValue: (base) => ({
-    ...base,
-    color: "#111111",
-    fontSize: "14px",
-  }),
+  placeholder: (base) => ({ ...base, color: "#9CA3AF", fontSize: "14px" }),
+  input:       (base) => ({ ...base, color: "#111111", fontSize: "14px" }),
+  singleValue: (base) => ({ ...base, color: "#111111", fontSize: "14px" }),
   menu: (base) => ({
     ...base,
     backgroundColor: "#FFFFFF",
@@ -47,65 +38,36 @@ const selectStyles = {
     borderRadius: "8px",
     overflow: "hidden",
   }),
-  menuList: (base) => ({
-    ...base,
-    backgroundColor: "#FFFFFF",
-    padding: "4px 0",
-  }),
+  menuList: (base) => ({ ...base, backgroundColor: "#FFFFFF", padding: "4px 0" }),
   option: (base, state) => ({
     ...base,
-    backgroundColor: state.isSelected
-      ? "#1C4532"
-      : state.isFocused
-      ? "#F7F7F5"
-      : "#FFFFFF",
+    backgroundColor: state.isSelected ? "#1C4532" : state.isFocused ? "#F7F7F5" : "#FFFFFF",
     color: state.isSelected ? "#FFFFFF" : "#111111",
     cursor: "pointer",
     padding: "10px 14px",
     fontSize: "14px",
-    "&:active": {
-      backgroundColor: "#F0FDF4",
-      color: "#1C4532",
-    },
+    "&:active": { backgroundColor: "#F0FDF4", color: "#1C4532" },
   }),
-  loadingMessage: (base) => ({
-    ...base,
-    color: "#6B7280",
-    fontSize: "14px",
-  }),
-  noOptionsMessage: (base) => ({
-    ...base,
-    color: "#6B7280",
-    fontSize: "14px",
-  }),
+  loadingMessage:   (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
+  noOptionsMessage: (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
 };
 
 function CaseForm() {
   const navigate = useNavigate();
-  const { setCaseData, clearCase }  = useCase();
-  const { isAuthenticated }         = useApplicantAuth();
+  const { setCaseData, clearCase } = useCase();
+  const { isAuthenticated }        = useApplicantAuth();
+  const { visaTypes }              = useConfig();
 
   const [visaType, setVisaType]       = useState("");
   const [country, setCountry]         = useState("");
   const [description, setDescription] = useState("");
 
-  const visaOptions = visaTypes.map((visa) => ({
-    value: visa,
-    label: visa,
-  }));
-
-  const countryOptions = countries.map((country) => ({
-    value: country,
-    label: country,
-  }));
+  const visaOptions    = visaTypes.map((v) => ({ value: v, label: v }));
+  const countryOptions = countries.map((c) => ({ value: c, label: c }));
 
   const handleAnalyze = async () => {
     if (!visaType || !country) return;
 
-    // ── Auth guard ────────────────────────────────────────────────────────────
-    // The Home page is public, so CaseForm can render while logged out.
-    // If the applicant is not authenticated, send them to /login and preserve
-    // the home path so they can return after signing in.
     if (!isAuthenticated) {
       navigate("/login", { state: { from: "/" } });
       return;
@@ -115,19 +77,19 @@ function CaseForm() {
       clearCase();
 
       const newCase = {
-        caseId:        `CASE-${Date.now()}`,
+        caseId:         `CASE-${Date.now()}`,
         visaType,
         country,
         description,
-        status:        "In Progress",
-        createdAt:     new Date().toISOString(),
-        documents:     [],
-        extractedData: {},
-        risks:         [],
-        tasks:         [],
-        notifications: [],
+        status:         "In Progress",
+        createdAt:      new Date().toISOString(),
+        documents:      [],
+        extractedData:  {},
+        risks:          [],
+        tasks:          [],
+        notifications:  [],
         readinessScore: null,
-        workflowStep:  WORKFLOW_STEPS.CASE_CREATED,
+        workflowStep:   WORKFLOW_STEPS.CASE_CREATED,
       };
 
       const savedCase = await createCase(newCase);

@@ -1,7 +1,12 @@
 // src/pages/Home.jsx
+//
+// FEATURE 4 CHANGE:
+//   Added "View Plans" button in the hero section linking to /packages.
+//   Added /packages link in footer under Platform column.
+//   Added Link import from react-router-dom.
 
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect }                  from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import airportPassport    from "../assets/hero/airport-passport.jpg";
 import immigrationOfficer from "../assets/hero/immigration-officer.jpg";
 import heroVideo          from "../assets/hero/hero-video.mp4";
@@ -42,24 +47,20 @@ function Home() {
       {/* ── HERO — full-bleed passport image ─────────────────────────────── */}
       <section className="relative h-[92vh] min-h-[560px] max-h-[900px] overflow-hidden">
 
-        {/* Background image */}
         <img
           src={airportPassport}
           alt="Passport and travel documents"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
 
-        {/* Dark overlay — bottom-heavy for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
 
-        {/* Top-left eyebrow label */}
         <div className="absolute top-8 left-8 lg:top-10 lg:left-12">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
             Visa Application Intelligence Platform
           </span>
         </div>
 
-        {/* Bottom content */}
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-14 lg:px-12 lg:pb-16">
           <div className="max-w-7xl mx-auto">
 
@@ -81,21 +82,29 @@ function Home() {
                   Start Assessment
                   <ArrowRight size={15} />
                 </a>
+
+                {/* FEATURE 4: View Plans link */}
+                <Link
+                  to="/packages"
+                  className="inline-flex items-center gap-2 rounded-[var(--r-lg)] border border-white/30 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98]"
+                >
+                  View Plans
+                </Link>
+
                 <button
                   onClick={() =>
                     document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="inline-flex items-center justify-center rounded-[var(--r-lg)] border border-white/30 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98]"
+                  className="inline-flex items-center justify-center rounded-[var(--r-lg)] px-4 py-3 text-sm font-semibold text-white/70 transition hover:text-white active:scale-[0.98]"
                 >
                   Learn More
                 </button>
               </div>
             </div>
 
-            {/* Stat band — sits inside hero above fold line */}
             <div className="mt-12 flex flex-wrap gap-px overflow-hidden rounded-[var(--r-lg)] border border-white/10">
               {[
-                { label: "Visa Categories",    value: "7" },
+                { label: "Visa Categories",    value: "7"         },
                 { label: "Verification Rate",  value: "AI-Driven" },
                 { label: "Active Tracking",    value: "Real-time" },
               ].map(({ label, value }) => (
@@ -152,7 +161,7 @@ function Home() {
         </div>
       </section>
 
-      {/* ── AI INTELLIGENCE — image + text ────────────────────────────────── */}
+      {/* ── AI INTELLIGENCE ───────────────────────────────────────────────── */}
       <section className="bg-white border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-16 items-center lg:grid-cols-2">
@@ -163,7 +172,6 @@ function Home() {
                 alt="Immigration intelligence"
                 className="w-full h-full object-cover"
               />
-              {/* Subtle green tint overlay */}
               <div className="absolute inset-0 bg-[var(--c-green)]/10" />
             </div>
 
@@ -225,13 +233,13 @@ function Home() {
 
           <div className="grid gap-px bg-[var(--c-border)] rounded-[var(--r-xl)] overflow-hidden sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { Icon: GraduationCap, name: "Student Visa",            desc: "Education and academic pursuits worldwide."      },
-              { Icon: Briefcase,     name: "Work Visa",                desc: "Employment and professional placement."          },
-              { Icon: Plane,         name: "Tourist Visa",             desc: "Travel and short-term visits."                  },
-              { Icon: HomeIcon,      name: "Permanent Residency",      desc: "Long-term settlement pathways."                 },
-              { Icon: Building2,     name: "Business Visa",            desc: "Commercial activities and meetings."            },
-              { Icon: Users,         name: "Family Sponsorship",       desc: "Reunification and family joining."              },
-              { Icon: TrendingUp,    name: "Investor Visa",            desc: "Investment-based immigration routes."           },
+              { Icon: GraduationCap, name: "Student Visa",       desc: "Education and academic pursuits worldwide."    },
+              { Icon: Briefcase,     name: "Work Visa",           desc: "Employment and professional placement."        },
+              { Icon: Plane,         name: "Tourist Visa",        desc: "Travel and short-term visits."                },
+              { Icon: HomeIcon,      name: "Permanent Residency", desc: "Long-term settlement pathways."               },
+              { Icon: Building2,     name: "Business Visa",       desc: "Commercial activities and meetings."          },
+              { Icon: Users,         name: "Family Sponsorship",  desc: "Reunification and family joining."            },
+              { Icon: TrendingUp,    name: "Investor Visa",       desc: "Investment-based immigration routes."         },
             ].map(({ Icon, name, desc }) => (
               <div
                 key={name}
@@ -268,9 +276,9 @@ function Home() {
               </p>
               <ul className="space-y-4">
                 {[
-                  { label: "Instant extraction",      sub: "Passport data read in seconds"              },
-                  { label: "Compliance check",         sub: "Every document validated against requirements" },
-                  { label: "Automatic verification",   sub: "AI confirms type-match for all 15 documents" },
+                  { label: "Instant extraction",    sub: "Passport data read in seconds"                },
+                  { label: "Compliance check",       sub: "Every document validated against requirements" },
+                  { label: "Automatic verification", sub: "AI confirms type-match for all documents"     },
                 ].map(({ label, sub }) => (
                   <li key={label} className="flex items-start gap-4">
                     <div className="mt-1 w-5 h-5 rounded-full border-2 border-[var(--c-green)] flex items-center justify-center shrink-0">
@@ -286,10 +294,7 @@ function Home() {
             </div>
 
             <div className="relative overflow-hidden rounded-[var(--r-2xl)] h-[440px]">
-              <video
-                autoPlay muted loop playsInline
-                className="w-full h-full object-cover"
-              >
+              <video autoPlay muted loop playsInline className="w-full h-full object-cover">
                 <source src={heroVideo} type="video/mp4" />
               </video>
               <div className="absolute inset-0 bg-[var(--c-green)]/15" />
@@ -325,7 +330,6 @@ function Home() {
               </a>
             </div>
 
-            {/* Navi card — clean, no glass */}
             <div className="rounded-[var(--r-2xl)] border border-[var(--c-border)] bg-white p-10 shadow-[var(--shadow-card)]">
               <div className="flex items-center gap-3 mb-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-xl)] bg-[var(--c-green)]">
@@ -369,16 +373,24 @@ function Home() {
             </div>
             <div className="lg:text-right">
               <p className="text-white/65 mb-8 max-w-sm lg:ml-auto">
-                Join thousands of applicants using BlueprintAI to navigate their
+                Join thousands of applicants using VISM to navigate their
                 visa process with confidence.
               </p>
-              <a
-                href="#assessment"
-                className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-white px-8 py-3.5 text-sm font-bold text-[var(--c-green)] shadow-sm transition hover:bg-[var(--c-green-light)] active:scale-[0.98]"
-              >
-                Start Assessment
-                <ArrowRight size={15} />
-              </a>
+              <div className="flex flex-wrap gap-3 lg:justify-end">
+                <a
+                  href="#assessment"
+                  className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-white px-8 py-3.5 text-sm font-bold text-[var(--c-green)] shadow-sm transition hover:bg-[var(--c-green-light)] active:scale-[0.98]"
+                >
+                  Start Assessment
+                  <ArrowRight size={15} />
+                </a>
+                <Link
+                  to="/packages"
+                  className="inline-flex items-center gap-2 rounded-[var(--r-lg)] border border-white/30 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/10 active:scale-[0.98]"
+                >
+                  View Plans
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -434,6 +446,7 @@ function Home() {
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Platform</h3>
               <ul className="space-y-2.5">
                 {[
+                  { href: "/packages",  label: "Pricing"    },
                   { href: "/analysis",  label: "Analysis"  },
                   { href: "/documents", label: "Documents" },
                   { href: "/journey",   label: "Journey"   },
