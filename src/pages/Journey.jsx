@@ -1,11 +1,20 @@
 // src/pages/Journey.jsx
+//
+// FEATURE 8 CHANGE:
+//   Added ConfidenceScoreGauge panel.
+//   Auto-generates score on first visit if none exists.
+//   Score stored in caseData.visaConfidenceScore via setCaseData.
 
-import { useNavigate } from "react-router-dom";
-import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
-import VisaJourneyTimeline from "../components/output/VisaJourneyTimeline";
-import ComplianceNotes     from "../components/output/ComplianceNotes";
-import { PageHeader }      from "../components/ui";
+import { useEffect, useState }      from "react";
+import { useNavigate }              from "react-router-dom";
+import { useCase, WORKFLOW_STEPS }  from "../context/CaseContext";
+import VisaJourneyTimeline          from "../components/output/VisaJourneyTimeline";
+import ComplianceNotes              from "../components/output/ComplianceNotes";
+import ConfidenceScoreGauge         from "../components/output/ConfidenceScoreGauge";
+import { PageHeader }               from "../components/ui";
+import { generateConfidenceScore }  from "../services/api";
 
+// ── Requirements checklist ────────────────────────────────────────────────────
 function RequirementsChecklist() {
   const { caseData, uploadedDocuments } = useCase();
   const requiredDocuments = caseData?.analysis?.documents || [];
@@ -15,7 +24,7 @@ function RequirementsChecklist() {
     { label: "Destination Country Selected", met: Boolean(caseData?.country)  },
     ...requiredDocuments.map((doc) => ({
       label: `${doc} Verified`,
-      met: uploadedDocuments.some(
+      met:   uploadedDocuments.some(
         (u) => u.requiredDocument === doc && u.valid
       ),
     })),
@@ -31,7 +40,6 @@ function RequirementsChecklist() {
           {metCount} / {checks.length} Complete
         </span>
       </div>
-
       <ul className="space-y-2.5">
         {checks.map(({ label, met }) => (
           <li
@@ -42,11 +50,9 @@ function RequirementsChecklist() {
                 : "border-[var(--c-border)] bg-[var(--c-bg)]"
             }`}
           >
-            <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                met ? "bg-[#16A34A]" : "bg-[#E6E8EB]"
-              }`}
-            >
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+              met ? "bg-[#16A34A]" : "bg-[#E6E8EB]"
+            }`}>
               {met ? (
                 <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -67,11 +73,56 @@ function RequirementsChecklist() {
   );
 }
 
+// ── Journey page ──────────────────────────────────────────────────────────────
 function Journey() {
-  const navigate = useNavigate();
-  const { caseData, setWorkflowStep } = useCase();
+  const navigate  = useNavigate();
+  const { caseData, setCaseData, setWorkflowStep } = useCase();
 
-  // ── Empty state — no case ────────────────────────────────────────────────
+  const [autoGenerating, setAutoGenerating] = useState(false);
+
+  // Auto-generate score on first visit if none exists yet
+  useEffect(() => {
+    const caseId   = caseData?._id;
+    const hasScore = caseData?.visaConfidenceScore?.score !== null &&
+                     caseData?.visaConfidenceScore?.score !== undefined;
+
+    if (!caseId || hasScore || autoGenerating) return;
+
+    let cancelled = false;
+    setAutoGenerating(true);
+
+    // Mark locally as running so gauge shows spinner immediately
+    setCaseData((prev) => ({
+      ...prev,
+      visaConfidenceScore: { ...prev?.visaConfidenceScore, running: true },
+    }));
+
+    generateConfidenceScore(caseId)
+      .then((result) => {
+        if (!cancelled && result?.visaConfidenceScore) {
+          setCaseData((prev) => ({
+            ...prev,
+            visaConfidenceScore: result.visaConfidenceScore,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.error("[Journey] Auto-score failed:", err);
+        if (!cancelled) {
+          setCaseData((prev) => ({
+            ...prev,
+            visaConfidenceScore: { ...prev?.visaConfidenceScore, running: false },
+          }));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setAutoGenerating(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [caseData?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Empty state ───────────────────────────────────────────────────────────
   if (!caseData) {
     return (
       <main className="min-h-screen bg-[var(--c-bg)]">
@@ -87,13 +138,13 @@ function Journey() {
             </svg>
             <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No Case Yet</h2>
             <p className="text-sm text-[var(--c-text-muted)] mb-6">
-              Create a case on the home page to view your visa journey timeline.
+              Create a case to view your visa journey and confidence score.
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/packages")}
               className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-green-mid)] transition"
             >
-              Go to Home
+              Get Started
             </button>
           </div>
         </div>
@@ -103,14 +154,17 @@ function Journey() {
 
   const visaJourney     = caseData?.analysis?.visaJourney     || [];
   const complianceNotes = caseData?.analysis?.complianceNotes || [];
+  const caseId          = caseData?.caseId || caseData?.id || "—";
+  const status          = caseData?.status || "In Progress";
+
+  const handleScoreUpdate = (newScore) => {
+    setCaseData((prev) => ({ ...prev, visaConfidenceScore: newScore }));
+  };
 
   const handleProceed = () => {
     setWorkflowStep(WORKFLOW_STEPS.JOURNEY_DONE);
     navigate("/dashboard");
   };
-
-  const caseId = caseData?.caseId || caseData?.id || "—";
-  const status = caseData?.status || "In Progress";
 
   return (
     <main className="min-h-screen bg-[var(--c-bg)]">
@@ -142,10 +196,23 @@ function Journey() {
 
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
 
-        <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
-          <VisaJourneyTimeline visaJourney={visaJourney} />
+        {/* ── FEATURE 8: Confidence Score + Journey in 2-col layout ────── */}
+        <div className="grid lg:grid-cols-[1fr_300px] gap-6 items-start">
+
+          {/* Left: journey timeline */}
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
+            <VisaJourneyTimeline visaJourney={visaJourney} />
+          </div>
+
+          {/* Right: confidence score gauge */}
+          <ConfidenceScoreGauge
+            caseId={caseData?._id}
+            score={caseData?.visaConfidenceScore}
+            onScoreUpdate={handleScoreUpdate}
+          />
         </div>
 
+        {/* ── Compliance + checklist ────────────────────────────────────── */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
             <ComplianceNotes notes={complianceNotes} />
@@ -153,6 +220,7 @@ function Journey() {
           <RequirementsChecklist />
         </div>
 
+        {/* ── Proceed ──────────────────────────────────────────────────── */}
         <div className="flex justify-end pb-4">
           <button
             type="button"
