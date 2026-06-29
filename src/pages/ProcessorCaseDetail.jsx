@@ -1,37 +1,29 @@
 // src/pages/ProcessorCaseDetail.jsx
+//
+// FEATURE 7 CHANGE:
+//   Added CountryGuidelinesPanel import.
+//   Panel renders between AgentAssessmentPanel and QuestionnairePanel
+//   so the processor sees country-specific visa requirements while
+//   reviewing the case.
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useProcessorAuth }     from "../context/ProcessorAuthContext";
-import CaseAssessmentPanel      from "../components/processor/CaseAssessmentPanel";
-import CasePassportPanel        from "../components/processor/CasePassportPanel";
-import CaseDocumentsPanel       from "../components/processor/CaseDocumentsPanel";
-import ProcessorNotesPanel      from "../components/processor/ProcessorNotesPanel";
-import ProcessorActions         from "../components/processor/ProcessorActions";
-import AuditTimeline            from "../components/processor/AuditTimeline";
-import QuestionnairePanel       from "../components/processor/QuestionnairePanel";
-import AgentAssessmentPanel     from "../components/processor/AgentAssessmentPanel";
+import { useParams, useNavigate }                   from "react-router-dom";
+import { useProcessorAuth }      from "../context/ProcessorAuthContext";
+import CaseAssessmentPanel       from "../components/processor/CaseAssessmentPanel";
+import CasePassportPanel         from "../components/processor/CasePassportPanel";
+import CaseDocumentsPanel        from "../components/processor/CaseDocumentsPanel";
+import ProcessorNotesPanel       from "../components/processor/ProcessorNotesPanel";
+import ProcessorActions          from "../components/processor/ProcessorActions";
+import AuditTimeline             from "../components/processor/AuditTimeline";
+import QuestionnairePanel        from "../components/processor/QuestionnairePanel";
+import AgentAssessmentPanel      from "../components/processor/AgentAssessmentPanel";
+import CountryGuidelinesPanel    from "../components/output/CountryGuidelinesPanel.jsx";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-async function fetchCase(id) {
-  const res = await fetch(`${API_URL}/cases/${id}`);
-  if (!res.ok) throw new Error("Case not found");
-  return res.json();
-}
-
-async function sendProcessorAction(caseId, action, note) {
-  const res = await fetch(`${API_URL}/cases/${caseId}/processor-action`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({ action, note: note || "" }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Action failed");
-  }
-  return res.json();
-}
+import {
+  getCaseByIdProcessor,
+  sendProcessorAction,
+} from "../services/api.js";
+import { formatDate, formatDateTime } from "../utils/dateUtils.js";
 
 function StatusBadge({ status }) {
   const map = {
@@ -48,36 +40,18 @@ function StatusBadge({ status }) {
   );
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString("en-GB", {
-      day:    "2-digit",
-      month:  "short",
-      year:   "numeric",
-      hour:   "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "—";
-  }
-}
-
 function ProcessorCaseDetail() {
   const { id }   = useParams();
   const navigate = useNavigate();
   const { auth } = useProcessorAuth();
 
-  const [caseRecord, setCaseRecord]   = useState(null);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState("");
-  const [notesSaving, setNotesSaving] = useState(false);
+  const [caseRecord,   setCaseRecord]   = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState("");
+  const [notesSaving,  setNotesSaving]  = useState(false);
 
   const viewLoggedRef = useRef(false);
-
-  // If the agent is still running when processor opens the case,
-  // poll every 3s until it finishes.
-  const pollRef = useRef(null);
+  const pollRef       = useRef(null);
 
   function stopPolling() {
     if (pollRef.current) {
@@ -88,7 +62,7 @@ function ProcessorCaseDetail() {
 
   const loadCase = useCallback(async () => {
     try {
-      const data = await fetchCase(id);
+      const data = await getCaseByIdProcessor(id);
       setCaseRecord(data);
       setError("");
       return data;
@@ -112,8 +86,6 @@ function ProcessorCaseDetail() {
           // Non-critical
         }
       }
-
-      // If agent is already running, start polling
       if (data?.agentAssessment?.running) {
         startAgentPolling(data._id);
       }
@@ -126,13 +98,13 @@ function ProcessorCaseDetail() {
     stopPolling();
     pollRef.current = setInterval(async () => {
       try {
-        const record = await fetchCase(caseId);
+        const record = await getCaseByIdProcessor(caseId);
         if (!record.agentAssessment?.running) {
           stopPolling();
           setCaseRecord(record);
         }
       } catch {
-        // Silent — don't disrupt the processor view
+        // Silent
       }
     }, 3000);
   }
@@ -154,6 +126,7 @@ function ProcessorCaseDetail() {
     }
   }, [caseRecord]);
 
+  // ── Loading ───────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center">
@@ -165,6 +138,7 @@ function ProcessorCaseDetail() {
     );
   }
 
+  // ── Error ─────────────────────────────────────────────────────────────────
   if (error || !caseRecord) {
     return (
       <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center px-6">
@@ -192,7 +166,6 @@ function ProcessorCaseDetail() {
       {/* ── Processor Navbar ──────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 bg-[var(--c-green)] shadow-[0_1px_0_rgba(255,255,255,0.1)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3.5 flex-wrap">
-
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -210,7 +183,6 @@ function ProcessorCaseDetail() {
               Processor
             </span>
           </div>
-
           <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-white/20 bg-white/10 px-3 py-1.5">
             <span className="w-2 h-2 rounded-full bg-[#4ade80]" />
             <span className="text-xs text-white font-medium">{auth?.username}</span>
@@ -234,9 +206,9 @@ function ProcessorCaseDetail() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "Case ID",     value: caseRecord.caseId },
-                { label: "Visa Type",   value: caseRecord.visaType },
-                { label: "Destination", value: caseRecord.country },
+                { label: "Case ID",     value: caseRecord.caseId               },
+                { label: "Visa Type",   value: caseRecord.visaType             },
+                { label: "Destination", value: caseRecord.country              },
                 { label: "Created",     value: formatDate(caseRecord.createdAt) },
               ].map((item) => (
                 <div
@@ -269,14 +241,25 @@ function ProcessorCaseDetail() {
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6 items-start">
 
+          {/* ── Left column — case content ──────────────────────────────── */}
           <div className="space-y-5 min-w-0">
+
             <CaseAssessmentPanel  caseRecord={caseRecord} />
             <AgentAssessmentPanel caseRecord={caseRecord} />
+
+            {/* FEATURE 7: Country-specific visa guidelines for the processor */}
+            <CountryGuidelinesPanel
+              country={caseRecord.country}
+              visaType={caseRecord.visaType}
+            />
+
             <QuestionnairePanel   caseRecord={caseRecord} />
             <CasePassportPanel    caseRecord={caseRecord} />
             <CaseDocumentsPanel   caseRecord={caseRecord} />
+
           </div>
 
+          {/* ── Right column — actions + notes + audit ──────────────────── */}
           <div className="space-y-5">
             <ProcessorActions
               caseId={caseRecord._id}

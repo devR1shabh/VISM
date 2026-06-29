@@ -1,12 +1,19 @@
 // src/components/processor/ProcessorLogin.jsx
+//
+// PHASE 3 CHANGE:
+// - Field changed from "Username" to "Email" (processors now have email accounts)
+// - login() is now async — it calls POST /api/auth/login via ProcessorAuthContext
+// - Demo credentials box updated to show the seeded email
+// - Everything else (layout, styles, loading spinner, error display) unchanged
 
 import { useState } from "react";
-import { useProcessorAuth } from "../../context/ProcessorAuthContext";
+import { Link }     from "react-router-dom";
+import { useProcessorAuth } from "../../context/ProcessorAuthContext.jsx";
 
 function ProcessorLogin() {
   const { login } = useProcessorAuth();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
@@ -15,12 +22,16 @@ function ProcessorLogin() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
-    const success = login(username.trim(), password);
-    if (!success) {
-      setError("Invalid credentials. Please try again.");
+
+    try {
+      await login(email.trim(), password);
+      // ProcessorProtectedRoute re-renders automatically when isAuthenticated
+      // becomes true — no navigate() needed here.
+    } catch (err) {
+      setError(err.message || "Invalid credentials. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -46,17 +57,19 @@ function ProcessorLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Email — replaces old Username field */}
             <div>
               <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
-                Username
+                Email Address
               </label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="username"
-                placeholder="processor"
+                autoComplete="email"
+                placeholder="processor@vism.internal"
                 className="w-full bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text)] px-4 py-3 rounded-[var(--r-lg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--c-green)] focus:border-[var(--c-green)] placeholder-[var(--c-text-muted)] transition"
               />
             </div>
@@ -84,7 +97,7 @@ function ProcessorLogin() {
 
             <button
               type="submit"
-              disabled={loading || !username || !password}
+              disabled={loading || !email || !password}
               className="w-full bg-[var(--c-green)] text-white py-3 rounded-[var(--r-lg)] text-sm font-semibold hover:bg-[var(--c-green-mid)] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {loading ? (
@@ -98,18 +111,23 @@ function ProcessorLogin() {
             </button>
           </form>
 
+          {/* Updated hint — points to the seeded account, not the old hardcoded creds */}
           <div className="mt-5 rounded-[var(--r-lg)] bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3 text-xs text-[var(--c-text-mid)]">
-            <p className="font-semibold text-[var(--c-text)] mb-1">Demo Credentials</p>
-            <p>Username: <span className="text-[var(--c-green)] font-mono font-bold">processor</span></p>
-            <p>Password: <span className="text-[var(--c-green)] font-mono font-bold">vism2024</span></p>
+            <p className="font-semibold text-[var(--c-text)] mb-1">Default Credentials</p>
+            <p>Email: <span className="text-[var(--c-green)] font-mono font-bold">processor@vism.internal</span></p>
+            <p>Password: <span className="text-[var(--c-green)] font-mono font-bold">ChangeMe123!</span></p>
+            <p className="mt-1.5 text-[var(--c-text-muted)]">
+              Set via <span className="font-mono">PROCESSOR_EMAIL</span> / <span className="font-mono">PROCESSOR_PASS</span> in <span className="font-mono">.env</span>
+            </p>
           </div>
         </div>
 
         <p className="mt-6 text-center text-xs text-[var(--c-text-muted)]">
-          <a href="/" className="text-[var(--c-green-mid)] hover:underline underline-offset-2">
+          <Link to="/" className="text-[var(--c-green-mid)] hover:underline underline-offset-2">
             ← Back to Applicant Portal
-          </a>
+          </Link>
         </p>
+
       </div>
     </main>
   );

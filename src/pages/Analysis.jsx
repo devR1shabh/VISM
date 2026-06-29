@@ -1,4 +1,9 @@
 ﻿// src/pages/Analysis.jsx
+//
+// FEATURE 7 CHANGE:
+//   Added CountryGuidelinesPanel after the case info section.
+//   Panel fetches and displays country + visa-type specific guidelines.
+//   Empty state and missing case links updated to point to /packages.
 
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -17,13 +22,13 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import { useCase, WORKFLOW_STEPS } from "../context/CaseContext";
-import AIApplicationOverview from "../components/output/AIApplicationOverview";
-import AIRiskPanel           from "../components/output/AIRiskPanel";
-import AIRecommendations     from "../components/output/AIRecommendations";
-import CaseSummary           from "../components/output/CaseSummary";
-import { PageHeader }        from "../components/ui";
-
+import { useCase, WORKFLOW_STEPS }     from "../context/CaseContext";
+import AIApplicationOverview           from "../components/output/AIApplicationOverview";
+import AIRiskPanel                     from "../components/output/AIRiskPanel";
+import AIRecommendations               from "../components/output/AIRecommendations";
+import CaseSummary                     from "../components/output/CaseSummary";
+import CountryGuidelinesPanel          from "../components/output/CountryGuidelinesPanel";
+import { PageHeader }                  from "../components/ui";
 import { generateAnalysis, updateCase } from "../services/api";
 
 const visaIconMap = {
@@ -42,8 +47,8 @@ function Analysis() {
 
   const { caseData, setCaseData, setWorkflowStep } = useCase();
 
-  const [analysis, setAnalysis]   = useState(() => caseData?.analysis || null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [analysis,   setAnalysis]   = useState(() => caseData?.analysis || null);
+  const [isLoading,  setIsLoading]  = useState(false);
 
   const redirectMessage = location.state?.message;
 
@@ -62,11 +67,7 @@ function Analysis() {
         );
 
         setAnalysis(result);
-
-        setCaseData((prev) => ({
-          ...prev,
-          analysis: result,
-        }));
+        setCaseData((prev) => ({ ...prev, analysis: result }));
 
         if (caseData._id) {
           updateCase(caseData._id, { analysis: result }).catch((err) =>
@@ -85,12 +86,12 @@ function Analysis() {
     runAnalysis();
   }, [caseData, analysis, setCaseData, setWorkflowStep]);
 
-  // ── Empty state — no case exists yet ─────────────────────────────────────
+  // ── Empty state ───────────────────────────────────────────────────────────
   if (!caseData) {
     return (
       <main className="min-h-screen bg-[var(--c-bg)]">
         <PageHeader
-          eyebrow="BlueprintAI Assessment Report"
+          eyebrow="VISM Assessment Report"
           title="AI Analysis & Eligibility Report"
           description="Review your case status, eligibility view, and key recommendations."
         />
@@ -99,13 +100,13 @@ function Analysis() {
             <Globe size={40} className="text-[var(--c-text-muted)] mx-auto mb-4" />
             <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No Case Yet</h2>
             <p className="text-sm text-[var(--c-text-muted)] mb-6">
-              Start by creating a case on the home page to generate your AI analysis.
+              Start by choosing a plan and creating your first application.
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/packages")}
               className="inline-flex items-center gap-2 rounded-lg bg-[var(--c-green)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-green-mid)] transition"
             >
-              Go to Home
+              View Plans
             </button>
           </div>
         </div>
@@ -118,7 +119,7 @@ function Analysis() {
     return (
       <div className="min-h-screen bg-[var(--c-bg)]">
         <PageHeader
-          eyebrow="BlueprintAI Assessment Report"
+          eyebrow="VISM Assessment Report"
           title="Generating Your Analysis..."
           description="AI is synthesizing your visa profile, risks, and recommended next steps."
         />
@@ -139,7 +140,7 @@ function Analysis() {
     <main className="min-h-screen bg-[var(--c-bg)]">
 
       <PageHeader
-        eyebrow="BlueprintAI Assessment Report"
+        eyebrow="VISM Assessment Report"
         title="AI Analysis & Eligibility Report"
         description="Review your case status, eligibility view, and key recommendations so you can move forward with confidence."
       />
@@ -152,6 +153,7 @@ function Analysis() {
           </div>
         )}
 
+        {/* ── Stat cards ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
             { label: "Visa Type",   value: caseData.visaType, Icon: VisaIcon },
@@ -159,41 +161,32 @@ function Analysis() {
             { label: "Status",      value: status,            Icon: FileText },
             { label: "Case ID",     value: caseId,            Icon: Sparkles },
           ].map(({ label, value, Icon }) => (
-            <div
-              key={label}
-              className="bg-white border border-[var(--c-border)] rounded-xl p-4 shadow-sm"
-            >
+            <div key={label} className="bg-white border border-[var(--c-border)] rounded-xl p-4 shadow-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--c-green-bg)] text-[var(--c-green-mid)] mb-3">
                 <Icon size={18} />
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)]">
                 {label}
               </p>
-              <p className="mt-1 text-sm font-bold text-[var(--c-text)] leading-tight">
-                {value}
-              </p>
+              <p className="mt-1 text-sm font-bold text-[var(--c-text)] leading-tight">{value}</p>
             </div>
           ))}
         </div>
 
+        {/* ── Case information ────────────────────────────────────────────── */}
         <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-green-mid)] mb-1">
             Case Information
           </p>
-          <h2 className="text-xl font-bold text-[var(--c-text)] mb-5">
-            Visa Case Details
-          </h2>
+          <h2 className="text-xl font-bold text-[var(--c-text)] mb-5">Visa Case Details</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {[
-              { label: "Case ID",             value: caseId            },
-              { label: "Visa Type",           value: caseData.visaType },
-              { label: "Destination Country", value: caseData.country  },
-              { label: "Case Status",         value: status            },
+              { label: "Case ID",             value: caseId             },
+              { label: "Visa Type",           value: caseData.visaType  },
+              { label: "Destination Country", value: caseData.country   },
+              { label: "Case Status",         value: status             },
             ].map(({ label, value }) => (
-              <div
-                key={label}
-                className="rounded-lg bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3"
-              >
+              <div key={label} className="rounded-lg bg-[var(--c-bg)] border border-[var(--c-border)] px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)] mb-1">
                   {label}
                 </p>
@@ -206,13 +199,18 @@ function Analysis() {
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--c-text-muted)] mb-1">
                 Case Description
               </p>
-              <p className="text-sm text-[var(--c-text-mid)] leading-relaxed">
-                {caseData.description}
-              </p>
+              <p className="text-sm text-[var(--c-text-mid)] leading-relaxed">{caseData.description}</p>
             </div>
           )}
         </div>
 
+        {/* ── FEATURE 7: Country Guidelines Panel ─────────────────────────── */}
+        <CountryGuidelinesPanel
+          country={caseData.country}
+          visaType={caseData.visaType}
+        />
+
+        {/* ── AI analysis sections ─────────────────────────────────────────── */}
         <div className="bg-white border border-[var(--c-border)] rounded-xl shadow-sm p-6">
           <AIApplicationOverview aiOverview={analysis.aiOverview} />
         </div>
@@ -229,6 +227,7 @@ function Analysis() {
           <AIRecommendations aiRecommendations={analysis.aiRecommendations || []} />
         </div>
 
+        {/* ── Proceed ─────────────────────────────────────────────────────── */}
         <div className="flex justify-end pb-4">
           <button
             type="button"

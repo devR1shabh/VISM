@@ -1,24 +1,11 @@
 // server/services/visaAnalysisService.js
-// All visa types now share the same 15-document checklist.
-// Per-visa compliance notes and journey steps remain specific.
+// Generates rule-based visa analysis (documents, compliance notes, journey steps).
+//
+// FEATURE 1 CHANGE:
+//   Removed the hardcoded REQUIRED_DOCUMENTS constant.
+//   Now imports ALL_DOCUMENTS from server/config/constants.js.
 
-const REQUIRED_DOCUMENTS = [
-  "Passport",
-  "Passport Size Photograph",
-  "National ID Card",
-  "Birth Certificate",
-  "Address Proof",
-  "Resume / CV",
-  "Academic Transcript",
-  "Degree Certificate",
-  "Employment Letter",
-  "Bank Statement",
-  "Proof of Funds",
-  "Travel History Document",
-  "Statement of Purpose",
-  "Police Clearance Certificate",
-  "Medical Certificate",
-];
+import { ALL_DOCUMENTS } from "../config/constants.js";
 
 export function generateRuleBasedAnalysis(visaType, country) {
   const complianceMap = {
@@ -137,8 +124,7 @@ export function generateRuleBasedAnalysis(visaType, country) {
   ];
 
   return {
-    // All visa types use the same 15-document list
-    documents:       REQUIRED_DOCUMENTS,
+    documents:       ALL_DOCUMENTS,
     complianceNotes: complianceMap[visaType] || defaultCompliance,
     visaJourney:     journeyMap[visaType]    || defaultJourney,
   };

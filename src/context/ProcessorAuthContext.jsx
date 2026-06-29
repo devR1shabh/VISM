@@ -1,64 +1,84 @@
 // src/context/ProcessorAuthContext.jsx
+//
+// Manages processor authentication state.
+//
+// PHASE 3 CHANGE:
+// Replaced the hardcoded credential check (username: "processor", password: "vism2024")
+// with a real POST /api/auth/login call. The processor account is now a proper
+// User document in MongoDB (seeded via server/scripts/seedProcessor.js).
+//
+// The context shape is intentionally kept identical to before so that
+// ProcessorProtectedRoute, ProcessorDashboard and ProcessorCaseDetail
+// require zero changes — they all consume { auth, isAuthenticated, logout }
+// and that API is preserved.
 
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
-// Hardcoded processor credentials.
-// In a production system these would come from a backend auth service.
-const PROCESSOR_CREDENTIALS = {
-  username: "processor",
-  password: "vism2024",
-};
-
-const STORAGE_KEY = "vism_processor_auth";
-
-function loadAuth() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveAuth(value) {
-  try {
-    if (value) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  } catch {
-    // ignore
-  }
-}
+import {
+  loginProcessor,
+  getMe,
+  clearProcessorToken,
+  getProcessorToken,
+} from "../services/authService.js";
 
 const ProcessorAuthContext = createContext(null);
 
 export function ProcessorAuthProvider({ children }) {
-  const [auth, setAuth] = useState(() => loadAuth());
+  // auth holds the User object: { id, name, email, role }
+  // Mirrors the old shape closely enough that consumers don't break.
+  const [auth, setAuth]         = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = (username, password) => {
-    if (
-      username === PROCESSOR_CREDENTIALS.username &&
-      password === PROCESSOR_CREDENTIALS.password
-    ) {
-      const session = { username, loggedInAt: new Date().toISOString() };
-      saveAuth(session);
-      setAuth(session);
-      return true;
+  // ── Rehydrate on mount ────────────────────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    async function rehydrate() {
+      const token = getProcessorToken();
+      const me    = await getMe(token);
+
+      if (!cancelled) {
+        if (me && me.role === "processor") {
+          setAuth(me);
+        } else if (me && me.role !== "processor") {
+          clearProcessorToken();
+        }
+        setIsLoading(false);
+      }
     }
-    return false;
-  };
 
-  const logout = () => {
-    saveAuth(null);
+    rehydrate();
+    return () => { cancelled = true; };
+  }, []);
+
+  // ── login ─────────────────────────────────────────────────────────────────
+  // Called by ProcessorLogin.jsx.
+  // Returns true on success (to match the original API surface),
+  // throws on failure so ProcessorLogin can display the server error.
+  const login = useCallback(async (email, password) => {
+    const data = await loginProcessor({ email, password });
+    setAuth(data.user);
+    return true;
+  }, []);
+
+  // ── logout ────────────────────────────────────────────────────────────────
+  const logout = useCallback(() => {
+    clearProcessorToken();
     setAuth(null);
-  };
+  }, []);
 
   const isAuthenticated = Boolean(auth);
 
   return (
-    <ProcessorAuthContext.Provider value={{ auth, isAuthenticated, login, logout }}>
+    <ProcessorAuthContext.Provider
+      value={{ auth, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </ProcessorAuthContext.Provider>
   );

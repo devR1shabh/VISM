@@ -1,14 +1,34 @@
 // server/controllers/caseController.js
 
 import Case from "../models/Case.js";
+import { DOCUMENT_CATEGORY_MAP } from "../config/constants.js";
 import { runReadinessAgent } from "../services/assessmentAgentService.js";
+import {
+  sendCaseSubmittedEmail,
+  sendCaseUpdateEmail,
+} from "../services/emailService.js";
 
+// ── createCase ────────────────────────────────────────────────────────────────
 export async function createCase(req, res) {
   try {
-    const newCase = await Case.create(req.body);
+    const caseData = {
+      ...req.body,
+      applicantId:    req.user?._id    ?? null,
+      applicantEmail: req.user?.email  ?? "",
+      applicantName:  req.user?.name   ?? "",
+    };
+
+    const newCase = await Case.create(caseData);
+
+    if (newCase.applicantEmail) {
+      sendCaseSubmittedEmail(newCase).catch((err) =>
+        console.error("[createCase] Email send failed:", err.message)
+      );
+    }
+
     res.status(201).json(newCase);
   } catch (error) {
-    console.error(error);
+    console.error("[caseController.createCase]", error);
     res.status(500).json({ error: "Failed to create case" });
   }
 }
@@ -40,12 +60,23 @@ export async function updateCase(req, res) {
   }
 }
 
+// ── addVerifiedDocument ───────────────────────────────────────────────────────
+// FEATURE 2 CHANGE:
+//   Now stamps `category` (mandatory | supporting) on every uploaded document
+//   by looking up the document type in DOCUMENT_CATEGORY_MAP from constants.js.
+//   Legacy documents (created before this feature) will have category: null.
+
 export async function addVerifiedDocument(req, res) {
   try {
     const { documentType } = req.body;
-    const caseId   = req.params.id;
+    const caseId    = req.params.id;
     const uploadedAt = new Date();
 
+    // Look up category from the single source of truth.
+    // Falls back to null for any document type not in the map.
+    const category = DOCUMENT_CATEGORY_MAP[documentType] ?? null;
+
+    // Try to update an existing entry first (re-upload scenario).
     let updatedCase = await Case.findOneAndUpdate(
       {
         _id: caseId,
@@ -53,22 +84,25 @@ export async function addVerifiedDocument(req, res) {
       },
       {
         $set: {
-          "uploadedDocuments.$.verified":  true,
+          "uploadedDocuments.$.verified":   true,
           "uploadedDocuments.$.uploadedAt": uploadedAt,
+          "uploadedDocuments.$.category":   category,
         },
       },
       { new: true }
     );
 
+    // No existing entry — push a new one.
     if (!updatedCase) {
       updatedCase = await Case.findByIdAndUpdate(
         caseId,
         {
           $push: {
             uploadedDocuments: {
-              type: documentType,
-              verified: true,
+              type:      documentType,
+              verified:  true,
               uploadedAt,
+              category,
             },
           },
         },
@@ -127,6 +161,7 @@ export async function savePassportData(req, res) {
   }
 }
 
+// ── getAllCases ────────────────────────────────────────────────────────────────
 export async function getAllCases(req, res) {
   try {
     const cases = await Case.find({}).sort({ createdAt: -1 }).lean();
@@ -137,12 +172,40 @@ export async function getAllCases(req, res) {
   }
 }
 
+// ── getApplicantCases ─────────────────────────────────────────────────────────
+export async function getApplicantCases(req, res) {
+  try {
+    const cases = await Case
+      .find({ applicantId: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(cases);
+  } catch (error) {
+    console.error("[caseController.getApplicantCases]", error);
+    res.status(500).json({ error: "Failed to fetch your cases" });
+  }
+}
+
+// ── getCaseById ───────────────────────────────────────────────────────────────
 export async function getCaseById(req, res) {
   try {
     const foundCase = await Case.findById(req.params.id).lean();
+
     if (!foundCase) {
       return res.status(404).json({ error: "Case not found" });
     }
+
+    if (req.user) {
+      const isProcessor = req.user.role === "processor";
+      const isOwner     = foundCase.applicantId &&
+                          String(foundCase.applicantId) === String(req.user._id);
+
+      if (!isProcessor && !isOwner) {
+        return res.status(404).json({ error: "Case not found" });
+      }
+    }
+
     res.json(foundCase);
   } catch (error) {
     console.error(error);
@@ -205,6 +268,12 @@ export async function processorAction(req, res) {
       return res.status(404).json({ error: "Case not found" });
     }
 
+    if (action !== "view_case" && updatedCase.applicantEmail) {
+      sendCaseUpdateEmail(updatedCase, action, note || "").catch((err) =>
+        console.error("[processorAction] Email send failed:", err.message)
+      );
+    }
+
     res.json(updatedCase);
   } catch (error) {
     console.error(error);
@@ -245,38 +314,16 @@ export async function saveQuestionnaire(req, res) {
   }
 }
 
-// ── runAssessment ────────────────────────────────────────────────────────────
-// Triggers the Readiness Assessment Agent for a given case.
-//
-// The agent reads the case from MongoDB, builds a snapshot, runs its
-// autonomous tool loop, and writes the result back to agentAssessment.
-//
-// The endpoint returns immediately with { running: true } after setting the
-// running flag, then the agent runs asynchronously. The frontend polls
-// GET /cases/:id to check when running becomes false and agentAssessment
-// is populated.
-//
-// This avoids HTTP timeout issues for long agent runs.
-
+// ── runAssessment ─────────────────────────────────────────────────────────────
 export async function runAssessment(req, res) {
   const caseId = req.params.id;
 
   try {
-    // Load the full case from DB
     const caseRecord = await Case.findById(caseId).lean();
     if (!caseRecord) {
       return res.status(404).json({ error: "Case not found" });
     }
 
-    // ── Mark as running ───────────────────────────────────────────────────────────────────────────
-    // We $set the whole agentAssessment object, NOT a dot-path like
-    // "agentAssessment.running". MongoDB cannot write dot-path fields into a
-    // null parent. Existing documents created before the agent feature was added
-    // store agentAssessment: null, so dot-path writes throw:
-    //   "Cannot create field 'running' in element { agentAssessment: null }"
-    // Replacing the whole object works whether the current value is null, {},
-    // or an already-populated sub-document. It also migrates legacy nulls in
-    // one atomic operation with no separate migration step required.
     await Case.findByIdAndUpdate(caseId, {
       $set: {
         agentAssessment: {
@@ -291,18 +338,11 @@ export async function runAssessment(req, res) {
       },
     });
 
-    // Respond immediately — agent runs in background
     res.json({ running: true, message: "Assessment agent started." });
 
-    // ── Build the case snapshot the agent will reason over ────────────────────
-    // Normalize uploadedDocuments from MongoDB format to the shape the agent tools expect.
-    // The agent tools look for d.valid and d.requiredDocument — these come from the
-    // client-side CaseContext shape, which the server stores differently.
-    // We synthesize a compatible snapshot here.
-
     const uploadedDocs = (caseRecord.uploadedDocuments || []).map((d) => ({
-      requiredDocument: d.type,       // server uses "type"; agent tools use "requiredDocument"
-      valid:            d.verified,   // server uses "verified"; agent tools use "valid"
+      requiredDocument: d.type,
+      valid:            d.verified,
     }));
 
     const caseSnapshot = {
@@ -316,11 +356,9 @@ export async function runAssessment(req, res) {
       uploadedDocuments: uploadedDocs,
     };
 
-    // ── Run the agent (async — response already sent) ─────────────────────────
     try {
       const result = await runReadinessAgent(caseSnapshot);
 
-      // Write the assessment result to MongoDB
       await Case.findByIdAndUpdate(caseId, {
         $set: {
           agentAssessment: {
@@ -348,9 +386,6 @@ export async function runAssessment(req, res) {
     } catch (agentError) {
       console.error("[Agent Controller] Agent run failed:", agentError);
 
-      // Clear the running flag even on failure.
-      // Again, use a full object $set rather than dot-paths so this works
-      // safely even if agentAssessment is currently null in the document.
       await Case.findByIdAndUpdate(caseId, {
         $set: {
           agentAssessment: {
@@ -368,7 +403,6 @@ export async function runAssessment(req, res) {
 
   } catch (error) {
     console.error("[Agent Controller] Setup error:", error);
-    // Only send error if headers not yet sent
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to start assessment agent" });
     }

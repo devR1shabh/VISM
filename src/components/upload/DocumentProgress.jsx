@@ -1,12 +1,39 @@
 ﻿// src/components/upload/DocumentProgress.jsx
+//
+// FEATURE 2 CHANGE:
+//   Now shows two progress rows: mandatory completion and supporting completion.
+//   Uses useConfig() to know which required docs are mandatory vs supporting.
 
-import { useNavigate } from "react-router-dom";
-import { useCase, WORKFLOW_STEPS } from "../../context/CaseContext";
-import { deriveDocumentSummary } from "../../engines/readinessEngine";
+import { useNavigate }                from "react-router-dom";
+import { useCase, WORKFLOW_STEPS }    from "../../context/CaseContext";
+import { useConfig }                  from "../../context/ConfigContext.jsx";
+import { deriveDocumentSummary }      from "../../engines/readinessEngine";
+
+function MiniProgress({ label, verified, total, color }) {
+  const pct = total === 0 ? 0 : Math.round((verified / total) * 100);
+  const barColor = color === "error"   ? "bg-[var(--c-error)]"
+                 : color === "info"    ? "bg-[var(--c-info)]"
+                 :                       "bg-[var(--c-green)]";
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-[var(--c-text-mid)]">{label}</span>
+        <span className="text-[var(--c-text-muted)]">{verified} / {total}</span>
+      </div>
+      <div className="rounded-full bg-[var(--c-border)] h-1.5 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 function DocumentProgress() {
   const navigate = useNavigate();
   const { caseData, uploadedDocuments, setWorkflowStep } = useCase();
+  const { documents: configDocs } = useConfig();
 
   const requiredDocuments = caseData?.analysis?.documents || [];
 
@@ -15,8 +42,25 @@ function DocumentProgress() {
 
   const progress = totalCount === 0 ? 0 : Math.round((verifiedCount / totalCount) * 100);
 
-  // Documents are advisory — user can always proceed regardless of upload count.
-  // After documents, the next step is the Questionnaire.
+  // ── Mandatory breakdown ───────────────────────────────────────────────────
+  const mandatoryRequired = requiredDocuments.filter(
+    (doc) => configDocs.categoryMap[doc] === "mandatory"
+  );
+  const mandatoryVerified = uploadedDocuments.filter(
+    (u) => u.valid && mandatoryRequired.includes(u.requiredDocument)
+  ).length;
+
+  // ── Supporting breakdown ──────────────────────────────────────────────────
+  const supportingRequired = requiredDocuments.filter(
+    (doc) => configDocs.categoryMap[doc] === "supporting"
+  );
+  const supportingVerified = uploadedDocuments.filter(
+    (u) => u.valid && supportingRequired.includes(u.requiredDocument)
+  ).length;
+
+  const allMandatoryDone = mandatoryRequired.length > 0 &&
+                           mandatoryVerified === mandatoryRequired.length;
+
   const handleProceed = () => {
     setWorkflowStep(WORKFLOW_STEPS.DOCUMENTS_DONE);
     navigate("/questionnaire");
@@ -33,23 +77,23 @@ function DocumentProgress() {
           </p>
           <h2 className="text-xl font-bold text-[var(--c-text)]">Application Document Status</h2>
           <p className="mt-1.5 text-sm font-medium text-[var(--c-text-muted)]">
-            {verifiedCount === totalCount && totalCount > 0
-              ? "✓ All documents verified"
-              : `${verifiedCount} of ${totalCount} documents verified — you can continue at any time`}
+            {allMandatoryDone
+              ? "✓ All mandatory documents verified — supporting docs improve your score"
+              : `${mandatoryVerified} of ${mandatoryRequired.length} mandatory documents verified`}
           </p>
         </div>
 
         <div className="rounded-[var(--r-xl)] border border-[var(--c-border)] bg-[var(--c-bg)] px-6 py-4 text-right shrink-0">
           <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--c-text-muted)] mb-1">
-            Verified Documents
+            Total Verified
           </p>
           <p className="font-display text-4xl font-bold text-[var(--c-text)]">{verifiedCount}</p>
           <p className="text-sm text-[var(--c-text-muted)]">/ {totalCount}</p>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="space-y-2 mb-6">
+      {/* Overall progress bar */}
+      <div className="space-y-2 mb-5">
         <div className="rounded-full bg-[var(--c-border)] h-2.5 overflow-hidden">
           <div
             className="h-full rounded-full bg-[var(--c-green)] transition-all duration-500"
@@ -58,10 +102,24 @@ function DocumentProgress() {
         </div>
         <div className="flex items-center justify-between text-xs text-[var(--c-text-muted)]">
           <span>{progress}% complete ({verifiedCount}/{totalCount})</span>
-          <span>
-            {totalCount === 0 ? "No documents required" : `${missing.length} remaining`}
-          </span>
+          <span>{missing.length} remaining</span>
         </div>
+      </div>
+
+      {/* Mandatory / Supporting breakdown bars */}
+      <div className="grid sm:grid-cols-2 gap-4 mb-6 p-4 bg-[var(--c-bg)] rounded-[var(--r-xl)] border border-[var(--c-border)]">
+        <MiniProgress
+          label="Mandatory Documents"
+          verified={mandatoryVerified}
+          total={mandatoryRequired.length}
+          color="error"
+        />
+        <MiniProgress
+          label="Supporting Documents"
+          verified={supportingVerified}
+          total={supportingRequired.length}
+          color="info"
+        />
       </div>
 
       {/* Document status pills */}
@@ -70,12 +128,15 @@ function DocumentProgress() {
           const uploaded = uploadedDocuments.find(
             (u) => u.requiredDocument === doc && u.valid
           );
+          const isMandatory = configDocs.categoryMap[doc] === "mandatory";
           return (
             <div
               key={doc}
               className={`inline-flex items-center gap-2 rounded-[var(--r-lg)] border px-3 py-2 text-sm font-medium ${
                 uploaded
                   ? "border-[var(--c-success-border)] bg-[var(--c-success-bg)] text-[var(--c-success)]"
+                  : isMandatory
+                  ? "border-[var(--c-error-border)] bg-[var(--c-error-bg)] text-[var(--c-error)]"
                   : "border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text-muted)]"
               }`}
             >
@@ -83,10 +144,12 @@ function DocumentProgress() {
                 className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
                   uploaded
                     ? "bg-[var(--c-success)] text-white"
+                    : isMandatory
+                    ? "bg-[var(--c-error)] text-white"
                     : "bg-[var(--c-border)] text-[var(--c-text-muted)]"
                 }`}
               >
-                {uploaded ? "✓" : "·"}
+                {uploaded ? "✓" : isMandatory ? "!" : "·"}
               </span>
               {doc}
             </div>

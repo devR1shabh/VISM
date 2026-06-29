@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL;
+import { sendProcessorAction } from "../../services/api.js";
 
 const ACTIONS = [
   {
@@ -37,18 +37,7 @@ const ACTIONS = [
   },
 ];
 
-async function sendAction(caseId, action, note) {
-  const res = await fetch(`${API_URL}/cases/${caseId}/processor-action`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({ action, note: note || "" }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Action failed");
-  }
-  return res.json();
-}
+// sendProcessorAction imported from src/services/api.js
 
 function ActionButton({ action, currentStatus, caseId, onActionSuccess }) {
   const [confirming, setConfirming] = useState(false);
@@ -75,7 +64,7 @@ function ActionButton({ action, currentStatus, caseId, onActionSuccess }) {
     setLoading(true);
     setError("");
     try {
-      const updated = await sendAction(caseId, action.key, noteText);
+      const updated = await sendProcessorAction(caseId, action.key, noteText);
       onActionSuccess(updated);
       setConfirming(false);
       setNoteText("");

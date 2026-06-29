@@ -1,21 +1,7 @@
 // src/components/processor/ProcessorNotesPanel.jsx
 
-import { useState } from "react";
-
-function formatDate(iso) {
-  if (!iso) return "";
-  try {
-    return new Date(iso).toLocaleString("en-GB", {
-      day:    "2-digit",
-      month:  "short",
-      year:   "numeric",
-      hour:   "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
+import { useState }             from "react";
+import { formatDateTime }       from "../../utils/dateUtils.js";
 
 function NoteCard({ note }) {
   return (
@@ -24,7 +10,7 @@ function NoteCard({ note }) {
         <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--c-green-mid)]">
           Processor Note
         </span>
-        <span className="text-xs text-[var(--c-text-muted)]">{formatDate(note.addedAt)}</span>
+        <span className="text-xs text-[var(--c-text-muted)]">{formatDateTime(note.addedAt)}</span>
       </div>
       <p className="text-sm text-[var(--c-text-mid)] leading-relaxed">{note.text}</p>
     </div>

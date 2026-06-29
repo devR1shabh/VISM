@@ -1,5 +1,7 @@
 // src/components/processor/AuditTimeline.jsx
 
+import { formatDateTime } from "../../utils/dateUtils.js";
+
 const EVENT_META = {
   "Case Created":          { icon: "📋", color: "text-[var(--c-green)]",      border: "border-[var(--c-green)]"      },
   "Documents Uploaded":    { icon: "📎", color: "text-[var(--c-info)]",        border: "border-[var(--c-info)]"        },
@@ -15,21 +17,6 @@ const EVENT_META = {
 
 function getEventMeta(event) {
   return EVENT_META[event] || { icon: "🔹", color: "text-[var(--c-text-muted)]", border: "border-[var(--c-border)]" };
-}
-
-function formatDateTime(iso) {
-  if (!iso) return "";
-  try {
-    return new Date(iso).toLocaleString("en-GB", {
-      day:    "2-digit",
-      month:  "short",
-      year:   "numeric",
-      hour:   "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
 }
 
 function TimelineEntry({ event, detail, timestamp, actor, isLast }) {

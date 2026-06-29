@@ -1,7 +1,13 @@
 // src/pages/Home.jsx
+//
+// ONBOARDING REDESIGN CHANGE:
+//   Removed the embedded CaseForm and #assessment section entirely.
+//   Home is now a pure marketing page.
+//   All "Start" CTAs now point to /packages.
+//   Removed CaseForm import.
 
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect }                        from "react";
+import { useLocation, useNavigate, Link }   from "react-router-dom";
 import airportPassport    from "../assets/hero/airport-passport.jpg";
 import immigrationOfficer from "../assets/hero/immigration-officer.jpg";
 import heroVideo          from "../assets/hero/hero-video.mp4";
@@ -21,8 +27,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import CaseForm from "../components/input/CaseForm";
-
 function Home() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,48 +43,47 @@ function Home() {
   return (
     <main className="bg-white text-[var(--c-text)]">
 
-      {/* ── HERO — full-bleed passport image ─────────────────────────────── */}
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative h-[92vh] min-h-[560px] max-h-[900px] overflow-hidden">
 
-        {/* Background image */}
         <img
           src={airportPassport}
           alt="Passport and travel documents"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-
-        {/* Dark overlay — bottom-heavy for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
 
-        {/* Top-left eyebrow label */}
         <div className="absolute top-8 left-8 lg:top-10 lg:left-12">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
             Visa Application Intelligence Platform
           </span>
         </div>
 
-        {/* Bottom content */}
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-14 lg:px-12 lg:pb-16">
           <div className="max-w-7xl mx-auto">
-
             <div className="max-w-2xl">
               <h1 className="font-display text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
                 Visa Applications<br />Made Intelligent
               </h1>
-
               <p className="mt-5 text-base text-white/70 leading-relaxed max-w-lg sm:text-lg">
                 VISM helps applicants assess eligibility, verify documents,
                 and track their immigration journey from one platform.
               </p>
 
+              {redirectMessage && (
+                <div className="mt-4 rounded-[var(--r-lg)] border border-white/20 bg-white/10 px-5 py-3 text-sm text-white backdrop-blur-sm">
+                  {redirectMessage}
+                </div>
+              )}
+
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <a
-                  href="#assessment"
+                <Link
+                  to="/packages"
                   className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-[var(--c-green)] px-7 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
                 >
-                  Start Assessment
+                  Get Started
                   <ArrowRight size={15} />
-                </a>
+                </Link>
                 <button
                   onClick={() =>
                     document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })
@@ -92,12 +95,11 @@ function Home() {
               </div>
             </div>
 
-            {/* Stat band — sits inside hero above fold line */}
             <div className="mt-12 flex flex-wrap gap-px overflow-hidden rounded-[var(--r-lg)] border border-white/10">
               {[
-                { label: "Visa Categories",    value: "7" },
-                { label: "Verification Rate",  value: "AI-Driven" },
-                { label: "Active Tracking",    value: "Real-time" },
+                { label: "Visa Categories",   value: "7"          },
+                { label: "Verification Rate", value: "AI-Driven"  },
+                { label: "Active Tracking",   value: "Real-time"  },
               ].map(({ label, value }) => (
                 <div key={label} className="flex-1 min-w-[120px] bg-black/30 backdrop-blur-sm px-6 py-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">{label}</p>
@@ -105,7 +107,6 @@ function Home() {
                 </div>
               ))}
             </div>
-
           </div>
         </div>
       </section>
@@ -113,7 +114,6 @@ function Home() {
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
       <section id="how-it-works" className="bg-white border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
-
           <div className="mb-16">
             <p className="text-[10px] font-semibold text-[var(--c-green-mid)] uppercase tracking-[0.28em] mb-4">
               How It Works
@@ -122,12 +122,11 @@ function Home() {
               Three steps to clarity
             </h2>
           </div>
-
           <div className="grid gap-0 sm:grid-cols-3 border border-[var(--c-border)] rounded-[var(--r-xl)] overflow-hidden">
             {[
-              { Icon: Search,      num: "01", title: "Assess Eligibility", desc: "Input your visa details. Our AI analyses your application fit and surfaces key risks." },
-              { Icon: ShieldCheck, num: "02", title: "Verify Documents",   desc: "Upload passport and supporting documents. Receive instant verification and data extraction." },
-              { Icon: Route,       num: "03", title: "Track Journey",      desc: "Monitor your entire immigration process from submission to decision in real time." },
+              { Icon: Search,      num: "01", title: "Choose a Plan",      desc: "Compare Self-Supported, Assisted, and Concierge. Pick the level of support that matches your application."   },
+              { Icon: ShieldCheck, num: "02", title: "Verify Documents",   desc: "Upload your passport and supporting documents. Receive instant AI verification and data extraction."          },
+              { Icon: Route,       num: "03", title: "Track Your Journey", desc: "Monitor your entire immigration process from submission to decision in real time."                            },
             ].map(({ Icon, num, title, desc }, i) => (
               <div
                 key={num}
@@ -148,25 +147,17 @@ function Home() {
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* ── AI INTELLIGENCE — image + text ────────────────────────────────── */}
+      {/* ── AI INTELLIGENCE ───────────────────────────────────────────────── */}
       <section className="bg-white border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-16 items-center lg:grid-cols-2">
-
             <div className="relative overflow-hidden rounded-[var(--r-2xl)] h-[440px]">
-              <img
-                src={immigrationOfficer}
-                alt="Immigration intelligence"
-                className="w-full h-full object-cover"
-              />
-              {/* Subtle green tint overlay */}
+              <img src={immigrationOfficer} alt="Immigration intelligence" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-[var(--c-green)]/10" />
             </div>
-
             <div>
               <p className="text-[10px] font-semibold text-[var(--c-green-mid)] uppercase tracking-[0.28em] mb-5">
                 Advanced Analytics
@@ -175,9 +166,9 @@ function Home() {
                 AI-Powered Immigration Intelligence
               </h2>
               <p className="text-[var(--c-text-mid)] leading-relaxed mb-8 text-base">
-                Advanced assessment models identify risks, improve application
-                readiness, and surface actionable recommendations — tailored
-                specifically to your visa type and destination.
+                Advanced assessment models identify risks, improve application readiness,
+                and surface actionable recommendations — tailored specifically to your
+                visa type and destination.
               </p>
               <ul className="space-y-4">
                 {[
@@ -197,7 +188,6 @@ function Home() {
                 ))}
               </ul>
             </div>
-
           </div>
         </div>
       </section>
@@ -205,7 +195,6 @@ function Home() {
       {/* ── SUPPORTED VISA TYPES ──────────────────────────────────────────── */}
       <section className="bg-[var(--c-bg)] border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
-
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-14">
             <div>
               <p className="text-[10px] font-semibold text-[var(--c-green-mid)] uppercase tracking-[0.28em] mb-4">
@@ -215,28 +204,24 @@ function Home() {
                 Supported Categories
               </h2>
             </div>
-            <a
-              href="#assessment"
+            <Link
+              to="/packages"
               className="self-start sm:self-auto inline-flex items-center gap-2 text-sm font-semibold text-[var(--c-green)] hover:text-[var(--c-green-mid)] transition"
             >
-              Start an assessment <ArrowRight size={14} />
-            </a>
+              View plans <ArrowRight size={14} />
+            </Link>
           </div>
-
           <div className="grid gap-px bg-[var(--c-border)] rounded-[var(--r-xl)] overflow-hidden sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { Icon: GraduationCap, name: "Student Visa",            desc: "Education and academic pursuits worldwide."      },
-              { Icon: Briefcase,     name: "Work Visa",                desc: "Employment and professional placement."          },
-              { Icon: Plane,         name: "Tourist Visa",             desc: "Travel and short-term visits."                  },
-              { Icon: HomeIcon,      name: "Permanent Residency",      desc: "Long-term settlement pathways."                 },
-              { Icon: Building2,     name: "Business Visa",            desc: "Commercial activities and meetings."            },
-              { Icon: Users,         name: "Family Sponsorship",       desc: "Reunification and family joining."              },
-              { Icon: TrendingUp,    name: "Investor Visa",            desc: "Investment-based immigration routes."           },
+              { Icon: GraduationCap, name: "Student Visa",       desc: "Education and academic pursuits worldwide."    },
+              { Icon: Briefcase,     name: "Work Visa",           desc: "Employment and professional placement."        },
+              { Icon: Plane,         name: "Tourist Visa",        desc: "Travel and short-term visits."                },
+              { Icon: HomeIcon,      name: "Permanent Residency", desc: "Long-term settlement pathways."               },
+              { Icon: Building2,     name: "Business Visa",       desc: "Commercial activities and meetings."          },
+              { Icon: Users,         name: "Family Sponsorship",  desc: "Reunification and family joining."            },
+              { Icon: TrendingUp,    name: "Investor Visa",       desc: "Investment-based immigration routes."         },
             ].map(({ Icon, name, desc }) => (
-              <div
-                key={name}
-                className="group bg-white px-6 py-7 transition hover:bg-[var(--c-green)] cursor-default"
-              >
+              <div key={name} className="group bg-white px-6 py-7 transition hover:bg-[var(--c-green)] cursor-default">
                 <div className="mb-5 flex h-9 w-9 items-center justify-center rounded-[var(--r-md)] bg-[var(--c-green-bg)] text-[var(--c-green)] group-hover:bg-white/20 group-hover:text-white transition">
                   <Icon size={18} />
                 </div>
@@ -245,7 +230,6 @@ function Home() {
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
@@ -253,7 +237,6 @@ function Home() {
       <section className="bg-white border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-16 items-center lg:grid-cols-2">
-
             <div>
               <p className="text-[10px] font-semibold text-[var(--c-green-mid)] uppercase tracking-[0.28em] mb-5">
                 Smart Verification
@@ -262,15 +245,15 @@ function Home() {
                 Smart Document Verification
               </h2>
               <p className="text-[var(--c-text-mid)] leading-relaxed mb-8 text-base">
-                Upload your passport and supporting documents. Our system
-                extracts data automatically, verifies completeness, and
-                flags any issues before submission.
+                Upload your passport and supporting documents. Our system extracts
+                data automatically, verifies completeness, and flags any issues
+                before submission.
               </p>
               <ul className="space-y-4">
                 {[
-                  { label: "Instant extraction",      sub: "Passport data read in seconds"              },
-                  { label: "Compliance check",         sub: "Every document validated against requirements" },
-                  { label: "Automatic verification",   sub: "AI confirms type-match for all 15 documents" },
+                  { label: "Instant extraction",    sub: "Passport data read in seconds"                  },
+                  { label: "Compliance check",       sub: "Every document validated against requirements"  },
+                  { label: "Automatic verification", sub: "AI confirms type-match for all documents"       },
                 ].map(({ label, sub }) => (
                   <li key={label} className="flex items-start gap-4">
                     <div className="mt-1 w-5 h-5 rounded-full border-2 border-[var(--c-green)] flex items-center justify-center shrink-0">
@@ -284,17 +267,12 @@ function Home() {
                 ))}
               </ul>
             </div>
-
             <div className="relative overflow-hidden rounded-[var(--r-2xl)] h-[440px]">
-              <video
-                autoPlay muted loop playsInline
-                className="w-full h-full object-cover"
-              >
+              <video autoPlay muted loop playsInline className="w-full h-full object-cover">
                 <source src={heroVideo} type="video/mp4" />
               </video>
               <div className="absolute inset-0 bg-[var(--c-green)]/15" />
             </div>
-
           </div>
         </div>
       </section>
@@ -303,7 +281,6 @@ function Home() {
       <section className="bg-[var(--c-bg)] border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-16 items-center lg:grid-cols-2">
-
             <div>
               <p className="text-[10px] font-semibold text-[var(--c-green-mid)] uppercase tracking-[0.28em] mb-5">
                 Intelligent Assistant
@@ -316,16 +293,14 @@ function Home() {
                 the entire process — answering questions, tracking progress,
                 and ensuring nothing is missed.
               </p>
-              <a
-                href="#assessment"
+              <Link
+                to="/packages"
                 className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-[var(--c-green)] px-7 py-3 text-sm font-bold text-white transition hover:bg-[var(--c-green-mid)] active:scale-[0.98]"
               >
-                Chat with Navi
+                Get Started
                 <ArrowRight size={14} />
-              </a>
+              </Link>
             </div>
-
-            {/* Navi card — clean, no glass */}
             <div className="rounded-[var(--r-2xl)] border border-[var(--c-border)] bg-white p-10 shadow-[var(--shadow-card)]">
               <div className="flex items-center gap-3 mb-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-xl)] bg-[var(--c-green)]">
@@ -341,11 +316,7 @@ function Home() {
                 24/7 throughout your visa application journey.
               </p>
               <div className="space-y-2.5">
-                {[
-                  "Real-time guidance",
-                  "Document checklist support",
-                  "Status updates",
-                ].map((feat) => (
+                {["Real-time guidance", "Document checklist support", "Status updates"].map((feat) => (
                   <div key={feat} className="flex items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-[var(--c-green)] shrink-0" />
                     <span className="text-sm text-[var(--c-text-mid)]">{feat}</span>
@@ -353,7 +324,6 @@ function Home() {
                 ))}
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -369,46 +339,20 @@ function Home() {
             </div>
             <div className="lg:text-right">
               <p className="text-white/65 mb-8 max-w-sm lg:ml-auto">
-                Join thousands of applicants using BlueprintAI to navigate their
+                Join thousands of applicants using VISM to navigate their
                 visa process with confidence.
               </p>
-              <a
-                href="#assessment"
-                className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-white px-8 py-3.5 text-sm font-bold text-[var(--c-green)] shadow-sm transition hover:bg-[var(--c-green-light)] active:scale-[0.98]"
-              >
-                Start Assessment
-                <ArrowRight size={15} />
-              </a>
+              <div className="flex flex-wrap gap-3 lg:justify-end">
+                <Link
+                  to="/packages"
+                  className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-white px-8 py-3.5 text-sm font-bold text-[var(--c-green)] shadow-sm transition hover:bg-[var(--c-green-light)] active:scale-[0.98]"
+                >
+                  View Plans
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── ASSESSMENT FORM ───────────────────────────────────────────────── */}
-      <section id="assessment" className="bg-white border-b border-[var(--c-border)] px-6 py-24 lg:px-8">
-        <div className="mx-auto max-w-2xl">
-          {redirectMessage && (
-            <div
-              role="alert"
-              className="mb-8 rounded-[var(--r-lg)] border border-[var(--c-green-light)] bg-[var(--c-green-bg)] px-6 py-4 text-sm text-[var(--c-green)]"
-            >
-              {redirectMessage}
-            </div>
-          )}
-
-          <div className="mb-10 text-center">
-            <p className="text-[10px] font-semibold text-[var(--c-green-mid)] uppercase tracking-[0.28em] mb-4">
-              Assessment Form
-            </p>
-            <h2 className="font-display text-4xl font-bold text-[var(--c-text)] mb-4">
-              Tell us about your application
-            </h2>
-            <p className="text-[var(--c-text-muted)] leading-relaxed">
-              Select your visa type and destination to generate a full AI eligibility analysis.
-            </p>
-          </div>
-
-          <CaseForm />
         </div>
       </section>
 
@@ -434,10 +378,10 @@ function Home() {
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Platform</h3>
               <ul className="space-y-2.5">
                 {[
-                  { href: "/analysis",  label: "Analysis"  },
-                  { href: "/documents", label: "Documents" },
-                  { href: "/journey",   label: "Journey"   },
-                  { href: "/dashboard", label: "Dashboard" },
+                  { href: "/packages",  label: "Pricing"    },
+                  { href: "/analysis",  label: "Analysis"   },
+                  { href: "/documents", label: "Documents"  },
+                  { href: "/journey",   label: "Journey"    },
                 ].map(({ href, label }) => (
                   <li key={label}>
                     <a href={href} className="text-sm text-white/65 hover:text-white transition">{label}</a>
@@ -450,9 +394,7 @@ function Home() {
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Institutional</h3>
               <ul className="space-y-2.5">
                 <li>
-                  <a href="/processor" className="text-sm text-white/65 hover:text-white transition">
-                    Processor Portal
-                  </a>
+                  <a href="/processor" className="text-sm text-white/65 hover:text-white transition">Processor Portal</a>
                 </li>
               </ul>
             </div>

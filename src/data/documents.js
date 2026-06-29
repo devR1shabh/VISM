@@ -1,23 +1,24 @@
 // src/data/documents.js
-// Single source of truth for all 15 required documents.
-// Every visa type uses this same list.
-// Import this wherever you need the canonical document list.
+//
+// DEPRECATED — do not import this in new code.
+// Use: const { documents } = useConfig();
+// Source of truth: server/config/constants.js
 
 const REQUIRED_DOCUMENTS = [
   "Passport",
-  "Passport Size Photograph",
-  "National ID Card",
-  "Birth Certificate",
-  "Address Proof",
+  "Bank Statement",
+  "Employment Letter",
   "Resume / CV",
   "Academic Transcript",
   "Degree Certificate",
-  "Employment Letter",
-  "Bank Statement",
-  "Proof of Funds",
-  "Travel History Document",
   "Statement of Purpose",
   "Police Clearance Certificate",
+  "Address Proof",
+  "Passport Size Photograph",
+  "National ID Card",
+  "Birth Certificate",
+  "Travel History Document",
+  "Proof of Funds",
   "Medical Certificate",
 ];
 

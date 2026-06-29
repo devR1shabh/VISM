@@ -61,20 +61,22 @@ export const WORKFLOW_STEPS = {
 };
 
 export function CaseProvider({ children }) {
-  // ── Initialize state from localStorage, but only if no "fresh session" flag is set
-  const [caseData, setCaseDataRaw] = useState(() => {
-    const freshSession = sessionStorage.getItem("_vism_fresh_session");
-    if (!freshSession) {
-      sessionStorage.setItem("_vism_fresh_session", "true");
-      localStorage.removeItem(STORAGE_KEYS.caseData);
-      localStorage.removeItem(STORAGE_KEYS.uploadedDocuments);
-      localStorage.removeItem(STORAGE_KEYS.activityFeed);
-      localStorage.removeItem(STORAGE_KEYS.naviMessages);
-      localStorage.removeItem(STORAGE_KEYS.questionnaire);
-      return null;
-    }
-    return loadFromStorage(STORAGE_KEYS.caseData, null);
-  });
+  // ── Initialize state from localStorage ───────────────────────────────────
+  // PHASE 4 CHANGE: Removed the "fresh session" wipe that intentionally
+  // destroyed case state on every new browser tab.
+  //
+  // That wipe was a workaround for the old anonymous session model where
+  // each tab needed a clean slate because there was no user account to scope
+  // cases to. Now that applicants have real JWT-authenticated accounts:
+  //
+  //   - The active case persists correctly across tabs and refreshes.
+  //   - clearCase() is called explicitly on logout (Navbar.jsx) to wipe state
+  //     when the user actually signs out — not on every new tab open.
+  //   - If a different applicant logs in on the same machine, logout clears
+  //     the previous user's case before the new session starts.
+  const [caseData, setCaseDataRaw] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.caseData, null)
+  );
 
   const [uploadedDocuments, setUploadedDocumentsRaw] = useState(() =>
     normalizeUploadedDocuments(
