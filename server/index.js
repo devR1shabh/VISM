@@ -10,6 +10,7 @@ import authRoutes        from "./routes/authRoutes.js";
 import configRoutes      from "./routes/configRoutes.js";
 import paymentRoutes     from "./routes/paymentRoutes.js";
 import guidelinesRoutes  from "./routes/guidelinesRoutes.js";
+import scoreRoutes       from "./routes/scoreRoutes.js";
 import { authLimiter, generalLimiter } from "./utils/rateLimiter.js";
 import analysisRoutes    from "./routes/analysisRoutes.js";
 import documentRoutes    from "./routes/documentRoutes.js";
@@ -22,7 +23,6 @@ if (!process.env.JWT_SECRET) {
   console.error("[FATAL] JWT_SECRET is not set.");
   process.exit(1);
 }
-
 if (!process.env.MONGODB_URI) {
   console.error("[FATAL] MONGODB_URI is not set.");
   process.exit(1);
@@ -40,11 +40,8 @@ app.use(
   cors({
     origin: ALLOWED_ORIGINS
       ? (origin, callback) => {
-          if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-            callback(null, true);
-          } else {
-            callback(new Error(`CORS: Origin ${origin} not allowed`));
-          }
+          if (!origin || ALLOWED_ORIGINS.includes(origin)) callback(null, true);
+          else callback(new Error(`CORS: Origin ${origin} not allowed`));
         }
       : true,
     credentials: true,
@@ -57,6 +54,7 @@ app.use("/api/auth", authLimiter);
 
 app.use("/api/config",      configRoutes);
 app.use("/api/guidelines",  guidelinesRoutes);
+app.use("/api/score",       scoreRoutes);
 app.use("/api/auth",        authRoutes);
 app.use("/api/payment",     paymentRoutes);
 app.use("/api/analysis",    analysisRoutes);
@@ -64,11 +62,7 @@ app.use("/api/documents",   documentRoutes);
 app.use("/api/copilot",     copilotRoutes);
 app.use("/api/cases",       caseRoutes);
 
-app.get("/", (_req, res) => {
-  res.json({ message: "VISM API Running" });
-});
+app.get("/", (_req, res) => res.json({ message: "VISM API Running" }));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`[Server] Running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`[Server] Running on port ${PORT}`));

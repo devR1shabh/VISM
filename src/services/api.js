@@ -1,7 +1,7 @@
 // src/services/api.js
 //
-// FEATURE 7 CHANGE:
-//   Added getCountryGuidelines() — GET /api/guidelines?country=...&visaType=...
+// FEATURE 8 CHANGE:
+//   Added generateConfidenceScore() — POST /api/score/:caseId/generate
 
 import { getApplicantToken, getProcessorToken } from "./authService.js";
 
@@ -33,13 +33,25 @@ export async function getConfig() {
 
 /* =============================================================================
    COUNTRY GUIDELINES — Feature 7
-   Public endpoint — no auth needed.
-   Returns processing times, fees, requirements for a country + visa type.
 ============================================================================= */
 export async function getCountryGuidelines(country, visaType) {
   const params   = new URLSearchParams({ country, visaType });
   const response = await fetch(`${API_URL}/guidelines?${params}`);
   if (!response.ok) throw new Error("Failed to fetch country guidelines");
+  return response.json();
+}
+
+/* =============================================================================
+   CONFIDENCE SCORE — Feature 8
+   Triggers AI scoring for a case.
+   Returns { success, visaConfidenceScore: { score, breakdown, label, generatedAt } }
+============================================================================= */
+export async function generateConfidenceScore(caseId) {
+  const response = await fetch(`${API_URL}/score/${caseId}/generate`, {
+    method:  "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+  });
+  if (!response.ok) await handleError(response, "Failed to generate confidence score");
   return response.json();
 }
 
