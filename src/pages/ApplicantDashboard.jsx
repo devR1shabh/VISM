@@ -1,18 +1,23 @@
 // src/pages/ApplicantDashboard.jsx
+//
+// ONBOARDING REDESIGN CHANGE:
+//   "New Case" button now links to /apply (not /).
+//   Empty state "Start a New Case" now links to /packages (not /).
+//   Empty state copy updated accordingly.
 
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate }                from "react-router-dom";
+import { Plus }                             from "lucide-react";
 
-import { useApplicantAuth }     from "../context/ApplicantAuthContext.jsx";
-import { getApplicantCases }    from "../services/api.js";
-import { PageHeader }           from "../components/ui/index.jsx";
+import { useApplicantAuth }           from "../context/ApplicantAuthContext.jsx";
+import { getApplicantCases }          from "../services/api.js";
+import { PageHeader }                 from "../components/ui/index.jsx";
 import { formatDate, formatDateTime } from "../utils/dateUtils.js";
-import CaseCard                 from "../components/applicant/CaseCard.jsx";
-import ProcessorRemarksPanel    from "../components/applicant/ProcessorRemarksPanel.jsx";
+import CaseCard                       from "../components/applicant/CaseCard.jsx";
+import ProcessorRemarksPanel          from "../components/applicant/ProcessorRemarksPanel.jsx";
 
 const FILTER_TABS = ["All", "Pending", "Approved", "Rejected", "Need Documents"];
 
-// ── Status badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
   const map = {
     "Pending":        "bg-[var(--c-warning-bg)]  text-[var(--c-warning)]  border-[var(--c-warning-border)]",
@@ -28,7 +33,6 @@ function StatusBadge({ status }) {
   );
 }
 
-// ── KPI summary cards ─────────────────────────────────────────────────────────
 function SummaryCards({ cases }) {
   const total    = cases.length;
   const approved = cases.filter((c) => c.processorStatus === "Approved").length;
@@ -38,19 +42,16 @@ function SummaryCards({ cases }) {
 
   const cards = [
     { label: "Total Cases",    value: total,    color: "border-l-[var(--c-green)]",   text: "text-[var(--c-green)]"   },
-    { label: "Approved",       value: approved,  color: "border-l-[var(--c-success)]", text: "text-[var(--c-success)]" },
-    { label: "Pending Review", value: pending,   color: "border-l-[var(--c-warning)]", text: "text-[var(--c-warning)]" },
-    { label: "Need Documents", value: needDocs,  color: "border-l-[var(--c-info)]",    text: "text-[var(--c-info)]"    },
-    { label: "Rejected",       value: rejected,  color: "border-l-[var(--c-error)]",   text: "text-[var(--c-error)]"   },
+    { label: "Approved",       value: approved, color: "border-l-[var(--c-success)]", text: "text-[var(--c-success)]" },
+    { label: "Pending Review", value: pending,  color: "border-l-[var(--c-warning)]", text: "text-[var(--c-warning)]" },
+    { label: "Need Documents", value: needDocs, color: "border-l-[var(--c-info)]",    text: "text-[var(--c-info)]"    },
+    { label: "Rejected",       value: rejected, color: "border-l-[var(--c-error)]",   text: "text-[var(--c-error)]"   },
   ];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
       {cards.map(({ label, value, color, text }) => (
-        <div
-          key={label}
-          className={`bg-[var(--c-card)] border border-[var(--c-border)] border-l-4 ${color} rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-5`}
-        >
+        <div key={label} className={`bg-[var(--c-card)] border border-[var(--c-border)] border-l-4 ${color} rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-5`}>
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--c-text-muted)]">{label}</p>
           <p className={`mt-2 text-3xl font-bold ${text}`}>{value}</p>
         </div>
@@ -59,16 +60,12 @@ function SummaryCards({ cases }) {
   );
 }
 
-// ── Audit timeline ────────────────────────────────────────────────────────────
 function AuditTimeline({ entries = [] }) {
   if (!entries.length) return null;
   const recent = [...entries].reverse().slice(0, 5);
-
   return (
     <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] shadow-[var(--shadow-card)] p-6">
-      <h2 className="text-sm font-bold text-[var(--c-text)] uppercase tracking-[0.08em] mb-4">
-        Case Timeline
-      </h2>
+      <h2 className="text-sm font-bold text-[var(--c-text)] uppercase tracking-[0.08em] mb-4">Case Timeline</h2>
       <ol className="relative border-l border-[var(--c-border)] space-y-4 ml-2">
         {recent.map((entry, idx) => (
           <li key={idx} className="pl-5 relative">
@@ -76,9 +73,7 @@ function AuditTimeline({ entries = [] }) {
               <div className="w-1.5 h-1.5 rounded-full bg-[var(--c-green)]" />
             </div>
             <p className="text-sm font-semibold text-[var(--c-text)] leading-snug">{entry.event}</p>
-            {entry.detail && (
-              <p className="text-xs text-[var(--c-text-muted)] mt-0.5 leading-relaxed">{entry.detail}</p>
-            )}
+            {entry.detail && <p className="text-xs text-[var(--c-text-muted)] mt-0.5 leading-relaxed">{entry.detail}</p>}
             <p className="text-[10px] text-[var(--c-text-muted)] mt-1">{formatDateTime(entry.timestamp)}</p>
           </li>
         ))}
@@ -87,7 +82,6 @@ function AuditTimeline({ entries = [] }) {
   );
 }
 
-// ── Documents panel ───────────────────────────────────────────────────────────
 function DocumentsPanel({ uploadedDocuments = [], requiredDocuments = [] }) {
   const total    = requiredDocuments.length;
   const verified = uploadedDocuments.filter(
@@ -107,7 +101,6 @@ function DocumentsPanel({ uploadedDocuments = [], requiredDocuments = [] }) {
           const uploaded   = uploadedDocuments.find((d) => d.type === docType);
           const isVerified = uploaded?.verified;
           const isUploaded = Boolean(uploaded);
-
           return (
             <div key={docType} className="flex items-center justify-between py-2 border-b border-[var(--c-border)] last:border-0">
               <span className="text-sm text-[var(--c-text-mid)] truncate flex-1 mr-4">{docType}</span>
@@ -119,13 +112,9 @@ function DocumentsPanel({ uploadedDocuments = [], requiredDocuments = [] }) {
                   Verified
                 </span>
               ) : isUploaded ? (
-                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--c-warning)] bg-[var(--c-warning-bg)] border border-[var(--c-warning-border)] rounded-full px-2 py-0.5 shrink-0">
-                  Uploaded
-                </span>
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--c-warning)] bg-[var(--c-warning-bg)] border border-[var(--c-warning-border)] rounded-full px-2 py-0.5 shrink-0">Uploaded</span>
               ) : (
-                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--c-text-muted)] bg-[var(--c-bg)] border border-[var(--c-border)] rounded-full px-2 py-0.5 shrink-0">
-                  Missing
-                </span>
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--c-text-muted)] bg-[var(--c-bg)] border border-[var(--c-border)] rounded-full px-2 py-0.5 shrink-0">Missing</span>
               )}
             </div>
           );
@@ -135,22 +124,13 @@ function DocumentsPanel({ uploadedDocuments = [], requiredDocuments = [] }) {
   );
 }
 
-// ── Case detail modal ─────────────────────────────────────────────────────────
 function CaseDetailPanel({ caseRecord, onClose }) {
-  const {
-    caseId, visaType, country, createdAt,
-    processorStatus, processorNotes = [],
-    uploadedDocuments = [], analysis, auditLog = [],
-    agentAssessment,
-  } = caseRecord;
-
+  const { caseId, visaType, country, createdAt, processorStatus, processorNotes = [], uploadedDocuments = [], analysis, auditLog = [], agentAssessment } = caseRecord;
   const requiredDocuments = analysis?.documents || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 py-6 sm:py-12">
       <div className="bg-[var(--c-bg)] w-full max-w-2xl rounded-[var(--r-2xl)] shadow-[var(--shadow-modal)] flex flex-col max-h-[90vh]">
-
-        {/* Header */}
         <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-[var(--c-border)] shrink-0">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--c-text-muted)]">{caseId}</p>
@@ -159,21 +139,14 @@ function CaseDetailPanel({ caseRecord, onClose }) {
           </div>
           <div className="flex items-center gap-3">
             <StatusBadge status={processorStatus || "Pending"} />
-            <button
-              onClick={onClose}
-              className="rounded-full p-1.5 text-[var(--c-text-muted)] hover:bg-[var(--c-border)] transition"
-              aria-label="Close"
-            >
+            <button onClick={onClose} className="rounded-full p-1.5 text-[var(--c-text-muted)] hover:bg-[var(--c-border)] transition" aria-label="Close">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
-
-        {/* Body */}
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
-
           <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-xl)] p-4 grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--c-text-muted)] font-semibold">Submitted</p>
@@ -196,29 +169,20 @@ function CaseDetailPanel({ caseRecord, onClose }) {
               </div>
             )}
           </div>
-
           <ProcessorRemarksPanel notes={processorNotes} processorStatus={processorStatus} />
           <DocumentsPanel uploadedDocuments={uploadedDocuments} requiredDocuments={requiredDocuments} />
           <AuditTimeline entries={auditLog} />
-
         </div>
-
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-[var(--c-border)] shrink-0">
-          <button
-            onClick={onClose}
-            className="w-full rounded-[var(--r-lg)] border border-[var(--c-border)] py-2.5 text-sm font-semibold text-[var(--c-text-muted)] hover:bg-[var(--c-bg-alt)] transition"
-          >
+          <button onClick={onClose} className="w-full rounded-[var(--r-lg)] border border-[var(--c-border)] py-2.5 text-sm font-semibold text-[var(--c-text-muted)] hover:bg-[var(--c-bg-alt)] transition">
             Close
           </button>
         </div>
-
       </div>
     </div>
   );
 }
 
-// ── ApplicantDashboard ────────────────────────────────────────────────────────
 function ApplicantDashboard() {
   const { user }  = useApplicantAuth();
   const navigate  = useNavigate();
@@ -282,15 +246,17 @@ function ApplicantDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No cases yet</h2>
+            <h2 className="text-lg font-bold text-[var(--c-text)] mb-2">No applications yet</h2>
             <p className="text-sm text-[var(--c-text-muted)] mb-6 leading-relaxed">
-              Start your visa journey by creating your first case on the home page.
+              Choose a plan to get started with your first visa application.
             </p>
+            {/* CHANGED: links to /packages, not / */}
             <Link
-              to="/"
+              to="/packages"
               className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-[var(--c-green)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-green-mid)] transition"
             >
-              Start a New Case
+              <Plus size={15} />
+              Choose a Plan
             </Link>
           </div>
         </div>
@@ -307,14 +273,13 @@ function ApplicantDashboard() {
         description="Track all your visa applications, documents, and processor updates in one place."
       >
         <div className="mt-4">
+          {/* CHANGED: links to /apply, not / */}
           <Link
-            to="/"
+            to="/apply"
             className="inline-flex items-center gap-2 rounded-[var(--r-lg)] bg-white/15 border border-white/25 px-5 py-2 text-sm font-semibold text-white hover:bg-white/25 transition"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            New Case
+            <Plus size={15} />
+            New Application
           </Link>
         </div>
       </PageHeader>

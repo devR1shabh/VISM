@@ -1,4 +1,9 @@
 // src/App.jsx
+//
+// ONBOARDING REDESIGN CHANGE:
+//   Added /packages/:packageId (PackageDetail) — public route
+//   Added /apply (Apply wizard) — protected route
+//   Updated PUBLIC_ROUTES to include new public pages
 
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
@@ -13,6 +18,8 @@ import ApplicantLogin      from "./pages/ApplicantLogin.jsx";
 import ApplicantRegister   from "./pages/ApplicantRegister.jsx";
 import ApplicantDashboard  from "./pages/ApplicantDashboard.jsx";
 import Packages            from "./pages/Packages.jsx";
+import PackageDetail       from "./pages/PackageDetail.jsx";
+import Apply               from "./pages/Apply.jsx";
 import Analysis            from "./pages/Analysis.jsx";
 import Documents           from "./pages/Documents.jsx";
 import Questionnaire       from "./pages/Questionnaire.jsx";
@@ -27,14 +34,17 @@ import Navi from "./components/navi/Navi.jsx";
 const NAVI_ROUTES            = ["/analysis", "/documents", "/questionnaire", "/journey"];
 const PROCESSOR_ROUTE_PREFIX = "/processor";
 
-// Public routes — no applicant navbar shown on these pages
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/packages"];
+// Pages where the applicant navbar is NOT shown
+// (public marketing pages + auth pages + wizard pages)
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/packages", "/apply"];
 
 function AppContent() {
   const location = useLocation();
 
   const isProcessorRoute = location.pathname.startsWith(PROCESSOR_ROUTE_PREFIX);
-  const isPublicRoute    = PUBLIC_ROUTES.includes(location.pathname);
+  // Also treat /packages/:id as public (no nav)
+  const isPackageDetail  = location.pathname.startsWith("/packages/");
+  const isPublicRoute    = PUBLIC_ROUTES.includes(location.pathname) || isPackageDetail;
   const showNavi         = !isProcessorRoute && NAVI_ROUTES.includes(location.pathname);
   const showApplicantNav = !isProcessorRoute && !isPublicRoute;
 
@@ -46,15 +56,16 @@ function AppContent() {
 
       <Routes>
 
-        {/* ── Public routes ──────────────────────────────────────────── */}
+        {/* ── Public / marketing ─────────────────────────────────────────── */}
         <Route path="/"         element={<Home />}              />
         <Route path="/login"    element={<ApplicantLogin />}    />
         <Route path="/register" element={<ApplicantRegister />} />
 
-        {/* ── Package comparison — public, no auth required ──────────── */}
-        <Route path="/packages" element={<Packages />} />
+        {/* ── Package pages — fully public ───────────────────────────────── */}
+        <Route path="/packages"            element={<Packages />}      />
+        <Route path="/packages/:packageId" element={<PackageDetail />} />
 
-        {/* ── Applicant: multi-case dashboard ────────────────────────── */}
+        {/* ── Applicant: cases dashboard ─────────────────────────────────── */}
         <Route
           path="/my-cases"
           element={
@@ -64,7 +75,17 @@ function AppContent() {
           }
         />
 
-        {/* ── Applicant: active-case workflow routes ──────────────────── */}
+        {/* ── Applicant: new application wizard ──────────────────────────── */}
+        <Route
+          path="/apply"
+          element={
+            <ApplicantProtectedRoute>
+              <Apply />
+            </ApplicantProtectedRoute>
+          }
+        />
+
+        {/* ── Applicant: active case workflow ────────────────────────────── */}
         <Route
           path="/analysis"
           element={
@@ -131,7 +152,7 @@ function AppContent() {
           }
         />
 
-        {/* ── Processor routes ────────────────────────────────────────── */}
+        {/* ── Processor routes ────────────────────────────────────────────── */}
         <Route
           path="/processor"
           element={

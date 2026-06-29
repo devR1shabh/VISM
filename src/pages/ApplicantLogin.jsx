@@ -1,24 +1,33 @@
 // src/pages/ApplicantLogin.jsx
 //
-// Login page for applicants.
-// Matches the existing VISM design system exactly (tokens, radius, shadows).
-// After a successful login, redirects to wherever the user was trying to go,
-// or to "/" (home) if they came here directly.
+// ONBOARDING REDESIGN CHANGE:
+//   Shows a success banner when arriving from /register.
+//   Reads pending package from sessionStorage.
+//   After login: navigates to /apply if package in session, else /my-cases.
 
-import { useState }                       from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useApplicantAuth }               from "../context/ApplicantAuthContext.jsx";
+import { useState }                         from "react";
+import { Link, useNavigate, useLocation }   from "react-router-dom";
+import { useApplicantAuth }                 from "../context/ApplicantAuthContext.jsx";
+import { getPackageById }                   from "../data/packages.js";
+
+const PENDING_PACKAGE_KEY = "vism_pending_package";
 
 function ApplicantLogin() {
-  const { login }    = useApplicantAuth();
-  const navigate     = useNavigate();
-  const location     = useLocation();
+  const { login }  = useApplicantAuth();
+  const navigate   = useNavigate();
+  const location   = useLocation();
 
-  // If the user was redirected here from a protected route, send them back
-  // after login. Otherwise send them to home.
-  const from = location.state?.from || "/";
+  // Success state from register redirect
+  const registered      = location.state?.registered      || false;
+  const registeredName  = location.state?.registeredName  || "";
+  const registeredEmail = location.state?.registeredEmail || "";
 
-  const [email, setEmail]       = useState("");
+  // Read pending package from sessionStorage for context banner
+  const pendingPackageId = sessionStorage.getItem(PENDING_PACKAGE_KEY) || null;
+  const pendingPkg       = pendingPackageId ? getPackageById(pendingPackageId) : null;
+  const showBanner       = pendingPkg && pendingPkg.id !== "self_supported";
+
+  const [email, setEmail]       = useState(registeredEmail);
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
@@ -30,7 +39,11 @@ function ApplicantLogin() {
 
     try {
       await login(email.trim(), password);
-      navigate(from, { replace: true });
+
+      // If there's a pending package in sessionStorage, go to the Apply wizard.
+      // Otherwise go to the cases dashboard.
+      const hasPendingPackage = Boolean(sessionStorage.getItem(PENDING_PACKAGE_KEY));
+      navigate(hasPendingPackage ? "/apply" : "/my-cases", { replace: true });
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
     } finally {
@@ -43,7 +56,7 @@ function ApplicantLogin() {
       <div className="w-full max-w-md">
 
         {/* ── Brand ────────────────────────────────────────────────────── */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <Link to="/" className="inline-flex flex-col items-center gap-1">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--c-green)] shadow-sm">
               <span className="text-lg font-black tracking-[0.1em] text-white">V</span>
@@ -55,6 +68,38 @@ function ApplicantLogin() {
           </p>
         </div>
 
+        {/* ── Registration success banner ───────────────────────────────── */}
+        {registered && (
+          <div className="mb-4 rounded-[var(--r-lg)] border border-[var(--c-success-border)] bg-[var(--c-success-bg)] px-4 py-3">
+            <p className="text-sm font-semibold text-[var(--c-success)]">
+              Account created{registeredName ? `, ${registeredName}` : ""}!
+            </p>
+            <p className="text-xs text-[var(--c-success)] mt-0.5 opacity-80">
+              Please sign in to continue your application.
+            </p>
+          </div>
+        )}
+
+        {/* ── Package context banner ────────────────────────────────────── */}
+        {showBanner && (
+          <div className="mb-4 flex items-center justify-between rounded-[var(--r-lg)] border border-[var(--c-green)] bg-[var(--c-green-bg)] px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] bg-[var(--c-green)] text-white px-2 py-0.5 rounded-full">
+                {pendingPkg.name}
+              </span>
+              <span className="text-sm font-semibold text-[var(--c-green)]">
+                {pendingPkg.priceDisplay} selected
+              </span>
+            </div>
+            <Link
+              to="/packages"
+              className="text-xs text-[var(--c-green-mid)] hover:underline underline-offset-2"
+            >
+              Change →
+            </Link>
+          </div>
+        )}
+
         {/* ── Card ─────────────────────────────────────────────────────── */}
         <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-[var(--r-2xl)] shadow-[var(--shadow-modal)] p-8">
 
@@ -62,15 +107,18 @@ function ApplicantLogin() {
             <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--c-text-muted)] font-semibold mb-2">
               Applicant Portal
             </p>
-            <h1 className="text-2xl font-bold text-[var(--c-text)]">Sign In</h1>
+            <h1 className="text-2xl font-bold text-[var(--c-text)]">
+              {registered ? "Welcome to VISM" : "Sign In"}
+            </h1>
             <p className="mt-2 text-sm text-[var(--c-text-muted)] leading-relaxed">
-              Access your visa cases, documents, and application status.
+              {registered
+                ? "Sign in to start your visa application."
+                : "Access your visa cases, documents, and application status."}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
                 Email Address
@@ -86,7 +134,6 @@ function ApplicantLogin() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-semibold text-[var(--c-text-mid)] mb-1.5">
                 Password
@@ -102,14 +149,12 @@ function ApplicantLogin() {
               />
             </div>
 
-            {/* Error */}
             {error && (
               <div className="rounded-[var(--r-lg)] border border-[var(--c-error-border)] bg-[var(--c-error-bg)] px-4 py-3 text-sm text-[var(--c-error)]">
                 {error}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading || !email || !password}
@@ -126,7 +171,6 @@ function ApplicantLogin() {
             </button>
           </form>
 
-          {/* ── Footer links ─────────────────────────────────────────── */}
           <p className="mt-6 text-center text-sm text-[var(--c-text-muted)]">
             Don&apos;t have an account?{" "}
             <Link
@@ -138,13 +182,9 @@ function ApplicantLogin() {
           </p>
         </div>
 
-        {/* ── Processor link ────────────────────────────────────────── */}
         <p className="mt-6 text-center text-xs text-[var(--c-text-muted)]">
           Are you a processor?{" "}
-          <Link
-            to="/processor"
-            className="text-[var(--c-green-mid)] hover:underline underline-offset-2"
-          >
+          <Link to="/processor" className="text-[var(--c-green-mid)] hover:underline underline-offset-2">
             Go to Processor Portal →
           </Link>
         </p>

@@ -1,9 +1,7 @@
 // src/services/api.js
 //
-// All backend fetch calls live here — no component ever calls fetch() directly.
-//
-// FEATURE 1 CHANGE:
-//   Added getConfig() — fetches shared constants from GET /api/config.
+// FEATURE 7 CHANGE:
+//   Added getCountryGuidelines() — GET /api/guidelines?country=...&visaType=...
 
 import { getApplicantToken, getProcessorToken } from "./authService.js";
 
@@ -25,9 +23,8 @@ async function handleError(response, fallback) {
 }
 
 /* =============================================================================
-   CONFIG — Feature 1
+   CONFIG
 ============================================================================= */
-
 export async function getConfig() {
   const response = await fetch(`${API_URL}/config`);
   if (!response.ok) throw new Error("Failed to fetch config");
@@ -35,9 +32,33 @@ export async function getConfig() {
 }
 
 /* =============================================================================
+   COUNTRY GUIDELINES — Feature 7
+   Public endpoint — no auth needed.
+   Returns processing times, fees, requirements for a country + visa type.
+============================================================================= */
+export async function getCountryGuidelines(country, visaType) {
+  const params   = new URLSearchParams({ country, visaType });
+  const response = await fetch(`${API_URL}/guidelines?${params}`);
+  if (!response.ok) throw new Error("Failed to fetch country guidelines");
+  return response.json();
+}
+
+/* =============================================================================
+   PAYMENT — Feature 6
+============================================================================= */
+export async function completePayment(caseId, { amount, packageId }) {
+  const response = await fetch(`${API_URL}/payment/${caseId}/complete`, {
+    method:  "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body:    JSON.stringify({ amount, packageId }),
+  });
+  if (!response.ok) await handleError(response, "Payment failed");
+  return response.json();
+}
+
+/* =============================================================================
    VISA ANALYSIS
 ============================================================================= */
-
 export async function generateAnalysis(visaType, country, description) {
   const response = await fetch(`${API_URL}/analysis`, {
     method:  "POST",
@@ -51,7 +72,6 @@ export async function generateAnalysis(visaType, country, description) {
 /* =============================================================================
    PASSPORT OCR
 ============================================================================= */
-
 export async function uploadPassport(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -67,7 +87,6 @@ export async function uploadPassport(file) {
 /* =============================================================================
    DOCUMENT VERIFICATION
 ============================================================================= */
-
 export async function verifyDocument(file, documentType) {
   const formData = new FormData();
   formData.append("file", file);
@@ -84,7 +103,6 @@ export async function verifyDocument(file, documentType) {
 /* =============================================================================
    CASE MANAGEMENT
 ============================================================================= */
-
 export async function createCase(caseData) {
   const response = await fetch(`${API_URL}/cases`, {
     method:  "POST",
@@ -124,7 +142,6 @@ export async function getApplicantCases() {
 /* =============================================================================
    DOCUMENT STORAGE
 ============================================================================= */
-
 export async function addVerifiedDocument(caseId, documentType) {
   const response = await fetch(`${API_URL}/cases/${caseId}/documents`, {
     method:  "PUT",
@@ -136,9 +153,8 @@ export async function addVerifiedDocument(caseId, documentType) {
 }
 
 /* =============================================================================
-   PASSPORT DATA PERSISTENCE
+   PASSPORT DATA
 ============================================================================= */
-
 export async function savePassportData(caseId, passportData) {
   const response = await fetch(`${API_URL}/cases/${caseId}/passport-data`, {
     method:  "POST",
@@ -152,7 +168,6 @@ export async function savePassportData(caseId, passportData) {
 /* =============================================================================
    NAVI AI COPILOT
 ============================================================================= */
-
 export async function sendNaviMessage(caseContext, message) {
   const response = await fetch(`${API_URL}/copilot/chat`, {
     method:  "POST",
@@ -169,7 +184,6 @@ export async function sendNaviMessage(caseContext, message) {
 /* =============================================================================
    QUESTIONNAIRE
 ============================================================================= */
-
 export async function saveQuestionnaire(caseId, answers) {
   const response = await fetch(`${API_URL}/cases/${caseId}/questionnaire`, {
     method:  "POST",
@@ -181,9 +195,8 @@ export async function saveQuestionnaire(caseId, answers) {
 }
 
 /* =============================================================================
-   READINESS ASSESSMENT AGENT
+   ASSESSMENT AGENT
 ============================================================================= */
-
 export async function triggerAssessmentAgent(caseId) {
   const response = await fetch(`${API_URL}/cases/${caseId}/run-assessment`, {
     method:  "POST",
@@ -204,7 +217,6 @@ export async function pollCaseForAssessment(caseId) {
 /* =============================================================================
    PROCESSOR
 ============================================================================= */
-
 function processorAuthHeaders() {
   const token = getProcessorToken();
   return token ? { "Authorization": `Bearer ${token}` } : {};
@@ -229,11 +241,8 @@ export async function getCaseByIdProcessor(caseId) {
 export async function sendProcessorAction(caseId, action, note) {
   const response = await fetch(`${API_URL}/cases/${caseId}/processor-action`, {
     method:  "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...processorAuthHeaders(),
-    },
-    body: JSON.stringify({ action, note: note || "" }),
+    headers: { "Content-Type": "application/json", ...processorAuthHeaders() },
+    body:    JSON.stringify({ action, note: note || "" }),
   });
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));

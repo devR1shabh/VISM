@@ -1,9 +1,16 @@
 // src/components/applicant/CaseCard.jsx
+//
+// FEATURE 5 CHANGE:
+//   Added PackageBadge — shows which tier the case was created under.
+//   Reads caseRecord.package (self_supported | assisted | concierge).
+//   Falls back to "self_supported" for legacy cases created before Feature 5.
 
-import { useNavigate }  from "react-router-dom";
-import { useCase }      from "../../context/CaseContext.jsx";
-import { formatDate }   from "../../utils/dateUtils.js";
+import { useNavigate }    from "react-router-dom";
+import { useCase }        from "../../context/CaseContext.jsx";
+import { formatDate }     from "../../utils/dateUtils.js";
+import { getPackageById } from "../../data/packages.js";
 
+// ── Status badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
   const map = {
     "Pending":        "bg-[var(--c-warning-bg)]  text-[var(--c-warning)]  border-[var(--c-warning-border)]",
@@ -19,6 +26,7 @@ function StatusBadge({ status }) {
   );
 }
 
+// ── Progress bar ──────────────────────────────────────────────────────────────
 function ProgressBar({ pct, color = "green" }) {
   const fillColor = color === "green" ? "bg-[var(--c-green)]"
                   : color === "amber" ? "bg-[var(--c-warning)]"
@@ -34,6 +42,27 @@ function ProgressBar({ pct, color = "green" }) {
   );
 }
 
+// ── Package badge ─────────────────────────────────────────────────────────────
+// Shows the tier for this case. Subtle — sits alongside other meta info.
+function PackageBadge({ packageId }) {
+  const pkg = getPackageById(packageId || "self_supported");
+
+  const styles = {
+    self_supported: "bg-[var(--c-bg)] text-[var(--c-text-muted)] border-[var(--c-border)]",
+    assisted:       "bg-[var(--c-green-bg)] text-[var(--c-green)] border-[var(--c-green-light)]",
+    concierge:      "bg-[var(--c-text)]/5 text-[var(--c-text)] border-[var(--c-text)]/20",
+  };
+
+  const cls = styles[pkg.id] || styles.self_supported;
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] ${cls}`}>
+      {pkg.name}
+    </span>
+  );
+}
+
+// ── CaseCard ──────────────────────────────────────────────────────────────────
 function CaseCard({ caseRecord }) {
   const { setCaseData } = useCase();
   const navigate        = useNavigate();
@@ -48,6 +77,7 @@ function CaseCard({ caseRecord }) {
     uploadedDocuments = [],
     analysis,
     createdAt,
+    package:          packageId,  // renamed to avoid reserved-word confusion
   } = caseRecord;
 
   const requiredDocs = analysis?.documents || [];
@@ -111,14 +141,17 @@ function CaseCard({ caseRecord }) {
         </div>
       )}
 
-      {/* Meta row */}
-      <div className="flex items-center gap-4 text-xs text-[var(--c-text-muted)] mb-5">
+      {/* Meta row — date, package badge, processor notes */}
+      <div className="flex items-center gap-3 flex-wrap text-xs text-[var(--c-text-muted)] mb-5">
         <span className="flex items-center gap-1">
           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           {formatDate(createdAt)}
         </span>
+
+        {/* FEATURE 5: package badge */}
+        <PackageBadge packageId={packageId} />
 
         {noteCount > 0 && (
           <span className="flex items-center gap-1 text-[var(--c-info)]">

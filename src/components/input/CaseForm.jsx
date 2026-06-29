@@ -1,20 +1,23 @@
 // src/components/input/CaseForm.jsx
 //
-// FEATURE 1 CHANGE:
-//   Removed `import visaTypes from "../../data/visaTypes"`.
-//   Now reads visa types from useConfig().
+// FEATURE 5 CHANGE:
+//   Reads selectedPackage from route state (set by Packages.jsx → navigate).
+//   Shows a compact package banner above the form fields.
+//   Stamps package + packageSelectedAt into every new case payload.
+//   Defaults to "self_supported" if no package state is present.
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Select from "react-select";
+import { useState }                         from "react";
+import { useNavigate, useLocation, Link }   from "react-router-dom";
+import Select                               from "react-select";
 
-import countries from "../../data/countries";
+import countries                      from "../../data/countries";
+import { useCase, WORKFLOW_STEPS }    from "../../context/CaseContext";
+import { useApplicantAuth }           from "../../context/ApplicantAuthContext.jsx";
+import { useConfig }                  from "../../context/ConfigContext.jsx";
+import { createCase }                 from "../../services/api";
+import { getPackageById }             from "../../data/packages.js";
 
-import { useCase, WORKFLOW_STEPS }  from "../../context/CaseContext";
-import { useApplicantAuth }         from "../../context/ApplicantAuthContext.jsx";
-import { useConfig }                from "../../context/ConfigContext.jsx";
-import { createCase }               from "../../services/api";
-
+// ── react-select styles — green token system ──────────────────────────────────
 const selectStyles = {
   control: (base, state) => ({
     ...base,
@@ -38,7 +41,7 @@ const selectStyles = {
     borderRadius: "8px",
     overflow: "hidden",
   }),
-  menuList: (base) => ({ ...base, backgroundColor: "#FFFFFF", padding: "4px 0" }),
+  menuList:         (base) => ({ ...base, backgroundColor: "#FFFFFF", padding: "4px 0" }),
   option: (base, state) => ({
     ...base,
     backgroundColor: state.isSelected ? "#1C4532" : state.isFocused ? "#F7F7F5" : "#FFFFFF",
@@ -52,11 +55,56 @@ const selectStyles = {
   noOptionsMessage: (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
 };
 
+// ── Package banner — shows selected tier above the form ───────────────────────
+function PackageBanner({ pkg }) {
+  const isFree     = pkg.price === 0;
+  const isFeatured = pkg.id === "assisted";
+  const isPremium  = pkg.id === "concierge";
+
+  return (
+    <div className={`flex items-center justify-between rounded-[var(--r-lg)] border px-4 py-3 mb-2 ${
+      isPremium  ? "border-[var(--c-text)] bg-[var(--c-text)]/5"       :
+      isFeatured ? "border-[var(--c-green)] bg-[var(--c-green-bg)]"    :
+                   "border-[var(--c-border)] bg-[var(--c-bg)]"
+    }`}>
+      <div className="flex items-center gap-2.5">
+        <span className={`text-[10px] font-bold uppercase tracking-[0.14em] px-2 py-0.5 rounded-full ${
+          isPremium  ? "bg-[var(--c-text)] text-white"            :
+          isFeatured ? "bg-[var(--c-green)] text-white"           :
+                       "bg-[var(--c-border)] text-[var(--c-text-muted)]"
+        }`}>
+          {pkg.name}
+        </span>
+        <span className="text-sm font-semibold text-[var(--c-text)]">
+          {isFree ? "Free" : pkg.priceDisplay}
+        </span>
+        <span className="text-xs text-[var(--c-text-muted)]">
+          {pkg.tagline}
+        </span>
+      </div>
+      <Link
+        to="/packages"
+        className="text-xs font-semibold text-[var(--c-green)] hover:text-[var(--c-green-mid)] hover:underline underline-offset-2 shrink-0"
+      >
+        Change plan →
+      </Link>
+    </div>
+  );
+}
+
 function CaseForm() {
-  const navigate = useNavigate();
+  const navigate              = useNavigate();
+  const location              = useLocation();
   const { setCaseData, clearCase } = useCase();
-  const { isAuthenticated }        = useApplicantAuth();
-  const { visaTypes }              = useConfig();
+  const { isAuthenticated }   = useApplicantAuth();
+  const { visaTypes }         = useConfig();
+
+  // ── Read selected package from route state ────────────────────────────────
+  // Set by Packages.jsx when "Get Started" is clicked.
+  // Preserved through register and login redirects.
+  // Defaults to "self_supported" (free tier) if not set.
+  const packageIdFromState = location.state?.selectedPackage || "self_supported";
+  const selectedPkg        = getPackageById(packageIdFromState);
 
   const [visaType, setVisaType]       = useState("");
   const [country, setCountry]         = useState("");
@@ -69,7 +117,13 @@ function CaseForm() {
     if (!visaType || !country) return;
 
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: "/" } });
+      // Pass the selected package through the login redirect
+      navigate("/login", {
+        state: {
+          from:            "/",
+          selectedPackage: selectedPkg.id,
+        },
+      });
       return;
     }
 
@@ -77,19 +131,25 @@ function CaseForm() {
       clearCase();
 
       const newCase = {
-        caseId:         `CASE-${Date.now()}`,
+        caseId:            `CASE-${Date.now()}`,
         visaType,
         country,
         description,
-        status:         "In Progress",
-        createdAt:      new Date().toISOString(),
-        documents:      [],
-        extractedData:  {},
-        risks:          [],
-        tasks:          [],
-        notifications:  [],
-        readinessScore: null,
-        workflowStep:   WORKFLOW_STEPS.CASE_CREATED,
+        status:            "In Progress",
+        createdAt:         new Date().toISOString(),
+        documents:         [],
+        extractedData:     {},
+        risks:             [],
+        tasks:             [],
+        notifications:     [],
+        readinessScore:    null,
+        workflowStep:      WORKFLOW_STEPS.CASE_CREATED,
+        // FEATURE 5: stamp the selected package on case creation
+        package:           selectedPkg.id,
+        packageSelectedAt: new Date().toISOString(),
+        // Self-supported is free — mark as paid immediately
+        // Paid tiers will be marked paid by the Razorpay flow (Feature 6)
+        paymentStatus:     selectedPkg.price === 0 ? "paid" : "unpaid",
       };
 
       const savedCase = await createCase(newCase);
@@ -103,6 +163,10 @@ function CaseForm() {
   return (
     <div className="bg-white border border-[var(--c-border)] rounded-[var(--r-2xl)] p-8 shadow-[var(--shadow-card)] space-y-5">
 
+      {/* ── Package banner ──────────────────────────────────────────────── */}
+      <PackageBanner pkg={selectedPkg} />
+
+      {/* ── Visa type ───────────────────────────────────────────────────── */}
       <div>
         <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Visa Type
@@ -117,6 +181,7 @@ function CaseForm() {
         />
       </div>
 
+      {/* ── Destination country ─────────────────────────────────────────── */}
       <div>
         <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Destination Country
@@ -131,6 +196,7 @@ function CaseForm() {
         />
       </div>
 
+      {/* ── Case description ────────────────────────────────────────────── */}
       <div>
         <label className="block mb-2 text-sm font-semibold text-[var(--c-text-mid)]">
           Case Description
@@ -144,6 +210,7 @@ function CaseForm() {
         />
       </div>
 
+      {/* ── Submit ──────────────────────────────────────────────────────── */}
       <button
         onClick={handleAnalyze}
         disabled={!visaType || !country}
