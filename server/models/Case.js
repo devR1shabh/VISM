@@ -141,6 +141,9 @@ const notificationSchema = new mongoose.Schema(
 
 const caseSchema = new mongoose.Schema(
   {
+    // unique: true — enforced via index below (kept off the inline field
+    // definition so the migration script can run a duplicate-check first;
+    // see server/scripts/addCaseIdUniqueIndex.js)
     caseId:      { type: String, required: true },
     visaType:    { type: String, required: true },
     country:     { type: String, required: true },
@@ -248,8 +251,10 @@ const caseSchema = new mongoose.Schema(
       default: [],
     },
 
-    activityFeed: { type: Array, default: [] },
-    chatHistory:  { type: Array, default: [] },
+    // NOTE: `activityFeed` and `chatHistory` fields were removed here —
+    // confirmed dead (never read or written anywhere in the codebase).
+    // The Navi copilot is stateless; case context is passed per-request
+    // and never persisted. See ROADMAP.md / migration notes for details.
   },
   { timestamps: true }
 );
@@ -265,6 +270,14 @@ caseSchema.index({ processorStatus: 1, createdAt: -1 });
 // FEATURE 3: Package index — used by the reporting dashboard (Feature 14)
 // to group and count cases by tier without a full collection scan.
 caseSchema.index({ package: 1, createdAt: -1 });
+
+// FEATURE 4 (Roadmap): caseId unique index — added via migration script
+// after a duplicate-check pass (server/scripts/addCaseIdUniqueIndex.js).
+// Declared here so the schema reflects the intended final state; the actual
+// index build on existing data is handled by the migration script, not by
+// Mongoose's automatic index sync, to avoid a startup crash if duplicates
+// still exist in production data at deploy time.
+caseSchema.index({ caseId: 1 }, { unique: true });
 
 const Case = mongoose.model("Case", caseSchema);
 

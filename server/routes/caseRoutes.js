@@ -32,6 +32,7 @@ import {
   processorAction,
   saveQuestionnaire,
   runAssessment,
+  getAssessmentHistory,
 } from "../controllers/caseController.js";
 
 import { protect, processorOnly } from "../middleware/auth.js";
@@ -82,5 +83,9 @@ router.post("/:id/questionnaire", saveQuestionnaire);
 
 // Trigger readiness assessment agent — open during transition
 router.post("/:id/run-assessment", runAssessment);
+
+// Roadmap: assessment/score run history — protect runs the same
+// ownership check as getCaseById (applicant must own, processor any).
+router.get("/:id/assessment-history", protect, getAssessmentHistory);
 
 export default router;

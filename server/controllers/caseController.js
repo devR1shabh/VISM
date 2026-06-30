@@ -1,6 +1,7 @@
 // server/controllers/caseController.js
 
 import Case from "../models/Case.js";
+import AssessmentRun from "../models/AssessmentRun.js";
 import { DOCUMENT_CATEGORY_MAP } from "../config/constants.js";
 import { runReadinessAgent } from "../services/assessmentAgentService.js";
 import {
@@ -314,6 +315,53 @@ export async function saveQuestionnaire(req, res) {
   }
 }
 
+// ── getAssessmentHistory ──────────────────────────────────────────────────────
+// GET /api/cases/:id/assessment-history?kind=agent|score
+//
+// Roadmap: returns the append-only AssessmentRun history for a case,
+// newest first. Ownership check mirrors getCaseById:
+//   applicant → must own the case
+//   processor → can access any case
+//
+// Optional ?kind= filter restricts to "agent" or "score" runs only.
+export async function getAssessmentHistory(req, res) {
+  try {
+    const caseId = req.params.id;
+    const { kind } = req.query;
+
+    if (kind && !["agent", "score"].includes(kind)) {
+      return res.status(400).json({ error: "kind must be 'agent' or 'score'." });
+    }
+
+    const foundCase = await Case.findById(caseId).lean();
+    if (!foundCase) {
+      return res.status(404).json({ error: "Case not found" });
+    }
+
+    if (req.user) {
+      const isProcessor = req.user.role === "processor";
+      const isOwner     = foundCase.applicantId &&
+                          String(foundCase.applicantId) === String(req.user._id);
+
+      if (!isProcessor && !isOwner) {
+        return res.status(404).json({ error: "Case not found" });
+      }
+    }
+
+    const query = { caseId, ...(kind ? { kind } : {}) };
+
+    const history = await AssessmentRun
+      .find(query)
+      .sort({ runAt: -1 })
+      .lean();
+
+    res.json(history);
+  } catch (error) {
+    console.error("[caseController.getAssessmentHistory]", error);
+    res.status(500).json({ error: "Failed to fetch assessment history" });
+  }
+}
+
 // ── runAssessment ─────────────────────────────────────────────────────────────
 export async function runAssessment(req, res) {
   const caseId = req.params.id;
@@ -383,6 +431,25 @@ export async function runAssessment(req, res) {
 
       console.log(`[Agent Controller] Assessment saved for case ${caseId}`);
 
+      // Roadmap: append-only history alongside the existing snapshot
+      // write above. Fire-and-forget — never blocks or fails the
+      // primary assessment flow.
+      AssessmentRun.create({
+        caseId,
+        kind:   "agent",
+        result: {
+          overallRisk:    result.overallRisk,
+          readinessLabel: result.readinessLabel,
+          actions:        result.actions,
+          reasoning:      result.reasoning,
+          toolCallLog:    result.toolCallLog,
+        },
+        triggeredBy: "agent",
+        runAt:       new Date(),
+      }).catch((err) =>
+        console.error("[Agent Controller] AssessmentRun history write failed:", err.message)
+      );
+
     } catch (agentError) {
       console.error("[Agent Controller] Agent run failed:", agentError);
 
@@ -399,6 +466,22 @@ export async function runAssessment(req, res) {
           },
         },
       });
+
+      AssessmentRun.create({
+        caseId,
+        kind:   "agent",
+        result: {
+          overallRisk:    "MEDIUM",
+          readinessLabel: "Assessment Failed",
+          actions:        ["Please re-run the assessment."],
+          reasoning:      `Agent encountered an error: ${agentError.message}`,
+          toolCallLog:    [],
+        },
+        triggeredBy: "system",
+        runAt:       new Date(),
+      }).catch((err) =>
+        console.error("[Agent Controller] AssessmentRun history write failed:", err.message)
+      );
     }
 
   } catch (error) {

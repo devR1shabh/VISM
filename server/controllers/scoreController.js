@@ -5,6 +5,7 @@
 //   Protected — requires a valid JWT.
 
 import Case                    from "../models/Case.js";
+import AssessmentRun           from "../models/AssessmentRun.js";
 import { computeConfidenceScore } from "../services/confidenceScoreService.js";
 
 export async function generateScore(req, res) {
@@ -33,6 +34,18 @@ export async function generateScore(req, res) {
 
     console.log(
       `[Score] Case ${caseId} — score: ${scoreData.score} (${scoreData.label})`
+    );
+
+    // Roadmap: append-only history alongside the existing snapshot write
+    // above. Fire-and-forget — never blocks or fails the primary scoring flow.
+    AssessmentRun.create({
+      caseId,
+      kind:        "score",
+      result:      scoreData,
+      triggeredBy: req.user?.role || "system",
+      runAt:       new Date(),
+    }).catch((err) =>
+      console.error("[Score] AssessmentRun history write failed:", err.message)
     );
 
     res.json({
